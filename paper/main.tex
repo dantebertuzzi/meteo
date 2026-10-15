@@ -53,7 +53,7 @@ O regime de chuva e de temperatura de Petrolina (PE), no semiárido do Nordeste,
 detectável nas últimas seis décadas. Usamos a série diária da estação convencional do INMET
 \Est{} (1961--2025), comparada com a estação automática A307 do mesmo sítio e com
 \NvizinhasUsadas{} estações convencionais vizinhas; \NanosValidos{} dos \NanosHidro{} anos
-hidrológicos (julho--junho) cumprem o critério de completude, o último deles
+hidrológicos (julho--junho) cumprem o critério de completude, de \PrimeiroAnoValido{} a
 \UltimoAnoValido{}. A chuva anual caiu \SenChuva{}~mm por década
 \IC{\SenChuvaICinf}{\SenChuvaICsup} (Mann--Kendall com pré-branqueamento, $p$\,\PTFPWChuva). A
 queda também aparece na referência regional (\SenReferencia{}~mm por década), e parte do excesso
@@ -89,7 +89,7 @@ Rainfall and temperature in Petrolina, in the semi-arid Northeast of Brazil, hav
 detectably over the last six decades. We use the daily record of the INMET conventional station
 \Est{} (1961--2025), compared with the collocated automatic station A307 and with
 \NvizinhasUsadas{} neighbouring stations; \NanosValidos{} of \NanosHidro{} hydrological years
-(July--June) meet the completeness criterion, the last one being \UltimoAnoValido{}. Annual
+(July--June) meet the completeness criterion, from \PrimeiroAnoValido{} to \UltimoAnoValido{}. Annual
 rainfall declined by \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsup}
 (trend-free pre-whitened Mann--Kendall, $p$\,\PTFPWChuva). The decline is also present in the
 regional reference (\SenReferencia{}~mm per decade), and part of the local excess may be
@@ -194,7 +194,10 @@ do mês. Assim, uma falha em agosto pesa pouco e uma falha em março pesa muito.
 temperatura usa-se a regra da OMM para meses (no máximo 10 dias ausentes e 4 consecutivos) e
 exigem-se 10 meses válidos por ano \parencite{wmo2017}. Dos \NanosHidro{} anos hidrológicos,
 \NanosValidos{} são válidos (\PrimeiroAnoValido{} a \UltimoAnoValido{}). Como sensibilidade,
-relaxamos o critério para FCA $\le$ 7,5\,\%, o que acrescenta \AnosFCASete{}.
+relaxamos o critério para FCA $\le$ 7,5\,\%, o que acrescenta \AnosFCASete{} (FCA de
+\FCAumnoveoitoumoitodois{}, \FCAdoiszerodoisumdoisdois{} e \FCAdoiszerodoistresdoisquatro{}\,\%,
+respectivamente). O último, um ano chuvoso no fim da série, fica fora do critério principal por
+pouco.
 
 \subsection{Qualidade e homogeneidade}
 A \cref{fig:ausencias} mostra a fração de dias ausentes por ano e variável, e a
@@ -400,8 +403,8 @@ total de 2012/13); \emph{E1$'$}, um ano $\le$ \ChuvaMinima{}~mm (o mínimo do re
   \centering
   \includegraphics[width=\textwidth]{figuras/fig04_chuva_anual.pdf}
   \caption{Chuva por ano hidrológico na \Est{} (anos válidos). Em laranja, os anos com chuva
-  $\le$ 2012/13. Linhas: média da Gamma não estacionária (contínua) e com inclinação regional
-  (tracejada).}
+  $\le$ 2012/13. Linhas: média da normal não estacionária, a candidata de menor AIC (contínua),
+  e média com a inclinação regional (tracejada). As demais candidatas têm médias quase iguais.}
   \label{fig:chuva}
 \end{figure}
 
@@ -502,6 +505,45 @@ mínimo dentro da amostra é um teste fraco: ela não detecta a hipótese de coe
 constante, rejeitada acima. Por isso os modelos bayesianos servem como sensibilidade à forma de
 quantificar a incerteza, não à escolha da distribuição.
 
+\paragraph{Validação fora da amostra.} Para testar os modelos com dados que eles não viram,
+ajustamos todos só com os \NTreino{} anos válidos até \AnoCorteValidacao{} e comparamos o número
+esperado de anos secos nos \NTeste{} anos válidos seguintes (\PrimeiroAnoTeste{} a
+\UltimoAnoTeste{}) com o observado, extrapolando a tendência dos modelos não estacionários
+(\cref{tab:valid}). Usamos dois limiares. O percentil 10 do período de ajuste
+(\LimiarPdez{}~mm) não depende do período de teste: houve \ObsPdez{} anos abaixo dele, contra
+cerca de \EspPdezEstMedia{} esperados pelos modelos estacionários ($p$\,\PObsPdezEstMedia{} de ver
+tantos) e de \EspPdezNSGamma{} a \EspPdezNSMedia{} pelos não estacionários
+($p$\,\PObsPdezNSMedia{} na média de Akaike). O limiar E1 tem viés de seleção, porque 2012/13 foi
+escolhido justamente por ser um ano extremo do período de teste; mesmo assim, ele discrimina a
+cauda dos modelos. Houve \ObsEum{} anos $\le$ E1. A Gamma com coeficiente de variação constante
+esperava \EspEumNSGamma{} ($p$\,\PObsEumNSGamma), e a média de Akaike não estacionária,
+\EspEumNSMedia{} ($p$\,\PObsEumNSMedia). A validação confirma, portanto, a não estacionariedade
+com um limiar não viesado e indica que a Gamma de forma fixa subestima a cauda seca.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Validação fora da amostra: número esperado de anos com chuva abaixo do limiar nos
+  \NTeste{} anos válidos de \PrimeiroAnoTeste{} a \UltimoAnoTeste{}, com os modelos ajustados até
+  \AnoCorteValidacao{}, e probabilidade de observar ao menos o número registrado (soma de
+  Bernoullis independentes). E1 tem viés de seleção (ver texto).}
+  \label{tab:valid}
+  \small
+  \begin{tabular}{@{}lrrrr@{}}
+    \toprule
+    & \multicolumn{2}{c}{P10 (\LimiarPdez{}~mm)} & \multicolumn{2}{c}{E1 (\ChuvaDozeTreze{}~mm)} \\
+    \cmidrule(lr){2-3}\cmidrule(l){4-5}
+    Modelo & esperado & $p$ & esperado & $p$ \\
+    \midrule
+    Observado & \ObsPdez & & \ObsEum & \\
+    Gamma estacionária & \EspPdezEstGamma & \PObsPdezEstGammaVal & \EspEumEstGamma & \PObsEumEstGammaVal \\
+    Média de Akaike estacionária & \EspPdezEstMedia & \PObsPdezEstMediaVal & \EspEumEstMedia & \PObsEumEstMediaVal \\
+    Gamma não estacionária (CV fixo) & \EspPdezNSGamma & \PObsPdezNSGammaVal & \EspEumNSGamma & \PObsEumNSGammaVal \\
+    Normal não estacionária (DP fixo) & \EspPdezNSNormal & \PObsPdezNSNormalVal & \EspEumNSNormal & \PObsEumNSNormalVal \\
+    Média de Akaike não estacionária & \EspPdezNSMedia & \PObsPdezNSMediaVal & \EspEumNSMedia & \PObsEumNSMediaVal \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \begin{table}[htbp]
   \centering
   \caption{Período de retorno (anos) de um ano hidrológico com chuva $\le$ 2012/13 (E1).
@@ -538,9 +580,9 @@ quantificar a incerteza, não à escolha da distribuição.
   \end{tabular}
 \end{table}
 
-As \cref{fig:retorno,fig:posterior} mostram o efeito da não estacionariedade na Gamma: com a
-média recente, a curva de retorno se desloca para baixo e a posterior de $T$ se concentra em
-valores menores. Para o mínimo do registro (E1$'$), o modelo Gamma estacionário dá $T=\TMinimo{}$
+A \cref{fig:retorno} mostra o efeito da não estacionariedade: com a média do último ano válido,
+a curva de retorno se desloca para baixo, e a média de Akaike fica abaixo da Gamma na cauda seca.
+A \cref{fig:posterior} mostra o mesmo deslocamento na posterior da Gamma bayesiana. Para o mínimo do registro (E1$'$), o modelo Gamma estacionário dá $T=\TMinimo{}$
 anos \IC{\TMinimoICinf}{\TMinimoICsup}. Ajustando só os \NanosCurto{} anos válidos de
 \PeriodoCurto{}, o período de retorno de E1 seria de \TCurto{} anos \IC{\TCurtoICinf}{\TCurtoICsup}.
 Esse valor reflete apenas o período recente e mais seco e não pode ser obtido sem a série longa,
@@ -549,8 +591,11 @@ que é o que permite separar tendência de variabilidade.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figuras/fig06_periodo_retorno.pdf}
-  \caption{Curva de período de retorno da chuva anual (cauda seca). Faixa: IC de 95\,\% por
-  bootstrap paramétrico da Gamma estacionária. Pontos: anos observados.}
+  \caption{Curva de período de retorno da chuva anual (cauda seca): médias por pesos de Akaike
+  estacionária e não estacionária (no último ano válido) e, como sensibilidade, a Gamma não
+  estacionária. Pontos: anos observados. A curva não estacionária chega a zero perto de 200 anos
+  porque a normal admite valores negativos; só a parte em torno dos limiares do texto é
+  interpretável. Os intervalos estão na \cref{tab:retorno}.}
   \label{fig:retorno}
 \end{figure}
 
@@ -568,7 +613,9 @@ A \cref{tab:prob} traduz $T$ em probabilidade de pelo menos um ano igual ou mais
 probabilidade em 30 anos é de \ProbMediaAkaikeNtreszero{}\,\%
 \IC{\ProbMediaAkaikeNtreszeroICinf}{\ProbMediaAkaikeNtreszeroICsup}. Mantido o clima do último ano
 observado, ela é de \ProbNSMediaUltNtreszero{}\,\%
-\IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup}; com só a inclinação regional,
+\IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup}. Esse número supõe o
+clima congelado no nível de \UltimoAnoNS{}, ao fim de uma década
+excepcionalmente seca, e o intervalo largo mostra o quanto ele é incerto; com só a inclinação regional,
 \ProbRegMediaNtreszero{}\,\% \IC{\ProbRegMediaNtreszeroICinf}{\ProbRegMediaNtreszeroICsup}. As
 linhas da Gamma bayesiana mostram a sensibilidade à distribuição. O cenário em que a tendência
 continua depois de 2025 extrapola uma tendência log-linear para além do período observado e
@@ -628,7 +675,11 @@ Com a definição direta (tercil inferior, corte em \CorteSeco{}~mm), $P(\text{s
 \IC{\PNSICinf}{\PNSICsup}, com probabilidade posterior \ProbPersistencia{} de haver persistência
 (\cref{fig:markov}a). Quando os estados são definidos sem a tendência, os valores passam a
 \PSSdet{} \IC{\PSSdetICinf}{\PSSdetICsup} e \PNSdet{} \IC{\PNSdetICinf}{\PNSdetICsup}, e a
-probabilidade de persistência cai para \ProbPersistenciaDet{} (\cref{fig:markov}b). Os anos
+probabilidade de persistência cai para \ProbPersistenciaDet{} (\cref{fig:markov}b). O resultado
+não depende da Gamma usada para remover a tendência: com a normal não estacionária, a candidata de
+menor AIC, os valores são \PSSdetNormal{} \IC{\PSSdetNormalICinf}{\PSSdetNormalICsup} e
+\PNSdetNormal{} \IC{\PNSdetNormalICinf}{\PNSdetNormalICsup}, com probabilidade de persistência
+\ProbPersistenciaDetNormal{}. Os anos
 secos de 2011/12 a 2016/17 são, portanto, compatíveis com a queda da média sem memória adicional
 de um ano para o outro. Esse resultado tem pouco poder. Há poucas transições observadas, e a
 tendência usada para definir os estados foi ajustada aos mesmos dados, de modo que ela absorve
@@ -649,7 +700,8 @@ A chuva anual tem correlação negativa, mas não significativa, com o ONI de no
 ($r = \ROniBruta$ \IC{\ROniBrutaICinf}{\ROniBrutaICsup}; $q$\,\QOniBruta) e com o gradiente
 TNA$-$TSA ($r = \RGradBruta$ \IC{\RGradBrutaICinf}{\RGradBrutaICsup}; $q$\,\QGradBruta). As
 correlações têm o sinal esperado e praticamente não mudam sem a tendência ($r = \ROniDet$ e
-$\RGradDet$), ou seja, o sinal do ENSO não vem da tendência. As probabilidades condicionais são
+$\RGradDet$; com a tendência removida pela normal, $\ROniDetNormal$ e $\RGradDetNormal$), ou seja,
+o sinal do ENSO não vem da tendência. As probabilidades condicionais são
 instáveis. Na série bruta, a probabilidade de ano seco parece maior com El Niño (\PSecoNino{}
 \IC{\PSecoNinoICinf}{\PSecoNinoICsup}, \NSecosNino{} de \NFaseNino{} anos) do que em anos neutros
 (\PSecoNeutro{} \IC{\PSecoNeutroICinf}{\PSecoNeutroICsup}); sem a tendência, passa a
@@ -672,7 +724,10 @@ $p$\,\PTFPWInicio), e a duração diminui \SenDuracao{} dias por década
 $p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, e só o teste com pré-branqueamento não é
 significativo. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
 maior que o efeito estimado, a não significância no TFPW reflete falta de poder, e não ausência
-de mudança: há indício de uma estação chuvosa que começa mais tarde e é mais curta.
+de mudança: há indício de uma estação chuvosa que começa mais tarde e é mais curta. Essas
+tendências descrevem só os anos com estação definida. Os anos sem estação (\AnosSemEstacao) são
+secos e se concentram no período recente; ficando de fora, tendem a fazer a mudança nas datas
+parecer menor do que é.
 
 \begin{figure}[htbp]
   \centering
@@ -691,7 +746,8 @@ de mudança: há indício de uma estação chuvosa que começa mais tarde e é m
 \end{figure}
 
 \paragraph{Tendências.} Dos \NtendTotal{} indicadores testados, \NtendSig{} têm $q<0{,}05$
-(\cref{tab:tend,fig:tend}). A temperatura mínima subiu \SenTmin{}~°C por década
+(\cref{tab:tend,fig:tend}), entre eles o vento, que não interpretamos climaticamente (ver
+adiante). A temperatura mínima subiu \SenTmin{}~°C por década
 \IC{\SenTminICinf}{\SenTminICsup} e a máxima, \SenTmax{} \IC{\SenTmaxICinf}{\SenTmaxICsup}. Como a
 comparação com a A307 sugere uma quebra por volta de 2009, repetimos a análise só até 2008: a
 Tmín ainda sobe \SenTminAteDoisMilOito{}~°C por década

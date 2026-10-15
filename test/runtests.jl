@@ -205,3 +205,11 @@ end
     ps = [f.F(200.0, 2.0) for f in m.fits]
     @test minimum(ps) - 1e-12 <= m.p_em(200.0, 2.0) <= maximum(ps) + 1e-12
 end
+
+@testset "Poisson-binomial" begin
+    # p iguais: reduz à binomial
+    @test prob_ao_menos_k(fill(0.2, 10), 3) ≈ ccdf(Binomial(10, 0.2), 2)
+    @test prob_ao_menos_k([0.1, 0.5, 0.9], 0) ≈ 1
+    @test prob_ao_menos_k([0.1, 0.5, 0.9], 3) ≈ 0.1 * 0.5 * 0.9
+    @test prob_ao_menos_k([0.3, 0.6], 1) ≈ 1 - 0.7 * 0.4
+end

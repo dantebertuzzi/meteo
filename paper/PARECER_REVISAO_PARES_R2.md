@@ -21,7 +21,7 @@ Reanálises desta rodada: Python/SciPy, independentes do código Julia, sobre
 | M3 — significância depende da década de 2010 | **Resolvido (15/10)** | Nova tabela de sensibilidade (todos, sem 2011/12–2016/17, até 2010/11, desde 1971/72, FCA ≤ 7,5 %) e comparação linear × degrau (AIC 476,1 × 481,4). Resumo PT/EN e Discussão dizem que a magnitude é estável, mas a detecção depende da década de 2010 (até 2010/11: p = 0,21). `verifica.py` 50/50. |
 | M4 — confirmação com dados independentes | **Aberto** | — |
 | Menores 1 (Tabela 2) e 2 (faixa com log-normal) | **Resolvidos** | — |
-| Menores 3–8 | **Abertos** | Datas condicionais da estação, contagem com vento, período no título, FCA 5,4 % de 2023/24, push do código, literatura local. |
+| Menores 3–8 | **3–6 resolvidos (15/10); 7–8 abertos** | Resolvidos: datas condicionais da estação, contagem com vento, período efetivo no resumo, FCA de 2023/24. Abertos: push do código (ação do autor) e literatura local. |
 
 ---
 
@@ -76,6 +76,10 @@ artefato da escolha da família.
 
 ### R2.2. Validação fora da amostra: a Gamma com CV constante falha
 
+> **Resolvido em 15/10/2026** (`bloco_validacao`, Tabela de validação). Com o limiar P10 do ajuste
+> (sem viés de seleção): observados 7; estacionários esperam ≈ 2 (p = 0,002), não estacionários 5,6–5,9
+> (p ≈ 0,3). Com E1: Gamma CV fixo p = 0,002; média de Akaike p = 0,12.
+
 Ajustando os modelos só até 2005/06 e prevendo 2006/07–2020/21 (15 anos válidos, com a tendência
 extrapolada), o número esperado de anos com chuva ≤ E1 é:
 
@@ -124,14 +128,14 @@ uma que olhe a variância ao longo do tempo (p.ex. DP dos resíduos por período
 
 ## 4. Novos pontos menores
 
-1. **Figuras 4, 6 e 7 mostram só a Gamma**, que agora é sensibilidade e cuja hipótese de CV
+1. ✅ *(resolvido: Fig. 4 e 6 refeitas; Fig. 7 é a posterior Gamma, legenda explica)* **Figuras 4, 6 e 7 mostram só a Gamma**, que agora é sensibilidade e cuja hipótese de CV
    constante é rejeitada (R2.1). A Figura 7 mostra posterior centrada em 23–31 anos, enquanto o
    resultado principal é 12. Atualizar a Figura 4 (linha da média entre candidatas ou da normal) e
    a Figura 6 (curva de retorno não estacionária), ou ao menos chamar a atenção na legenda.
-2. **"92 % em 30 anos"** (clima de 2020/21 mantido) é um número que chama atenção. Lembrar ao
+2. ✅ *(resolvido)* **"92 % em 30 anos"** (clima de 2020/21 mantido) é um número que chama atenção. Lembrar ao
    lado dele que supõe anos independentes e o clima congelado no nível de uma década excepcionalmente
    seca; o IC [28; 99] deve aparecer sempre junto.
-3. **Teleconexões:** a correlação sem tendência também usa a PIT da Gamma; checar com a normal,
+3. ✅ *(resolvido: r com a normal no texto; persistência também)* **Teleconexões:** a correlação sem tendência também usa a PIT da Gamma; checar com a normal,
    como em §3 (não refeito nesta rodada).
 4. **Frase "Os modelos bayesianos… servem como sensibilidade à forma de quantificar a incerteza,
    não à escolha da distribuição":** boa, manter, mas combinar com R2.3.

@@ -225,6 +225,15 @@ function ns_media_akaike_boot(y, x, x0, xs; b = nothing, formas = (false, true),
     return permutedims(reduce(hcat, R))
 end
 
+"P(N ≥ k) para N = Σ Bernoulli(pᵢ) independentes (Poisson-binomial), por programação dinâmica."
+function prob_ao_menos_k(ps, k)
+    f = [1.0]                                         # f[j+1] = P(N = j)
+    for p in ps
+        f = [f; 0.0] .* (1 - p) .+ [0.0; f] .* p
+    end
+    return sum(f[k+1:end])
+end
+
 """
 P(≥ 1 ano com chuva ≤ x₀ nos próximos n anos) quando p varia ano a ano:
     1 − Πⱼ (1 − pⱼ).

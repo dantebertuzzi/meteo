@@ -1,7 +1,8 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-10-15 20:09 | 788 macros
+% 2026-10-15 20:19 | 842 macros
 \newcommand{\AICChuvaDegrau}{\num{481.4}}
 \newcommand{\AICChuvaLinear}{\num{476.1}}
+\newcommand{\AnoCorteValidacao}{2005/06}
 \newcommand{\AnoDegrauChuva}{2009/10}
 \newcommand{\AnoMinimo}{2016/17}
 \newcommand{\AnosCobertosSPI}{\num{41}}
@@ -46,6 +47,16 @@
 \newcommand{\EfeitoFormaLogNormal}{\num{17.0}}
 \newcommand{\EfeitoFormaNormal}{\num{-0.6}}
 \newcommand{\EfeitoFormaWeibull}{\num{-11.4}}
+\newcommand{\EspEumEstGamma}{\num{0.02}}
+\newcommand{\EspEumEstMedia}{\num{0.11}}
+\newcommand{\EspEumNSGamma}{\num{0.07}}
+\newcommand{\EspEumNSMedia}{\num{0.60}}
+\newcommand{\EspEumNSNormal}{\num{0.86}}
+\newcommand{\EspPdezEstGamma}{\num{1.98}}
+\newcommand{\EspPdezEstMedia}{\num{2.03}}
+\newcommand{\EspPdezNSGamma}{\num{5.60}}
+\newcommand{\EspPdezNSMedia}{\num{5.85}}
+\newcommand{\EspPdezNSNormal}{\num{5.74}}
 \newcommand{\EvRefDuracao}{\num{21}}
 \newcommand{\EvRefFim}{11/2013}
 \newcommand{\EvRefInicio}{03/2012}
@@ -53,6 +64,9 @@
 \newcommand{\EvRefPico}{\num{-2.95}}
 \newcommand{\EvRefRankSeveridade}{\num{1}}
 \newcommand{\EvRefSeveridade}{\num{40.1}}
+\newcommand{\FCAdoiszerodoistresdoisquatro}{\num{5.4}}
+\newcommand{\FCAdoiszerodoisumdoisdois}{\num{7.0}}
+\newcommand{\FCAumnoveoitoumoitodois}{\num{7.2}}
 \newcommand{\FimMediano}{14/04}
 \newcommand{\FracNovAbr}{\num{91}}
 \newcommand{\GammaEscala}{\num{79.1}}
@@ -60,6 +74,7 @@
 \newcommand{\GammaPAD}{\num{0.15}}
 \newcommand{\GammaPesoAkaike}{\num{0.13}}
 \newcommand{\InicioMediano}{23/11}
+\newcommand{\LimiarPdez}{\num{345}}
 \newcommand{\MDTCDD}{\num{12.2}}
 \newcommand{\MDTCWD}{\num{0.7}}
 \newcommand{\MDTCentroide}{\num{6.3}}
@@ -131,9 +146,11 @@
 \newcommand{\NTNumzerop}{\num{46}}
 \newcommand{\NTXnovezerop}{\num{47}}
 \newcommand{\NTXx}{\num{47}}
+\newcommand{\NTeste}{\num{15}}
 \newcommand{\NTmax}{\num{47}}
 \newcommand{\NTmed}{\num{42}}
 \newcommand{\NTmin}{\num{46}}
+\newcommand{\NTreino}{\num{32}}
 \newcommand{\NUR}{\num{44}}
 \newcommand{\NVento}{\num{34}}
 \newcommand{\NanosAteDozeTreze}{\num{2}}
@@ -158,6 +175,8 @@
 \newcommand{\ORSemEstacao}{\num{1.47}}
 \newcommand{\ORSemEstacaoICinf}{\num{0.83}}
 \newcommand{\ORSemEstacaoICsup}{\num{2.60}}
+\newcommand{\ObsEum}{\num{2}}
+\newcommand{\ObsPdez}{\num{7}}
 \newcommand{\PDozeTreze}{\num{0.012}}
 \newcommand{\PFisher}{\ensuremath{=}\,\num{0.31}}
 \newcommand{\PFisherVal}{\num{0.31}}
@@ -208,10 +227,33 @@
 \newcommand{\PNSdet}{\num{0.28}}
 \newcommand{\PNSdetICinf}{\num{0.15}}
 \newcommand{\PNSdetICsup}{\num{0.45}}
+\newcommand{\PNSdetNormal}{\num{0.34}}
+\newcommand{\PNSdetNormalICinf}{\num{0.19}}
+\newcommand{\PNSdetNormalICsup}{\num{0.51}}
 \newcommand{\PNSspi}{\num{0.14}}
 \newcommand{\PNSspiICinf}{\num{0.05}}
 \newcommand{\PNSspiICsup}{\num{0.27}}
 \newcommand{\PNoventaCincoUmido}{\num{44.1}}
+\newcommand{\PObsEumEstGamma}{\ensuremath{<}\,\num{0.001}}
+\newcommand{\PObsEumEstGammaVal}{\num{< 0.001}}
+\newcommand{\PObsEumEstMedia}{\ensuremath{=}\,\num{0.005}}
+\newcommand{\PObsEumEstMediaVal}{\num{0.005}}
+\newcommand{\PObsEumNSGamma}{\ensuremath{=}\,\num{0.002}}
+\newcommand{\PObsEumNSGammaVal}{\num{0.002}}
+\newcommand{\PObsEumNSMedia}{\ensuremath{=}\,\num{0.12}}
+\newcommand{\PObsEumNSMediaVal}{\num{0.12}}
+\newcommand{\PObsEumNSNormal}{\ensuremath{=}\,\num{0.21}}
+\newcommand{\PObsEumNSNormalVal}{\num{0.21}}
+\newcommand{\PObsPdezEstGamma}{\ensuremath{=}\,\num{0.002}}
+\newcommand{\PObsPdezEstGammaVal}{\num{0.002}}
+\newcommand{\PObsPdezEstMedia}{\ensuremath{=}\,\num{0.002}}
+\newcommand{\PObsPdezEstMediaVal}{\num{0.002}}
+\newcommand{\PObsPdezNSGamma}{\ensuremath{=}\,\num{0.31}}
+\newcommand{\PObsPdezNSGammaVal}{\num{0.31}}
+\newcommand{\PObsPdezNSMedia}{\ensuremath{=}\,\num{0.36}}
+\newcommand{\PObsPdezNSMediaVal}{\num{0.36}}
+\newcommand{\PObsPdezNSNormal}{\ensuremath{=}\,\num{0.34}}
+\newcommand{\PObsPdezNSNormalVal}{\num{0.34}}
 \newcommand{\PPCMinEst}{\num{0.36}}
 \newcommand{\PPCMinNS}{\num{0.27}}
 \newcommand{\PPettittChuva}{\ensuremath{=}\,\num{0.23}}
@@ -231,6 +273,9 @@
 \newcommand{\PSSdet}{\num{0.19}}
 \newcommand{\PSSdetICinf}{\num{0.04}}
 \newcommand{\PSSdetICsup}{\num{0.47}}
+\newcommand{\PSSdetNormal}{\num{0.24}}
+\newcommand{\PSSdetNormalICinf}{\num{0.07}}
+\newcommand{\PSSdetNormalICsup}{\num{0.50}}
 \newcommand{\PSSspi}{\num{0.19}}
 \newcommand{\PSSspiICinf}{\num{0.02}}
 \newcommand{\PSSspiICsup}{\num{0.56}}
@@ -324,6 +369,7 @@
 \newcommand{\PesoNSVarTotal}{\num{0.46}}
 \newcommand{\PesoNSWeibull}{\num{0.11}}
 \newcommand{\PesoNSWeibullVar}{\num{0.16}}
+\newcommand{\PrimeiroAnoTeste}{2006/07}
 \newcommand{\PrimeiroAnoValido}{1963/64}
 \newcommand{\ProbBNegativo}{\num{1.000}}
 \newcommand{\ProbBayesNcinco}{\num{7}}
@@ -428,6 +474,7 @@
 \newcommand{\ProbNSUltNumzeroICsup}{\num{66}}
 \newcommand{\ProbPersistencia}{\num{0.91}}
 \newcommand{\ProbPersistenciaDet}{\num{0.26}}
+\newcommand{\ProbPersistenciaDetNormal}{\num{0.26}}
 \newcommand{\ProbRegMediaNcinco}{\num{30}}
 \newcommand{\ProbRegMediaNcincoICinf}{\num{5}}
 \newcommand{\ProbRegMediaNcincoICsup}{\num{68}}
@@ -556,12 +603,18 @@
 \newcommand{\RGradDet}{\num{-0.18}}
 \newcommand{\RGradDetICinf}{\num{-0.44}}
 \newcommand{\RGradDetICsup}{\num{0.12}}
+\newcommand{\RGradDetNormal}{\num{-0.18}}
+\newcommand{\RGradDetNormalICinf}{\num{-0.45}}
+\newcommand{\RGradDetNormalICsup}{\num{0.11}}
 \newcommand{\ROniBruta}{\num{-0.20}}
 \newcommand{\ROniBrutaICinf}{\num{-0.46}}
 \newcommand{\ROniBrutaICsup}{\num{0.09}}
 \newcommand{\ROniDet}{\num{-0.19}}
 \newcommand{\ROniDetICinf}{\num{-0.46}}
 \newcommand{\ROniDetICsup}{\num{0.10}}
+\newcommand{\ROniDetNormal}{\num{-0.21}}
+\newcommand{\ROniDetNormalICinf}{\num{-0.47}}
+\newcommand{\ROniDetNormalICsup}{\num{0.08}}
 \newcommand{\RankAnocinco}{1997/98}
 \newcommand{\RankAnodois}{2012/13}
 \newcommand{\RankAnoquatro}{1992/93}
@@ -787,4 +840,5 @@
 \newcommand{\TaxaEventos}{\num{1.5}}
 \newcommand{\UltimoAnoFCASete}{2023/24}
 \newcommand{\UltimoAnoNS}{2020/21}
+\newcommand{\UltimoAnoTeste}{2020/21}
 \newcommand{\UltimoAnoValido}{2020/21}

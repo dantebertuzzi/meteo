@@ -426,6 +426,9 @@ function bloco_nao_estacionario(L, E, V)
     registra!("NSFCASeteEfeito", 100(exp(n75.b) - 1); dig = 1)
     registra!("TFCASeteUlt", 1 / n75.p_em(E.x1213, tc(maximum(d75.ano_hidro))); sig = 2)
     registra!("UltimoAnoFCASete", rotulo_hidro(maximum(d75.ano_hidro)))
+    for r in eachrow(d75[in.(d75.ano_hidro, Ref(novos)), :])
+        registra!("FCA" * nome_macro(rotulo_hidro(r.ano_hidro)), 100r.fca; dig = 1)   # FCA (%) dos anos acrescentados
+    end
 
     # --- sensibilidade da tendência da chuva ao período: a série termina na década seca de 2010,
     #     então testam-se a remoção da seca de 2011/12–2016/17, o corte antes dela e o início em 1971
@@ -499,6 +502,57 @@ function bloco_nao_estacionario(L, E, V)
                          T_regional = [isnothing(nf) ? missing : 1 / nf.p_em(E.x1213, tc(a)) for a in anos],
                          T_bayes_med = [median(1 ./ [pdraw(i, a) for i in 1:20:nd]) for a in anos]), "periodo_retorno_no_tempo")
     return (tend = tend, tab = tab, oni = oni, nt = nt, nf = nf, po = po, cen = tcen, tT = tT, ma = ma)
+end
+
+# ============================================================================= P1: validação fora da amostra
+"""
+Ajusta os modelos só com os anos válidos até `corte` e compara o número esperado de anos com
+chuva ≤ limiar nos anos válidos seguintes com o observado. Dois limiares: E1 (2012/13), que tem
+viés de seleção por ser um ano do próprio período de teste, e o percentil 10 do período de
+ajuste, que não depende do período de teste. A tendência dos modelos não estacionários é
+extrapolada para os anos de teste.
+"""
+function bloco_validacao(L, E; corte = 2005)
+    titulo("Validação fora da amostra (ajuste até $(rotulo_hidro(corte)))")
+    v = sort(E.v, :ano_hidro); y = Float64.(v.prec); a = v.ano_hidro
+    tc(x) = (x - mean(a)) / 10
+    tr = a .<= corte; te = .!tr
+    ytr, ttr = y[tr], tc.(a[tr]); tte = tc.(a[te]); yte = y[te]
+    registra!("AnoCorteValidacao", rotulo_hidro(corte)); registra!("NTreino", count(tr)); registra!("NTeste", count(te))
+    registra!("PrimeiroAnoTeste", rotulo_hidro(minimum(a[te]))); registra!("UltimoAnoTeste", rotulo_hidro(maximum(a[te])))
+    # modelos ajustados ao período de treino
+    est = Dict(string(nameof(D)) => ajusta_mle(D, ytr) for D in CANDIDATAS)
+    aic = Dict(k => 2length(params(d)) - 2loglikelihood(d, ytr) for (k, d) in est)
+    amin = minimum(values(aic)); w = Dict(k => exp(-(x - amin) / 2) for (k, x) in aic); sw = sum(values(w))
+    ma = ns_media_akaike(ytr, ttr)
+    gfix = only(f for f in ma.fits if f.D === Gamma && !f.forma_var)
+    nfix = only(f for f in ma.fits if f.D === Normal && !f.forma_var)
+    modelos = [("EstGamma", "Gamma estacionária"), ("EstMedia", "Média de Akaike estacionária"),
+               ("NSGamma", "Gamma não estacionária (CV fixo)"), ("NSNormal", "Normal não estacionária (DP fixo)"),
+               ("NSMedia", "Média de Akaike não estacionária (8)")]
+    pfun = Dict("EstGamma" => (x0, t) -> cdf(est["Gamma"], x0),
+                "EstMedia" => (x0, t) -> sum(w[k] * cdf(est[k], x0) for k in keys(est)) / sw,
+                "NSGamma" => (x0, t) -> gfix.F(x0, t),
+                "NSNormal" => (x0, t) -> nfix.F(x0, t),
+                "NSMedia" => (x0, t) -> ma.p_em(x0, t))
+    p10 = quantile(ytr, 0.10)
+    registra!("LimiarPdez", p10; dig = 0)
+    linhas = NamedTuple[]
+    for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10))
+        obs = count(<=(x0), yte)
+        registra!("Obs" * rotL, obs)
+        for (k, nome) in modelos
+            ps = [pfun[k](x0, t) for t in tte]
+            esp = sum(ps); pk = prob_ao_menos_k(ps, obs)
+            registra!("Esp" * rotL * k, esp; dig = 2)
+            registra_p!("PObs" * rotL * k, pk)
+            push!(linhas, (limiar = rotL, x0 = x0, modelo = nome, esperado = esp, observado = obs, p_ao_menos_obs = pk))
+        end
+    end
+    tab = DataFrame(linhas)
+    mostra(tab; titulo = "Esperado × observado nos anos de teste (P = probabilidade de ≥ observado)")
+    salva_ptab(tab, "validacao_fora_amostra")
+    return tab
 end
 
 # ============================================================================= SPI / SPEI / corridas
@@ -605,6 +659,14 @@ function bloco_markov(L, I)
     registra_ic!("PSSdet", m3.pSS[2], m3.pSS[1], m3.pSS[3]; dig = 2)
     registra_ic!("PNSdet", m3.pNS[2], m3.pNS[1], m3.pNS[3]; dig = 2)
     registra!("ProbPersistenciaDet", m3.prob_dif_pos; dig = 2)
+    # mesma análise com a normal não estacionária (DP constante), a candidata de menor AIC:
+    # verifica que a conclusão não depende da Gamma usada para remover a tendência
+    nn = ns_candidata(Normal, Float64.(v.prec), tc.(v.ano_hidro))
+    est4 = [ismissing(p) ? missing : (nn.F(p, tc(a)) <= 1 / 3 ? "S" : "N") for (p, a) in zip(L.dh.prec, L.dh.ano_hidro)]
+    m4 = markov_posterior(transicoes(L.dh.ano_hidro, est4))
+    registra_ic!("PSSdetNormal", m4.pSS[2], m4.pSS[1], m4.pSS[3]; dig = 2)
+    registra_ic!("PNSdetNormal", m4.pNS[2], m4.pNS[1], m4.pNS[3]; dig = 2)
+    registra!("ProbPersistenciaDetNormal", m4.prob_dif_pos; dig = 2)
     Cs = (C, C2, C3); ms = (m, m2, m3)
     tab = DataFrame(definicao = ["tercil inferior", "SPI ≤ −1", "tercil sem tendência (PIT)"],
                     SS = [c[1, 1] for c in Cs], SN = [c[1, 2] for c in Cs], NS = [c[2, 1] for c in Cs], NN = [c[2, 2] for c in Cs],
@@ -948,6 +1010,14 @@ function bloco_teleconexoes(L, E, N)
         k = (r.indice == "ONI" ? "Oni" : "Grad") * (startswith(r.resposta, "chuva sem") ? "Det" : "Bruta")
         registra_ic!("R" * k, r.r_pearson, r.ic_inf, r.ic_sup; dig = 2); registra_p!("Q" * k, r.q_bh)
     end
+    # sensibilidade: chuva sem tendência pela normal não estacionária (DP constante)
+    nn = ns_candidata(Normal, Float64.(v.prec), tc.(v.ano_hidro))
+    df.z_normal = [quantile(Normal(), clamp(nn.F(p, tc(a)), 1e-6, 1 - 1e-6)) for (p, a) in zip(v.prec, v.ano_hidro)]
+    for (ind, k) in ((:oni, "Oni"), (:grad, "Grad"))
+        s = dropmissing(df[:, [ind, :z_normal]]); r = cor(s[!, ind], s.z_normal)
+        lo, hi = ic_pearson(r, nrow(s))
+        registra_ic!("R" * k * "DetNormal", r, lo, hi; dig = 2)
+    end
     # tendência do gradiente (TNA aquece mais que TSA?) — ajuda a interpretar a diferença bruta × sem tendência
     g = dropmissing(df[:, [:ano_hidro, :grad]])
     tg = analise_tendencia(g.ano_hidro, g.grad; nome = "TNA − TSA")
@@ -984,6 +1054,7 @@ function executa_paper()
     R = bloco_retorno(L, E)
     B = bloco_bayes(L, E)
     N = bloco_nao_estacionario(L, E, V)
+    VF = bloco_validacao(L, E)
     I = bloco_indices(L, E)
     M = bloco_markov(L, I)
     S = bloco_sensibilidade(L, E, R)
@@ -994,7 +1065,7 @@ function executa_paper()
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)
     println("\nMacros: ", escreve_macros())
-    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
+    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
 end
 
 using Serialization

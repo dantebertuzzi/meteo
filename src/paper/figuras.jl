@@ -107,14 +107,16 @@ end
 # ----------------------------------------------------------------------------- 4. chuva anual
 function fig_chuva_anual(P)
     dh = P.L.dh; v = dh[dh.valido, :]
-    nt = P.N.nt; m = mean(v.ano_hidro)
+    m = mean(v.ano_hidro)
+    # média da normal não estacionária (forma fixa), a candidata de menor AIC: log μ = a + b·τ
+    nn = only(f for f in P.N.ma.fits if f.D === Normal && !f.forma_var)
     fig = figura(210)
     ax = Axis(fig[1, 1]; ylabel = "Chuva no ano hidrológico (mm)", xticks = 1960:10:2020, ytickformat = v -> fmt_br.(v))
     seco = v.prec .<= P.E.x1213 .+ 0.5
     barplot!(ax, v.ano_hidro, Float64.(v.prec); color = [s ? COR_SECO : (COR_CINZA, 0.55) for s in seco], gap = 0.25)
     anos = 1963:2024
-    lines!(ax, collect(anos), [exp(nt.a + nt.b * (a - m) / 10) for a in anos]; color = COR_TEXTO, linewidth = 1.3,
-           label = "média da Gamma não estacionária")
+    lines!(ax, collect(anos), [exp(nn.θ[2] + nn.θ[3] * (a - m) / 10) for a in anos]; color = COR_TEXTO, linewidth = 1.3,
+           label = "média não estacionária (normal)")
     if !isnothing(P.N.nf)
         lines!(ax, collect(anos), [exp(P.N.nf.a + P.N.nf.b * (a - m) / 10) for a in anos]; color = COR_TEXTO2, linewidth = 1.0,
                linestyle = :dash, label = "inclinação regional (vizinhas)")
@@ -147,22 +149,35 @@ function fig_spi_spei(P)
 end
 
 # ----------------------------------------------------------------------------- 6. período de retorno
+"Quantil de nível p de uma distribuição dada só pela CDF F (crescente), por bisseção em [lo, hi]."
+function quantil_cdf(F, p; lo = 0.0, hi = 3000.0)
+    for _ in 1:60
+        mid = (lo + hi) / 2
+        F(mid) < p ? (lo = mid) : (hi = mid)
+    end
+    return (lo + hi) / 2
+end
+
 function fig_retorno(P)
-    x = Float64.(P.E.v.prec); n = length(x); g = fit_mle(Gamma, x)
+    x = Float64.(P.E.v.prec); n = length(x)
     Ts = exp.(range(log(1.05), log(500), length = 80)); pnex = 1 ./ Ts
-    rng = MersenneTwister(SEMENTE)
-    bs = [fit_mle(Gamma, rand(rng, g, n)) for _ in 1:2000]
-    Q = hcat([quantile.(Ref(b), pnex) for b in bs]...)
-    lo = [quantile(Q[i, :], 0.025) for i in eachindex(Ts)]; hi = [quantile(Q[i, :], 0.975) for i in eachindex(Ts)]
+    # estacionário: média por pesos de Akaike das quatro candidatas (mistura das CDFs)
+    cmp = P.R.cmp
+    Fest(z) = sum(w * cdf(d, z) for (w, d) in zip(cmp.peso_akaike, cmp.modelo))
+    # não estacionário: média por pesos de Akaike das oito candidatas, no último ano válido
+    # (reajusta em vez de usar a função guardada no cache: closures desserializadas falham no modo `figuras`)
+    tt = (P.E.v.ano_hidro .- mean(P.E.v.ano_hidro)) ./ 10; tult = maximum(tt)
+    ma = ns_media_akaike(x, tt)
+    Fns(z) = ma.p_em(z, tult)
+    nt = P.N.nt; gu = Gamma(nt.k, exp(nt.a + nt.b * tult) / nt.k)
+    ult = rotulo_hidro(maximum(P.E.v.ano_hidro))
     fig = figura(230)
     ax = Axis(fig[1, 1]; xscale = log10, xlabel = "Período de retorno T (anos) de um ano com chuva ≤ x",
               ylabel = "Chuva no ano hidrológico x (mm)", xticks = ([1, 2, 5, 10, 20, 50, 100, 200, 500], ["1", "2", "5", "10", "20", "50", "100", "200", "500"]),
               ytickformat = v -> fmt_br.(v))
-    band!(ax, Ts, lo, hi; color = (COR_AZUL, 0.18))
-    lines!(ax, Ts, quantile.(g, pnex); color = COR_AZUL, linewidth = 1.5, label = "Gamma estacionária (IC 95 % bootstrap)")
-    nt = P.N.nt; t25 = (2025 - mean(P.E.v.ano_hidro)) / 10
-    g25 = Gamma(nt.k, exp(nt.a + nt.b * t25) / nt.k)
-    lines!(ax, Ts, quantile.(g25, pnex); color = COR_LARANJA, linewidth = 1.5, label = "Gamma não estacionária, condições de 2025")
+    lines!(ax, Ts, [quantil_cdf(Fest, p) for p in pnex]; color = COR_AZUL, linewidth = 1.5, label = "estacionário (média de Akaike)")
+    lines!(ax, Ts, [quantil_cdf(Fns, p) for p in pnex]; color = COR_LARANJA, linewidth = 1.5, label = "não estacionário, $(ult) (média de Akaike)")
+    lines!(ax, Ts, quantile.(gu, pnex); color = COR_LARANJA, linewidth = 1.0, linestyle = :dash, label = "Gamma não estacionária, $(ult) (sensibilidade)")
     xs = sort(x); Temp = 1 ./ pos_weibull(n)
     scatter!(ax, Temp, xs; color = COR_TEXTO, markersize = 4, label = "observado (posição de Weibull)")
     hlines!(ax, [P.E.x1213]; color = COR_TEXTO2, linewidth = 0.6, linestyle = :dot)

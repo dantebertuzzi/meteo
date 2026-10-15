@@ -173,6 +173,14 @@ w8, sw8, T8 = media(list(ns))
 compara("peso de Akaike NS da normal fixa", w8[("Normal", False)] / sw8, "PesoNSNormal", tol_abs=0.006)
 compara("T NS média das 8 candidatas", T8, "TNSMediaUlt", tol_rel=0.05)
 
+# validação fora da amostra: Gamma estacionária ajustada até 2005/06, limiar P10 do ajuste
+trv = anos <= 2005; xtr, xte = x[trv], x[~trv]
+p10 = np.quantile(xtr, 0.10)            # mesma definição de quantil (tipo 7) do Julia
+compara("limiar P10 da validação (mm)", p10, "LimiarPdez", tol_abs=0.6)
+gtr = stats.gamma(*stats.gamma.fit(xtr, floc=0))
+compara("esperado P10, Gamma estacionária", len(xte) * gtr.cdf(p10), "EspPdezEstGamma", tol_abs=0.011)
+compara("observado P10 no teste", int((xte <= p10).sum()), "ObsPdez", tol_abs=0)
+
 # ---------------------------------------------------------------- 5. SPI-12 de junho (2012/13, 2016/17)
 mens = d.groupby(["ano", "mes"]).agg(prec=("prec", "sum"), aus=("prec", lambda s: s.isna().sum()), n=("prec", "size")).reset_index()
 mens["dias"] = [dias_mes[m] + (1 if m == 2 and (a % 4 == 0 and (a % 100 != 0 or a % 400 == 0)) else 0) for a, m in zip(mens.ano, mens.mes)]
