@@ -191,8 +191,16 @@ end
     for D in CANDIDATAS
         @test ns_candidata(D, y, x; b = 0.0).ll ≈ loglikelihood(ajusta_mle(D, y), y) rtol = 1e-6
     end
-    # a média é uma combinação convexa das candidatas
+    # forma variável: aninha a fixa (verossimilhança não menor) e, com CV que cresce no
+    # tempo nos dados simulados, recupera o sinal do efeito na forma
+    fv = ns_candidata(Gamma, y, x; forma_var = true)
+    @test fv.ll >= c.ll - 1e-6
+    z = [rand(rng, Gamma(8exp(-0.3xi), 500 / (8exp(-0.3xi)))) for xi in x for _ in 1:5]
+    xz = repeat(x, inner = 5)
+    @test ns_candidata(Gamma, z, xz; forma_var = true).c < 0
+    # a média é uma combinação convexa das candidatas (4 famílias × forma fixa e variável)
     m = ns_media_akaike(y, x)
+    @test length(m.fits) == 2length(CANDIDATAS)
     @test sum(m.w) ≈ 1
     ps = [f.F(200.0, 2.0) for f in m.fits]
     @test minimum(ps) - 1e-12 <= m.p_em(200.0, 2.0) <= maximum(ps) + 1e-12

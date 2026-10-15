@@ -29,6 +29,12 @@ Reanálises desta rodada: Python/SciPy, independentes do código Julia, sobre
 
 ### R2.1. A dependência da distribuição vem da forma constante, não da família
 
+> **Resolvido em 15/10/2026.** `ns_candidata(...; forma_var = true)` acrescenta log s = s₀ + c·t;
+> a média principal usa 8 candidatas (4 famílias × forma fixa/variável): **12 anos [5,0; 88]**;
+> com forma variável as famílias dão 10–12 anos; LR rejeita CV constante na Gamma (p = 0,034).
+> Resumo, Métodos, Resultados, Tabela 1, Discussão, Limitação e Conclusão atualizados. R2.3
+> (frase da checagem preditiva) também ajustado. Testes: 11/11; `verifica.py`: 44/44.
+
 O texto revisado diz que, no caso não estacionário, o período de retorno "vai de 10 a 36 anos
 conforme a distribuição" e que "a escolha da distribuição pesa tanto quanto a amostra". A
 reanálise mostra que isso decorre de uma hipótese comum às quatro candidatas: **a forma
@@ -96,6 +102,8 @@ valores da Gamma com CV constante (estacionária ou não).
 limiares não escolhidos a partir do período de teste (p.ex. o percentil 10 do período de ajuste).
 
 ### R2.3. A checagem preditiva posterior é um teste fraco
+
+> **Resolvido em 15/10/2026** (frase reescrita em Resultados).
 
 O texto diz que os modelos bayesianos (todos Gamma) "reproduzem a cauda seca observada", com
 base na probabilidade preditiva do mínimo amostral (0,36 e 0,27). R2.2 mostra que a mesma Gamma

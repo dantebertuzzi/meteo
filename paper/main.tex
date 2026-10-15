@@ -67,9 +67,10 @@ década). Em seguida, avaliamos o que a queda da chuva implica para anos tão se
 \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. Com a média do último ano
 observado (\UltimoAnoNS), passa a \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup};
 com só a inclinação regional, a \TRegionalMedia{} anos \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
-em 2025. Ambos são médias por pesos de Akaike entre quatro distribuições; entre elas, o valor não
-estacionário vai de \TNSModelosMin{} a \TNSModelosMax{} anos, e a escolha da distribuição pesa
-tanto quanto a amostra. Esses intervalos são
+em 2025. Ambos são médias por pesos de Akaike entre quatro distribuições. O valor depende de
+a variabilidade acompanhar ou não a queda da média: os dados indicam que o desvio-padrão da chuva
+anual ficou estável, e, com essa hipótese livre, as quatro distribuições dão de \TNSVarMin{} a
+\TNSVarMax{} anos. Esses intervalos são
 largos, e mostrar o tamanho dessa incerteza é parte do resultado: com uma estação e cerca de meio
 século de anos válidos, a frequência de anos extremos só pode ser conhecida em ordem de grandeza.
 Pelo mesmo motivo, os dados não separam a persistência de anos secos da tendência, nem detectam a
@@ -99,9 +100,10 @@ year would have a return period of the order of \TMediaAkaikeB{} years
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. At the mean of the last observed year
 (\UltimoAnoNS) it becomes \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; with
 the regional slope only, \TRegionalMedia{} years \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
-in 2025. Both are Akaike-weighted averages over four distributions; across them, the
-non-stationary value ranges from \TNSModelosMin{} to \TNSModelosMax{} years, so the choice of
-distribution matters as much as the sample. These intervals are wide,
+in 2025. Both are Akaike-weighted averages over four distributions. The value depends on
+whether variability scales with the declining mean: the data indicate a stable standard
+deviation of annual rainfall, and with that assumption relaxed all four distributions give
+\TNSVarMin{} to \TNSVarMax{} years. These intervals are wide,
 and quantifying that uncertainty is part of the result: with one station and about half a
 century of valid years, the frequency of extreme years can only be known to an order of
 magnitude. For the same reason, the data cannot separate persistence of dry years from the trend,
@@ -302,17 +304,20 @@ selecionado dessa forma deve ser lido como a frequência de anos \emph{ao menos 
 o limiar}, e não como uma estimativa não viesada da raridade daquele ano específico.
 
 \paragraph{Não estacionariedade.} O parâmetro de posição de cada candidata passa a variar no
-tempo, com forma constante:
+tempo:
 \begin{equation}
-  \log \lambda_t = a + b\,\tau_t,
+  \log \lambda_t = a + b\,\tau_t, \qquad \log s_t = s_0 + c\,\tau_t,
 \end{equation}
-com $\tau_t$ o tempo em décadas centrado e $\lambda_t$ a média (normal e Gamma), a escala
-(Weibull) ou a mediana (log-normal). Assim, as quatro candidatas têm a mesma tendência
-multiplicativa, $e^{b}-1$ por década, e diferem na forma como a variabilidade acompanha a média:
+com $\tau_t$ o tempo em décadas centrado, $\lambda_t$ a média (normal e Gamma), a escala
+(Weibull) ou a mediana (log-normal), e $s_t$ o parâmetro de forma (o desvio-padrão na normal e
+na log-normal). Assim, as quatro candidatas têm a mesma tendência multiplicativa, $e^{b}-1$ por
+década. Com $c = 0$ (forma fixa), elas diferem na forma como a variabilidade acompanha a média:
 a normal mantém o desvio-padrão constante; a Gamma, a Weibull e a log-normal mantêm o coeficiente
-de variação. Como no caso estacionário, o resultado principal é a média de $p$ ponderada pelos
-pesos de Akaike das candidatas não estacionárias, com IC por bootstrap não paramétrico dos anos,
-em que as quatro candidatas e os pesos são reajustados a cada réplica. A Gamma não estacionária,
+de variação. Com $c$ livre (forma variável), essa relação é estimada a partir dos dados, e a
+hipótese de forma fixa é testada por razão de verossimilhança em cada família. Como no caso
+estacionário, o resultado principal é a média de $p$ ponderada pelos pesos de Akaike das oito
+candidatas não estacionárias (quatro famílias, com forma fixa e variável), com IC por bootstrap
+não paramétrico dos anos, em que as oito candidatas e os pesos são reajustados a cada réplica. A Gamma não estacionária,
 $Y_t \sim \mathrm{Gamma}(k,\ \mu_t/k)$, também é ajustada de forma bayesiana, com
 $b \sim \mathcal N(0,\,0{,}2)$, que admite variações de até cerca de 40\,\% por década, e serve
 como sensibilidade. Ela também define os estados sem tendência da persistência e das
@@ -426,17 +431,23 @@ A tendência da chuva anual é forte: \SenChuva{}~mm/década \IC{\SenChuvaICinf}
 preferido ao estacionário ($\Delta\mathrm{AIC} = \NSTempoDAIC$; razão de verossimilhança
 $p$\,\NSTempoP), com variação da média de \NSTempoEfeito{}\,\% por década (bayesiano:
 \BayesNSEfeito{}\,\% \IC{\BayesNSEfeitoICinf}{\BayesNSEfeitoICsup}; $P(b<0\mid y) =
-\ProbBNegativo$). Entre as candidatas não estacionárias, porém, a Gamma tem o segundo pior ajuste,
-à frente só da log-normal. A de menor AIC é a \MelhorAICNS{} (peso \PesoNSNormal{}), seguida da Weibull
-(\PesoNSWeibull{}), da Gamma (\PesoNSGamma{}) e da log-normal (\PesoNSLogNormal{}). A diferença
-está na forma como a variabilidade acompanha a queda da média: a normal mantém o desvio-padrão
-constante, e a Gamma, o coeficiente de variação. Os dados favorecem a primeira, isto é, a
-dispersão absoluta da chuva anual diminuiu menos que a média.
+\ProbBNegativo$). Mas a hipótese de coeficiente de variação constante, embutida na Gamma, é
+rejeitada pelos dados. Deixando a forma variar no tempo, a razão de verossimilhança rejeita a
+forma fixa na Gamma ($p$\,\PFormaVarGamma) e na log-normal ($p$\,\PFormaVarLogNormal), é marginal
+na Weibull ($p$\,\PFormaVarWeibull) e é desnecessária na normal ($p$\,\PFormaVarNormal), cujo
+desvio-padrão fica praticamente constante (\EfeitoFormaNormal{}\,\% por década). Na Gamma, o
+parâmetro de forma cai \EfeitoFormaGamma{}\,\% por década, isto é, o coeficiente de variação
+cresce. Em outras palavras, a chuva anual diminuiu sem que a amplitude da oscilação interanual em
+milímetros diminuísse, o que torna os anos muito secos relativamente mais frequentes.
 
-Essa escolha pesa muito na cauda. No último ano hidrológico válido (\UltimoAnoNS), o período de
-retorno de E1 vai de \TNSNormal{} anos (normal) a \TNSWeibull{} (Weibull) e \TNSGamma{} (Gamma).
-O resultado principal, a média ponderada pelos pesos de Akaike, é de \TNSMediaUlt{} anos
-\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}. Com a inclinação regional, mais lenta
+Essa hipótese pesa muito na cauda. No último ano hidrológico válido (\UltimoAnoNS), com forma
+fixa, o período de retorno de E1 vai de \TNSNormal{} anos (normal) a \TNSWeibull{} (Weibull) e
+\TNSGamma{} (Gamma). Com forma variável, as quatro famílias convergem: \TNSNormalVar{} (normal),
+\TNSWeibullVar{} (Weibull), \TNSGammaVar{} (Gamma) e \TNSLogNormalVar{} anos (log-normal). A
+candidata de menor AIC é a \MelhorAICNS{} com forma \MelhorAICNSForma{} (peso \PesoNSNormal{}), e as
+versões com forma variável somam peso \PesoNSVarTotal{}. O resultado principal, a média ponderada
+pelos pesos de Akaike das oito candidatas, é de \TNSMediaUlt{} anos
+\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; só com as de forma fixa, \TNSMediaFixaUlt{} anos. Com a inclinação regional, mais lenta
 (\NSRegionalEfeito{}\,\% por década), a média entre as candidatas dá \TRegionalMedia{} anos
 \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup} em 2025. Comparado no mesmo esquema, o período de
 retorno passa de \TMediaAkaikeB{} anos sob estacionariedade para \TNSMediaUlt{} com a média
@@ -447,10 +458,11 @@ anos recentes e chuvosos \AnosFCASete{}, ela é de \SenChuvaFCASete{}~mm/década
 \IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup}.
 
 Os modelos bayesianos, todos Gamma, convergiram ($\hat R \le \RhatMaxNS$; tamanho efetivo de
-amostra $\ge \ESSMin$) e reproduzem a cauda seca observada: a probabilidade preditiva de um
-mínimo simulado ser menor que o observado é \PPCMinEst{} no modelo estacionário e \PPCMinNS{} no
-não estacionário. Eles servem como sensibilidade à forma de quantificar a incerteza, não à
-escolha da distribuição.
+amostra $\ge \ESSMin$). A probabilidade preditiva de um mínimo simulado ser menor que o observado
+é \PPCMinEst{} no modelo estacionário e \PPCMinNS{} no não estacionário, mas essa checagem do
+mínimo dentro da amostra é um teste fraco: ela não detecta a hipótese de coeficiente de variação
+constante, rejeitada acima. Por isso os modelos bayesianos servem como sensibilidade à forma de
+quantificar a incerteza, não à escolha da distribuição.
 
 \begin{table}[htbp]
   \centering
@@ -472,7 +484,8 @@ escolha da distribuição.
     \midrule
     \multicolumn{3}{@{}l}{\emph{Não estacionário, \UltimoAnoNS{}}} \\
     Média por pesos de Akaike & bootstrap dos anos & \TNSMediaUlt{} \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} \\
-    Normal / Weibull / Gamma & máxima verossimilhança & \TNSNormal{} / \TNSWeibull{} / \TNSGamma{} \\
+    Normal / Weibull / Gamma, forma fixa & máxima verossimilhança & \TNSNormal{} / \TNSWeibull{} / \TNSGamma{} \\
+    Normal / Weibull / Gamma, forma variável & máxima verossimilhança & \TNSNormalVar{} / \TNSWeibullVar{} / \TNSGammaVar{} \\
     Gamma & posterior & \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} \\
     Gamma, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & máxima verossimilhança & \TFCASeteUlt{} \\
     \midrule
@@ -744,9 +757,10 @@ persistência adicional de um ano para o outro.
 \paragraph{O que os dados não conseguem dizer.} Esses números de período de retorno são ordens
 de grandeza, e o cenário com inclinação regional (\TRegionalMedia{} anos em 2025) deve ser lido
 lado a lado com o principal. A conclusão não estacionária depende de uma tendência log-linear ao
-longo de seis décadas e, sobretudo, da forma da distribuição: manter o desvio-padrão (normal) ou
-o coeficiente de variação (Gamma) constante leva a \TNSNormal{} ou \TNSGamma{} anos. A média por
-pesos de Akaike incorpora essa incerteza, mas só entre as candidatas consideradas. Com uma estação, não é possível separar persistência de tendência. As correlações com o
+longo de seis décadas e de como a variabilidade acompanha a queda da média. Supor coeficiente de
+variação constante leva a \TNSGamma{} anos na Gamma, mas essa hipótese é rejeitada pelos dados;
+com ela relaxada, as quatro famílias dão de \TNSVarMin{} a \TNSVarMax{} anos. A média por pesos de
+Akaike incorpora essa incerteza, mas só entre as candidatas consideradas. Com uma estação, não é possível separar persistência de tendência. As correlações com o
 ENSO e com o gradiente do Atlântico têm o sinal esperado, não são significativas e não dependem da
 tendência. Isso não contradiz o papel conhecido desses modos \parencite{hastenrath1977,moura1981}:
 reflete o tamanho da amostra, com \NFaseNino{} a \NFaseNeutro{} anos por fase do ENSO. Responder
@@ -773,10 +787,11 @@ complexos aplicados à mesma série.
   sobretudo na Tmáx.
   \item \textbf{Forma da distribuição.} No caso não estacionário, a candidata de menor AIC é a
   normal, que tem suporte em valores negativos; isso não afeta a cauda em torno de 151~mm, mas a
-  torna inadequada para valores muito baixos. A Gamma tem cauda seca mais fina que a dos dados
-  ($T$ empírico \TEmpiricoDozeTreze{} contra \TGamma{} anos na Gamma estacionária), e seus
-  períodos de retorno são os mais longos. Os modelos bayesianos e os estados sem tendência da
-  persistência e das teleconexões usam a Gamma.
+  torna inadequada para valores muito baixos. A Gamma com coeficiente de variação constante tem
+  cauda seca mais fina que a dos dados ($T$ empírico \TEmpiricoDozeTreze{} contra \TGamma{} anos
+  na Gamma estacionária), e essa hipótese é rejeitada no caso não estacionário. Ainda assim, os
+  modelos bayesianos e os estados sem tendência da persistência e das teleconexões usam a Gamma
+  com forma fixa.
   \item \textbf{Período efetivo.} A chuva é analisada até \UltimoAnoValido{}. Os anos chuvosos
   \AnosFCASete{} ficam fora pelo critério de completude; incluí-los atenua a tendência, de modo
   que a exclusão favorece o resultado principal.
@@ -811,7 +826,8 @@ complexos aplicados à mesma série.
   ordem de \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}, sob
   estacionariedade, para \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a
   média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). O
-  valor depende da distribuição (\TNSModelosMin{} a \TNSModelosMax{} anos), os intervalos cobrem
+  valor é estável entre as distribuições quando a variabilidade não é forçada a cair junto com
+  a média (\TNSVarMin{} a \TNSVarMax{} anos), os intervalos cobrem
   uma ordem de grandeza, e esses números indicam escala, não valores precisos.
   \item Os dados não separam a persistência de anos secos da tendência nem detectam a influência
   do ENSO; a sequência de 2011/12 a 2016/17 é compatível com a queda da média sozinha.

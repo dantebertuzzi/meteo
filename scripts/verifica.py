@@ -136,29 +136,38 @@ tu = (2020 - anos.mean()) / 10
 Tult = 1 / stats.gamma.cdf(x0, k1, scale=math.exp(a1 + b1 * tu) / k1)
 compara("T NS MV em 2020/21", Tult, "TTempoUlt", tol_rel=0.05)
 
-# média por pesos de Akaike das candidatas não estacionárias (posição log-linear, forma constante)
-def ns_fit(nome):
-    def dist(th):
-        s_, eta = math.exp(th[0]), th[1] + th[2] * t
+# média por pesos de Akaike das candidatas não estacionárias: posição log-linear e forma
+# fixa ou log-linear no tempo (log s = s0 + c·t)
+def ns_fit(nome, var=False):
+    def mk_(th, tt):
+        s_ = np.exp(th[0] + (th[3] * tt if var else 0.0)); eta = th[1] + th[2] * tt
         return {"Normal": lambda: stats.norm(np.exp(eta), s_), "LogNormal": lambda: stats.lognorm(s_, scale=np.exp(eta)),
                 "Gamma": lambda: stats.gamma(s_, scale=np.exp(eta) / s_), "Weibull": lambda: stats.weibull_min(s_, scale=np.exp(eta))}[nome]()
-    def at(th, tt):
-        s_, eta = math.exp(th[0]), th[1] + th[2] * tt
-        return {"Normal": stats.norm(math.exp(eta), s_), "LogNormal": stats.lognorm(s_, scale=math.exp(eta)),
-                "Gamma": stats.gamma(s_, scale=math.exp(eta) / s_), "Weibull": stats.weibull_min(s_, scale=math.exp(eta))}[nome]
     f0 = fits[nome]
     s0 = {"Normal": x.std(), "LogNormal": np.log(x).std(), "Gamma": f0.args[0], "Weibull": f0.args[0]}[nome]
     a0 = {"Normal": math.log(x.mean()), "LogNormal": np.log(x).mean(), "Gamma": math.log(x.mean()), "Weibull": math.log(f0.kwds.get("scale", f0.args[-1]))}[nome]
-    nl = lambda th: (lambda v: v if np.isfinite(v) else 1e12)(-np.sum(dist(th).logpdf(x)))
-    o_ = optimize.minimize(nl, [math.log(s0), a0, 0.0], method="Nelder-Mead", options={"xatol": 1e-9, "fatol": 1e-10, "maxiter": 40000})
-    return 6 + 2 * o_.fun, at(o_.x, tu).cdf(x0)
-ns = {k: ns_fit(k) for k in ("Normal", "Weibull", "Gamma", "LogNormal")}
-amin_ns = min(a for a, _ in ns.values())
-wns = {k: math.exp(-(a - amin_ns) / 2) for k, (a, _) in ns.items()}; sw = sum(wns.values())
+    nl = lambda th: (lambda v: v if np.isfinite(v) else 1e12)(-np.sum(mk_(th, t).logpdf(x)))
+    th0 = [math.log(s0), a0, 0.0]
+    if var:
+        th0 = list(ns_fit(nome)[2]) + [0.0]
+    o_ = optimize.minimize(nl, th0, method="Nelder-Mead", options={"xatol": 1e-9, "fatol": 1e-10, "maxiter": 40000})
+    o_ = optimize.minimize(nl, o_.x, method="Nelder-Mead", options={"xatol": 1e-10, "fatol": 1e-11, "maxiter": 40000})
+    return 2 * len(th0) + 2 * o_.fun, float(mk_(o_.x, tu).cdf(x0)), o_.x, -o_.fun
+FAM = ("Normal", "Weibull", "Gamma", "LogNormal")
+ns = {(k, v): ns_fit(k, v) for k in FAM for v in (False, True)}
+def media(chaves):
+    amin_ = min(ns[c][0] for c in chaves)
+    w_ = {c: math.exp(-(ns[c][0] - amin_) / 2) for c in chaves}; sw_ = sum(w_.values())
+    return w_, sw_, sw_ / sum(w_[c] * ns[c][1] for c in chaves)
 for k in ("Normal", "Weibull", "Gamma"):
-    compara(f"T NS {k} em 2020/21", 1 / ns[k][1], "TNS" + k, tol_rel=0.05)
-compara("peso de Akaike NS da normal", wns["Normal"] / sw, "PesoNSNormal", tol_abs=0.006)
-compara("T NS média por AIC em 2020/21", sw / sum(wns[k] * ns[k][1] for k in ns), "TNSMediaUlt", tol_rel=0.05)
+    compara(f"T NS {k} em 2020/21", 1 / ns[(k, False)][1], "TNS" + k, tol_rel=0.05)
+    compara(f"T NS {k} forma variável", 1 / ns[(k, True)][1], "TNS" + k + "Var", tol_rel=0.05)
+compara("LR forma variável (Gamma) p", stats.chi2.sf(2 * (ns[("Gamma", True)][3] - ns[("Gamma", False)][3]), 1), "PFormaVarGamma", tol_abs=0.003)
+_, _, Tfix = media([(k, False) for k in FAM])
+compara("T NS média, só forma fixa", Tfix, "TNSMediaFixaUlt", tol_rel=0.05)
+w8, sw8, T8 = media(list(ns))
+compara("peso de Akaike NS da normal fixa", w8[("Normal", False)] / sw8, "PesoNSNormal", tol_abs=0.006)
+compara("T NS média das 8 candidatas", T8, "TNSMediaUlt", tol_rel=0.05)
 
 # ---------------------------------------------------------------- 5. SPI-12 de junho (2012/13, 2016/17)
 mens = d.groupby(["ano", "mes"]).agg(prec=("prec", "sum"), aus=("prec", lambda s: s.isna().sum()), n=("prec", "size")).reset_index()

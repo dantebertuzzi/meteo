@@ -335,20 +335,37 @@ function bloco_nao_estacionario(L, E, V)
     nf = ismissing(b_reg) ? nothing : gamma_inclinacao_fixa(y, t, b_reg)
 
     # --- resultado principal: média por pesos de Akaike das candidatas não estacionárias,
-    #     no mesmo esquema do caso estacionário (a Gamma sozinha fica como sensibilidade)
+    #     no mesmo esquema do caso estacionário (a Gamma sozinha fica como sensibilidade).
+    #     Cada família entra com forma fixa (DP constante na normal, CV constante nas demais)
+    #     e com forma log-linear no tempo, que libera a relação entre variabilidade e média.
     ult = maximum(v.ano_hidro); registra!("UltimoAnoNS", rotulo_hidro(ult))
     ma = ns_media_akaike(y, t)
     ma.tab.T_ult = [1 / f.F(E.x1213, tc(ult)) for f in ma.fits]
     ma.tab.T_2025 = [1 / f.F(E.x1213, tc(2025)) for f in ma.fits]
+    sufixo(f) = f == "fixa" ? "" : "Var"
+    for r in eachrow(ma.tab)
+        registra!("TNS" * r.distribuicao * sufixo(r.forma), r.T_ult; sig = 2)
+        registra!("PesoNS" * r.distribuicao * sufixo(r.forma), r.peso_akaike; dig = 2)
+    end
+    # razão de verossimilhança forma variável × fixa, por família (χ²₁)
+    for D in CANDIDATAS
+        nome = string(nameof(D))
+        ffix = only(f for f in ma.fits if f.D === D && !f.forma_var)
+        fvar = only(f for f in ma.fits if f.D === D && f.forma_var)
+        registra_p!("PFormaVar" * nome, ccdf(Chisq(1), max(2(fvar.ll - ffix.ll), 0.0)))
+        registra!("EfeitoForma" * nome, 100(exp(fvar.c) - 1); dig = 1)
+    end
+    fixas = ma.tab.forma .== "fixa"
+    registra!("TNSModelosMin", minimum(ma.tab.T_ult[fixas]); sig = 2); registra!("TNSModelosMax", maximum(ma.tab.T_ult[fixas]); sig = 2)
+    registra!("TNSVarMin", minimum(ma.tab.T_ult[.!fixas]); sig = 2); registra!("TNSVarMax", maximum(ma.tab.T_ult[.!fixas]); sig = 2)
+    registra!("PesoNSVarTotal", sum(ma.tab.peso_akaike[.!fixas]); dig = 2)
+    mf = ns_media_akaike(y, t; formas = (false,))          # sensibilidade: só forma fixa
+    registra!("TNSMediaFixaUlt", 1 / mf.p_em(E.x1213, tc(ult)); sig = 2)
     sort!(ma.tab, :AIC)
     mostra(ma.tab; titulo = "Candidatas não estacionárias (posição log-linear no tempo)")
     salva_ptab(ma.tab, "nao_estacionarias_candidatas")
     registra!("MelhorAICNS", lowercase(ma.tab.distribuicao[1]))
-    for r in eachrow(ma.tab)
-        registra!("TNS" * r.distribuicao, r.T_ult; sig = 2)
-        registra!("PesoNS" * r.distribuicao, r.peso_akaike; dig = 2)
-    end
-    registra!("TNSModelosMin", minimum(ma.tab.T_ult); sig = 2); registra!("TNSModelosMax", maximum(ma.tab.T_ult); sig = 2)
+    registra!("MelhorAICNSForma", ma.tab.forma[1])
     pbm = ns_media_akaike_boot(y, t, E.x1213, [tc(ult), tc(2025)])
     registra!("NBootNSMedia", size(pbm, 1))
     for (j, (rot, a)) in enumerate((("Ult", ult), ("DoisMilVinteCinco", 2025)))
