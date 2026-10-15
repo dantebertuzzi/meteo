@@ -60,9 +60,11 @@ queda também aparece na referência regional (\SenReferencia{}~mm por década),
 local pode ser instrumental. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de modo semelhante
 em toda a distribuição; corrigindo uma possível quebra da Tmáx em \QuebraTmaxCabrobo{}, a máxima
-ainda sobe \SenTmaxAjustada{}~°C por década. Essas tendências resistem às análises de sensibilidade, inclusive à
-inclusão dos anos chuvosos recentes que não cumprem o critério (\SenChuvaFCASete{}~mm por
-década). Em seguida, avaliamos o que a queda da chuva implica para anos tão secos quanto 2012/13
+ainda sobe \SenTmaxAjustada{}~°C por década. A magnitude da queda da chuva é estável nas análises
+de sensibilidade, inclusive com os anos chuvosos recentes que não cumprem o critério
+(\SenChuvaFCASete{}~mm por década) e sem os anos da seca de 2011/12 a 2016/17
+(\SenChuvaSemSeca{}). Sua significância, porém, depende da década de 2010: com os dados só até
+2010/11, a tendência (\SenChuvaAteDezOnze{}~mm por década) não seria detectável. Em seguida, avaliamos o que a queda da chuva implica para anos tão secos quanto 2012/13
 (\ChuvaDozeTreze{}~mm, praticamente empatado com \RankAnotres{} como segundo mais seco, atrás de
 \AnoMinimo{}). Supondo clima estacionário, um ano assim teria período de retorno da ordem de
 \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. Com a média do último ano
@@ -95,8 +97,11 @@ instrumental. Both rainfall intensity and the number of wet days decreased. Mini
 temperatures rose by \SenTmin{} and \SenTmax{}~°C per decade, similarly across the distribution;
 correcting a possible break in maximum temperature in \QuebraTmaxCabrobo{}, the maximum still rises
 by \SenTmaxAjustada{}~°C per decade.
-These trends are robust to sensitivity analyses, including the recent wet years that fail the
-completeness criterion (\SenChuvaFCASete{}~mm per decade). We then assess what the rainfall
+The magnitude of the rainfall decline is stable across sensitivity analyses, including the
+recent wet years that fail the completeness criterion (\SenChuvaFCASete{}~mm per decade) and
+excluding the 2011/12--2016/17 drought years (\SenChuvaSemSeca{}). Its significance, however,
+depends on the 2010s: with data only up to 2010/11, the trend (\SenChuvaAteDezOnze{}~mm per
+decade) would not be detectable. We then assess what the rainfall
 decline implies for years as dry as 2012/13 (\ChuvaDozeTreze{}~mm, virtually tied with
 \RankAnotres{} as the second driest, after \AnoMinimo{}). Under a stationary climate, such a
 year would have a return period of the order of \TMediaAkaikeB{} years
@@ -456,9 +461,39 @@ pelos pesos de Akaike das oito candidatas, é de \TNSMediaUlt{} anos
 retorno passa de \TMediaAkaikeB{} anos sob estacionariedade para \TNSMediaUlt{} com a média
 recente. Dentro da Gamma, a passagem é de \TGamma{} para \TTempoUlt{} anos (máxima
 verossimilhança), ou \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} na versão bayesiana.
-A tendência resiste ao critério de completude mais frouxo: com FCA $\le$ 7,5\,\%, que inclui os
-anos recentes e chuvosos \AnosFCASete{}, ela é de \SenChuvaFCASete{}~mm/década
-\IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup}.
+
+\paragraph{Sensibilidade da tendência da chuva.} Como a série válida termina numa década seca e
+sem os anos chuvosos que a sucederam, testamos a tendência em subamostras (\cref{tab:senschuva}).
+A magnitude é estável: de \SenChuvaAteDezOnze{} a \SenChuvaDesdeSetentaUm{}~mm por década em todas
+as versões. Ela não vem só da seca de 2011/12 a 2016/17, pois sem esses anos a queda continua
+significativa, embora mais fraca ($p$\,\PTFPWChuvaSemSeca). Também resiste ao critério de
+completude mais frouxo, que inclui os anos chuvosos \AnosFCASete{}, e não depende do início da
+série. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
+intervalo inclui zero e o teste não rejeita a ausência de tendência ($p$\,\PTFPWChuvaAteDezOnze).
+A queda já estava em curso antes da última década, mas só se torna detectável com ela. Uma
+tendência linear descreve a série melhor que um degrau único no melhor ponto de corte
+(\AnoDegrauChuva; AIC \AICChuvaLinear{} contra \AICChuvaDegrau{}), o que favorece a leitura de
+mudança gradual em vez de um único salto. Isso não exclui uma contribuição instrumental parcial,
+como a discutida na \cref{sec:dados}.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Sensibilidade da tendência da chuva anual (declive de Sen, mm por década, IC de 95\,\%;
+  $p$ do Mann--Kendall com pré-branqueamento).}
+  \label{tab:senschuva}
+  \small
+  \begin{tabular}{@{}lrrr@{}}
+    \toprule
+    Amostra & $n$ & Sen \IC{inf}{sup} & $p$ \\
+    \midrule
+    Todos os anos válidos & \NanosValidos & \SenChuva{} \IC{\SenChuvaICinf}{\SenChuvaICsup} & \PTFPWChuvaVal \\
+    Sem 2011/12--2016/17 & \NChuvaSemSeca & \SenChuvaSemSeca{} \IC{\SenChuvaSemSecaICinf}{\SenChuvaSemSecaICsup} & \PTFPWChuvaSemSecaVal \\
+    Até 2010/11 & \NChuvaAteDezOnze & \SenChuvaAteDezOnze{} \IC{\SenChuvaAteDezOnzeICinf}{\SenChuvaAteDezOnzeICsup} & \PTFPWChuvaAteDezOnzeVal \\
+    A partir de 1971/72 & \NChuvaDesdeSetentaUm & \SenChuvaDesdeSetentaUm{} \IC{\SenChuvaDesdeSetentaUmICinf}{\SenChuvaDesdeSetentaUmICsup} & \PTFPWChuvaDesdeSetentaUmVal \\
+    FCA $\le$ 7,5\,\% & \NChuvaFCASete & \SenChuvaFCASete{} \IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup} & \PTFPWChuvaFCASeteVal \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 Os modelos bayesianos, todos Gamma, convergiram ($\hat R \le \RhatMaxNS$; tamanho efetivo de
 amostra $\ge \ESSMin$). A probabilidade preditiva de um mínimo simulado ser menor que o observado
@@ -751,8 +786,9 @@ clara de aquecimento desigual entre os quantis; todos excluem zero.
 
 \paragraph{O regime mudou.} O resultado mais firme deste trabalho é que Petrolina ficou mais seca
 e mais quente desde a década de 1960. A chuva anual caiu \SenChuva{}~mm por década, com
-intervalo que exclui zero com folga, e a queda resiste ao critério de completude mais frouxo,
-que inclui os anos chuvosos recentes. Ela não é só local: a referência formada pelas vizinhas cai
+intervalo que exclui zero com folga, e a magnitude da queda é estável entre subamostras, inclusive
+com os anos chuvosos recentes e sem os anos da seca de 2011/12 a 2016/17. A detecção, porém,
+depende da década de 2010: até 2010/11, a mesma queda não seria significativa. Ela não é só local: a referência formada pelas vizinhas cai
 \SenReferencia{}~mm por década. A parte exclusiva da \Est{} coincide, com significância marginal,
 com a instalação da estação automática em \QuebraQ{}. Um leitor cético pode atribuir essa parte a
 uma mudança instrumental, mas não a queda regional. A diminuição aparece tanto nos índices de

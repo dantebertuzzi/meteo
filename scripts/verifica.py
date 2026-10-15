@@ -120,6 +120,10 @@ r = mk.original_test(x); ts = stats.theilslopes(x, anos, alpha=0.95)
 compara("Sen chuva (mm/década)", 10 * ts.slope, "SenChuva", tol_abs=0.6)
 compara("Sen chuva IC inf", 10 * ts.low_slope, "SenChuvaICinf", tol_abs=1.6)
 compara("Sen chuva IC sup", 10 * ts.high_slope, "SenChuvaICsup", tol_abs=1.6)
+for nome_, m_, k_ in (("sem 2011/12–2016/17", ~((anos >= 2011) & (anos <= 2016)), "SenChuvaSemSeca"),
+                     ("até 2010/11", anos <= 2010, "SenChuvaAteDezOnze"), ("desde 1971/72", anos >= 1971, "SenChuvaDesdeSetentaUm")):
+    t_ = stats.theilslopes(x[m_], anos[m_], alpha=0.95)
+    compara(f"Sen chuva {nome_}", 10 * t_.slope, k_, tol_abs=0.6)
 print(f"[MK] chuva: p MK = {r.p:.2e}; p TFPW (pymannkendall) = {mk.trend_free_pre_whitening_modification_test(x).p:.4f}; macro PTFPWChuva = {M['PTFPWChuva']}")
 
 # ---------------------------------------------------------------- 4. Gamma não estacionária

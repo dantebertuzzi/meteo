@@ -427,6 +427,39 @@ function bloco_nao_estacionario(L, E, V)
     registra!("TFCASeteUlt", 1 / n75.p_em(E.x1213, tc(maximum(d75.ano_hidro))); sig = 2)
     registra!("UltimoAnoFCASete", rotulo_hidro(maximum(d75.ano_hidro)))
 
+    # --- sensibilidade da tendência da chuva ao período: a série termina na década seca de 2010,
+    #     então testam-se a remoção da seca de 2011/12–2016/17, o corte antes dela e o início em 1971
+    sens = [("Todos os anos válidos", "Todos", trues(nrow(v))),
+            ("Sem 2011/12–2016/17", "SemSeca", .!(2011 .<= v.ano_hidro .<= 2016)),
+            ("Até 2010/11", "AteDezOnze", v.ano_hidro .<= 2010),
+            ("A partir de 1971/72", "DesdeSetentaUm", v.ano_hidro .>= 1971)]
+    tsens = DataFrame(map(sens) do (rot, k, m)
+        tr = analise_tendencia(v.ano_hidro[m], v.prec[m]; nome = rot)
+        if k != "Todos"
+            registra_ic!("SenChuva" * k, tr.sen_decada, tr.sen_ic_inf, tr.sen_ic_sup; dig = 0)
+            registra_p!("PTFPWChuva" * k, tr.p_mk_tfpw); registra!("NChuva" * k, tr.n)
+        end
+        (amostra = rot, n = tr.n, sen = tr.sen_decada, ic_inf = tr.sen_ic_inf, ic_sup = tr.sen_ic_sup,
+         p_mk = tr.p_mk, p_tfpw = tr.p_mk_tfpw)
+    end)
+    registra_p!("PTFPWChuvaFCASete", tr75.p_mk_tfpw); registra!("NChuvaFCASete", tr75.n)
+    push!(tsens, (amostra = "FCA ≤ 7,5 %", n = tr75.n, sen = tr75.sen_decada, ic_inf = tr75.sen_ic_inf,
+                  ic_sup = tr75.sen_ic_sup, p_mk = tr75.p_mk, p_tfpw = tr75.p_mk_tfpw))
+    mostra(tsens; titulo = "Sensibilidade da tendência da chuva anual ao período (Sen por década)")
+    salva_ptab(tsens, "sensibilidade_tendencia_chuva")
+    # tendência linear × degrau único (melhor ponto de corte), ambos com erro normal, por AIC
+    aa = Float64.(v.ano_hidro); nn = length(y)
+    rss_lin = sum(abs2, residuals(lm(hcat(ones(nn), aa), y)))
+    cortes = [c for c in sort(unique(v.ano_hidro)) if 5 <= count(<(c), v.ano_hidro) <= nn - 5]
+    rss_deg, c_deg = minimum(map(cortes) do c
+        g = v.ano_hidro .>= c
+        (sum(abs2, y[.!g] .- mean(y[.!g])) + sum(abs2, y[g] .- mean(y[g])), c)
+    end)
+    # degrau: média antes, média depois e o ponto de corte (escolhido pelos dados) → 4 parâmetros com σ
+    registra!("AICChuvaLinear", nn * log(rss_lin / nn) + 2 * 3; dig = 1)
+    registra!("AICChuvaDegrau", nn * log(rss_deg / nn) + 2 * 4; dig = 1)
+    registra!("AnoDegrauChuva", rotulo_hidro(c_deg))
+
     # --- probabilidade de ≥ 1 evento em n anos, por cenário
     cen = NamedTuple[]
     g = fit_mle(Gamma, y); p_est = cdf(g, E.x1213)
