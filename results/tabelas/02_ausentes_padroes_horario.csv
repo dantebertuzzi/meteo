@@ -1,0 +1,12 @@
+prec,p,pmax,pmin,t,td,tmax,tmin,tdmax,tdmin,urmax,urmin,ur,vdir,vraj,vvel,n_ausentes,n,pct
+false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,0,170855,89.1541431851388
+true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,16,19704,10.281778334376957
+true,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,1,907,0.4732832394072219
+false,false,true,true,false,false,true,true,true,true,true,true,false,false,true,false,9,81,0.04226675015654352
+false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,1,47,0.024525151325401794
+true,false,true,true,false,false,false,false,false,false,false,false,false,true,true,true,6,13,0.006783552494260071
+false,false,true,true,false,false,true,true,true,true,true,true,false,true,true,true,11,11,0.005739929033604676
+true,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,2,10,0.005218117303276978
+true,false,true,true,false,false,true,true,true,true,true,true,false,false,true,false,10,6,0.0031308703819661866
+false,false,false,false,false,true,false,false,true,true,true,true,true,false,false,false,6,5,0.002609058651638489
+false,false,true,true,false,true,true,true,true,true,true,true,true,false,true,false,11,1,0.0005218117303276978

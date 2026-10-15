@@ -1,0 +1,9 @@
+checagem,n_avaliado,n_violacoes
+Tmín(hora) > Tmáx(hora),171837,0
+"T > Tmáx(hora) + 0,5 °C",171837,0
+"T < Tmín(hora) − 0,5 °C",171837,0
+"Td > T + 0,5 °C",171930,0
+URmín > URmáx,171832,0
+Pmín > Pmáx,171824,0
+Rajada < velocidade média,171767,0
+Chuva > 50 mm/h (plausível; sinalizada),171000,2

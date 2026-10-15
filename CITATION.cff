@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+message: "Se usar este trabalho, cite-o como abaixo."
+type: software
+title: "Menos chuva e mais calor em Petrolina-PE (1961–2025): tendências do regime meteorológico e o que elas implicam para a frequência de anos muito secos"
+authors:
+  - family-names: "Bertuzzi"
+    given-names: "Dante de Souza"
+    affiliation: "Pesquisador independente"
+    orcid: "https://orcid.org/0009-0007-5223-2814"
+version: "0.1.0"
+date-released: "2026-10-14"
+license: MIT
+repository-code: "https://github.com/dantebertuzzi/meteo"
+keywords:
+  - seca
+  - semiárido
+  - Nordeste do Brasil
+  - período de retorno
+  - SPI
+  - SPEI
+  - Mann-Kendall
+  - não estacionariedade
+  - Julia
+preferred-citation:
+  type: article
+  title: "Menos chuva e mais calor em Petrolina-PE (1961–2025): tendências do regime meteorológico e o que elas implicam para a frequência de anos muito secos"
+  authors:
+    - family-names: "Bertuzzi"
+      given-names: "Dante de Souza"
+      orcid: "https://orcid.org/0009-0007-5223-2814"
+  year: 2026
+  publisher:
+    name: "Zenodo"
+  languages:
+    - pt

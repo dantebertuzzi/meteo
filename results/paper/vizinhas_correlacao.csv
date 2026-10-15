@@ -1,0 +1,9 @@
+estacao,anos_comuns,pares_dif,rho_dif,usada
+Caraíba,0,0,NaN,false
+Floresta,12,9,0.7957936295417426,false
+Petrolândia,4,2,NaN,false
+Cabrobó,32,23,0.8822958764656128,true
+Paulo Afonso,33,28,0.5790240802553539,true
+Senhor do Bonfim,22,18,0.8437620181693363,true
+Ouricuri,25,20,0.3680457256725,false
+Remanso,35,26,0.7586398839023858,true

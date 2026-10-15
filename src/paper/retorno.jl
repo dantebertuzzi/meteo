@@ -1,0 +1,212 @@
+# =============================================================================
+# retorno.jl — período de retorno de anos secos (cauda inferior da chuva anual)
+#
+# Para um evento de referência x₀ (total anual), a probabilidade de não
+# excedência é p = F(x₀) = P(X ≤ x₀) e o período de retorno médio é T = 1/p
+# (anos). Supondo anos independentes e estacionariedade, o número de anos até o
+# próximo evento é geométrico, e
+#     P(≥ 1 evento em n anos) = 1 − (1 − p)ⁿ.
+# A incerteza de p é propagada para T e para essa probabilidade de três formas:
+#   1) bootstrap paramétrico (reamostra da Gamma ajustada e reajusta);
+#   2) verossimilhança perfilada de p (IC de Wilks, χ²₁);
+#   3) posterior bayesiana (Turing, NUTS) com prioris fracamente informativas.
+# =============================================================================
+
+# ----------------------------------------------------------------------------- empírico
+"Posição de plotagem de Weibull: P(X ≤ x₍ᵢ₎) ≈ i/(n + 1) — não viesada para a probabilidade."
+pos_weibull(n) = (1:n) ./ (n + 1)
+
+# ----------------------------------------------------------------------------- bootstrap
+"""
+    bootstrap_p(D, x, x0; B)
+
+Bootstrap paramétrico de p = F(x₀) sob a família `D`. Devolve as B réplicas de p.
+"""
+function bootstrap_p(D, x, x0; B = NBOOT, rng = MersenneTwister(SEMENTE))
+    d = fit_mle(D, x); n = length(x)
+    ps = Float64[]
+    for _ in 1:B
+        xb = rand(rng, d, n)
+        db = try fit_mle(D, xb) catch; continue end
+        push!(ps, cdf(db, x0))
+    end
+    return ps
+end
+
+# ----------------------------------------------------------------------------- perfilada
+"""
+    perfil_p_gamma(x, x0; nivel)
+
+Reparametriza a Gamma por (k, p): para k fixo, o θ que faz F(x₀) = p é
+θ = x₀ / Q_{Gamma(k,1)}(p). O perfil ℓₚ(p) = max_k ℓ(k, θ(k, p)) e o IC é
+{p : 2[ℓ̂ − ℓₚ(p)] ≤ χ²₁(nível)}. Os limites são achados por bisseção em logit(p).
+"""
+function perfil_p_gamma(x, x0; nivel = 0.95)
+    ll(k, p) = (θ = x0 / quantile(Gamma(k, 1.0), p); loglikelihood(Gamma(k, θ), x))
+    function lp(p)
+        r = optimize(lk -> -ll(exp(lk), p), log(0.05), log(200.0))
+        return -Optim.minimum(r)
+    end
+    dhat = fit_mle(Gamma, x); phat = cdf(dhat, x0); lmax = loglikelihood(dhat, x)
+    corte = quantile(Chisq(1), nivel) / 2
+    g(p) = lmax - lp(p) - corte
+    logit(p) = log(p / (1 - p)); expit(u) = 1 / (1 + exp(-u))
+    function raiz(a, b)                          # bisseção em logit(p)
+        fa = g(expit(a))
+        for _ in 1:80
+            m = (a + b) / 2; fm = g(expit(m))
+            sign(fm) == sign(fa) ? (a = m; fa = fm) : (b = m)
+        end
+        expit((a + b) / 2)
+    end
+    u = logit(phat)
+    inf = g(expit(u - 15)) > 0 ? raiz(u - 15, u) : 0.0
+    sup = g(expit(u + 10)) > 0 ? raiz(u, u + 10) : 1.0
+    grade = expit.(range(u - 4, u + 3, length = 120))
+    return (p = phat, inf = inf, sup = sup, perfil = DataFrame(p = grade, desvio = [2(lmax - lp(p)) for p in grade]))
+end
+
+# ----------------------------------------------------------------------------- resumo
+"Resumo de p, T e P(≥1 em n anos) a partir de réplicas (bootstrap ou posterior)."
+function resumo_replicas(ps; horizontes = (5, 10, 20, 30), nivel = 0.95)
+    a = (1 - nivel) / 2
+    q(v) = quantile(v, [a, 0.5, 1 - a])
+    out = (p = q(ps), T = q(1 ./ ps),
+           prob_n = Dict(n => q(1 .- (1 .- ps) .^ n) for n in horizontes))
+    return out
+end
+
+prob_ao_menos_um(p, n) = 1 - (1 - p)^n
+
+# ----------------------------------------------------------------------------- bayes
+"""
+Modelo Gamma parametrizado por média μ e forma k (CV = 1/√k):
+    log k ~ Normal(log 4, 1)     ⇒ CV entre ~0,2 e ~1,3 com 95 % de prob.
+    log μ ~ Normal(log 500, 1)   ⇒ média entre ~70 e ~3 500 mm.
+São fracamente informativas: cobrem todo o semiárido e excluem só valores
+fisicamente absurdos. A sensibilidade é testada com desvios-padrão 2× maiores.
+"""
+@model function modelo_gamma(y; sd_k = 1.0, sd_mu = 1.0)
+    logk ~ Normal(log(4.0), sd_k)
+    logmu ~ Normal(log(500.0), sd_mu)
+    k = exp(logk); μ = exp(logmu)
+    for i in eachindex(y)
+        y[i] ~ Gamma(k, μ / k)
+    end
+end
+
+"Amostra a posterior e devolve as réplicas de p = F(x₀) (uma por draw)."
+function posterior_p(y, x0; n = 4000, cadeias = 4, sd_k = 1.0, sd_mu = 1.0, rng = MersenneTwister(SEMENTE))
+    ch = sample(rng, modelo_gamma(y; sd_k, sd_mu), NUTS(0.9), MCMCThreads(), n ÷ cadeias, cadeias; progress = false)
+    lk = vec(Array(ch[:logk])); lm = vec(Array(ch[:logmu]))
+    ps = [cdf(Gamma(exp(a), exp(b) / exp(a)), x0) for (a, b) in zip(lk, lm)]
+    return ps, ch
+end
+
+"R̂ e ESS básicos (Gelman–Rubin com divisão das cadeias), sem depender da API do objeto de cadeias."
+function diagnostico_cadeias(ch, nome)
+    M = Array(ch[nome])                       # iterações × cadeias
+    M = ndims(M) == 1 ? reshape(M, :, 1) : M
+    n, m = size(M); h = n ÷ 2
+    sub = hcat([M[1:h, j] for j in 1:m]..., [M[h+1:2h, j] for j in 1:m]...)
+    médias = vec(mean(sub, dims = 1)); W = mean(var(sub, dims = 1)); B = h * var(médias)
+    rhat = sqrt(((h - 1) / h * W + B / h) / W)
+    return rhat
+end
+
+# ----------------------------------------------------------------------------- não estacionário
+"""
+    gamma_nao_estacionaria(y, x; x0)
+
+Gamma com forma k constante e média log-linear num covariável:
+    log μᵢ = a + b·xᵢ   (x = tempo centrado em décadas, ou ONI).
+Ajuste por MV (Optim, BFGS). Compara-se com o modelo estacionário por razão de
+verossimilhança (χ²₁) e AIC.
+"""
+function gamma_nao_estacionaria(y, x)
+    nll(θ) = (k = exp(θ[1]); -sum(logpdf(Gamma(k, exp(θ[2] + θ[3] * xi) / k), yi) for (yi, xi) in zip(y, x)))
+    d0 = fit_mle(Gamma, y)
+    θ0 = [log(shape(d0)), log(mean(y)), 0.0]
+    r = optimize(nll, θ0, BFGS())
+    θ = Optim.minimizer(r); ll1 = -Optim.minimum(r); ll0 = loglikelihood(d0, y)
+    H = hessiana(nll, θ; h = 1e-5)
+    ep = sqrt.(max.(diag(inv(H)), 0.0))
+    LR = 2(ll1 - ll0)
+    return (k = exp(θ[1]), a = θ[2], b = θ[3], ep_b = ep[3], ll = ll1, ll0 = ll0,
+            AIC = 6 - 2ll1, AIC0 = 4 - 2ll0, LR = LR, p_LR = ccdf(Chisq(1), LR),
+            p_em = (x0, xi) -> cdf(Gamma(exp(θ[1]), exp(θ[2] + θ[3] * xi) / exp(θ[1])), x0))
+end
+
+# ----------------------------------------------------------------------------- não estacionário: extensões
+"Gamma com log μᵢ = a + b_fixo·xᵢ (b imposto, p.ex. a taxa regional); estima a e k por MV."
+function gamma_inclinacao_fixa(y, x, b)
+    nll(θ) = (k = exp(θ[1]); -sum(logpdf(Gamma(k, exp(θ[2] + b * xi) / k), yi) for (yi, xi) in zip(y, x)))
+    r = optimize(nll, [log(shape(fit_mle(Gamma, y))), log(mean(y))], NelderMead())
+    θ = Optim.minimizer(r)
+    return (k = exp(θ[1]), a = θ[2], b = b, ll = -Optim.minimum(r),
+            p_em = (x0, xi) -> cdf(Gamma(exp(θ[1]), exp(θ[2] + b * xi) / exp(θ[1])), x0))
+end
+
+"""
+P(≥ 1 ano com chuva ≤ x₀ nos próximos n anos) quando p varia ano a ano:
+    1 − Πⱼ (1 − pⱼ).
+`pfun(j)` devolve p no ano j = 1…n.
+"""
+prob_n_variavel(pfun, n) = 1 - prod(1 - pfun(j) for j in 1:n)
+
+"""
+Gamma não estacionária bayesiana: log μᵢ = a + b·xᵢ, x em décadas centradas.
+    log k ~ Normal(log 4, 1);  a ~ Normal(log 500, 1);  b ~ Normal(0, 0,2)
+A priori de b admite ±40 %/década com 95 % de probabilidade — muito mais larga
+que qualquer tendência plausível de chuva anual, mas exclui valores absurdos.
+"""
+@model function modelo_gamma_ns(y, x)
+    logk ~ Normal(log(4.0), 1.0)
+    a ~ Normal(log(500.0), 1.0)
+    b ~ Normal(0.0, 0.2)
+    k = exp(logk)
+    θ = [exp(a + b * xi) / k for xi in x]
+    if !(isfinite(k) && k > 0 && all(t -> isfinite(t) && t > 0, θ))
+        Turing.@addlogprob! -Inf          # rejeita propostas numericamente inválidas no aquecimento
+        return
+    end
+    for i in eachindex(y)
+        y[i] ~ Gamma(k, θ[i])
+    end
+end
+
+function posterior_ns(y, x; n = 4000, cadeias = 4, rng = MersenneTwister(SEMENTE))
+    ch = sample(rng, modelo_gamma_ns(y, x), NUTS(0.9), MCMCThreads(), n ÷ cadeias, cadeias; progress = false)
+    return (logk = vec(Array(ch[:logk])), a = vec(Array(ch[:a])), b = vec(Array(ch[:b])), ch = ch)
+end
+
+# ----------------------------------------------------------------------------- diagnósticos bayesianos
+"""
+Tamanho efetivo de amostra (ESS) de uma matriz iterações × cadeias:
+ESS = N / (1 + 2 Σₖ ρ̂ₖ), com ρ̂ₖ a autocorrelação média entre cadeias, somada
+enquanto os pares (ρ̂₂ₖ₋₁ + ρ̂₂ₖ) forem positivos (sequência inicial positiva de Geyer).
+"""
+function ess(M::AbstractMatrix)
+    n, m = size(M)
+    x = M .- mean(M, dims = 1); v = vec(mean(x .^ 2, dims = 1))
+    ρ(k) = mean(sum(x[1:n-k, j] .* x[1+k:n, j]) / (n * v[j]) for j in 1:m)
+    s = 0.0; k = 1
+    while k + 1 < n
+        par = ρ(k) + ρ(k + 1)
+        par <= 0 && break
+        s += par; k += 2
+    end
+    return n * m / (1 + 2s)
+end
+ess(ch, nome) = (A = Array(ch[nome]); ess(ndims(A) == 1 ? reshape(A, :, 1) : A))
+
+"""
+Checagem preditiva posterior do mínimo: para cada draw θ⁽ˢ⁾, simula uma amostra
+do mesmo tamanho (e, no modelo não estacionário, nos mesmos anos) e guarda o
+mínimo. p_ppc = P(min_sim ≤ min_obs). Valores próximos de 0 ou 1 indicam que o
+modelo não reproduz a cauda seca observada.
+"""
+function ppc_minimo(dist_por_draw, nobs, min_obs; rng = MersenneTwister(SEMENTE))
+    mins = [minimum(rand(rng, d) for d in dist_por_draw(s)) for s in 1:nobs.ndraws]
+    return mean(mins .<= min_obs), mins
+end

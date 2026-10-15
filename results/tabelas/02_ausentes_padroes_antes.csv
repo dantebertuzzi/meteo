@@ -1,0 +1,8 @@
+prec,tmed,tmax,tmin,ur,urmin,td,p,vvel,n_ausentes,n,pct
+false,false,false,false,false,false,false,false,false,0,6871,84.13125994857353
+true,true,true,true,true,true,true,true,true,9,1104,13.517815599363292
+true,false,false,false,false,false,false,false,false,1,186,2.2774580629362067
+true,false,true,true,false,true,false,false,false,4,3,0.036733194563487205
+true,false,true,true,false,true,false,false,true,5,1,0.012244398187829068
+false,false,true,true,false,true,false,false,false,3,1,0.012244398187829068
+false,false,false,false,true,true,true,false,false,3,1,0.012244398187829068

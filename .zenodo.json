@@ -1,0 +1,40 @@
+{
+  "title": "Menos chuva e mais calor em Petrolina-PE (1961–2025): tendências do regime meteorológico e o que elas implicam para a frequência de anos muito secos",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "description": "<p>Artigo estatístico reprodutível (LaTeX + Julia) sobre as mudanças no regime meteorológico de Petrolina (PE), semiárido brasileiro, e o que elas implicam para a frequência de anos muito secos, com base na estação convencional do INMET 82983 (1961–2025), validada contra a estação automática A307 e contra estações vizinhas. A chuva anual caiu e as temperaturas mínima e máxima subiram de forma detectável; o período de retorno de um ano tão seco quanto 2012/13 é estimado com modelos estacionários e não estacionários (frequentistas e bayesianos) e, com uma única estação, só pode ser conhecido em ordem de grandeza. Inclui testes de homogeneidade, índices SPI/SPEI e ETCCDI, regressão quantílica e cadeia de Markov. Todo número do texto é gerado pelo código.</p>",
+  "creators": [
+    {
+      "name": "Bertuzzi, Dante de Souza",
+      "affiliation": "Pesquisador independente",
+      "orcid": "0009-0007-5223-2814"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "language": "por",
+  "keywords": [
+    "seca",
+    "semiárido",
+    "Nordeste do Brasil",
+    "Petrolina",
+    "período de retorno",
+    "SPI",
+    "SPEI",
+    "não estacionariedade",
+    "Mann-Kendall",
+    "Julia"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/dantebertuzzi/meteo",
+      "relation": "isSupplementedBy",
+      "scheme": "url"
+    },
+    {
+      "identifier": "10.5281/zenodo.22217099",
+      "relation": "requires",
+      "scheme": "doi"
+    }
+  ],
+  "version": "0.1.0"
+}

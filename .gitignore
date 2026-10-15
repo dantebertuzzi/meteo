@@ -1,0 +1,21 @@
+# zips baixados do BDMEP (o conteúdo já está em data/raw/bdmep/)
+*.zip
+
+# auxiliares do LaTeX
+paper/*.aux
+paper/*.bbl
+paper/*.bcf
+paper/*.blg
+paper/*.fdb_latexmk
+paper/*.fls
+paper/*.log
+paper/*.out
+paper/*.run.xml
+paper/*.toc
+
+# cache binário das análises (regenerável por scripts/paper.jl)
+results/paper/resultados.jls
+
+# ambiente Python da verificação independente
+.venv-verif/
+__pycache__/
