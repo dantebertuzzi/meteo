@@ -1,9 +1,12 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-10-15 19:48 | 733 macros
+% 2026-10-15 20:03 | 764 macros
 \newcommand{\AnoMinimo}{2016/17}
 \newcommand{\AnosCobertosSPI}{\num{41}}
 \newcommand{\AnosFCASete}{1981/82, 2021/22, 2023/24}
 \newcommand{\AnosSemEstacao}{1975/76, 1992/93, 1997/98, 2011/12, 2012/13, 2015/16, 2016/17}
+\newcommand{\BTmaxDegrau}{\num{0.23}}
+\newcommand{\BTmaxDegrauICinf}{\num{0.06}}
+\newcommand{\BTmaxDegrauICsup}{\num{0.41}}
 \newcommand{\BayesNSEfeito}{\num{-12.1}}
 \newcommand{\BayesNSEfeitoICinf}{\num{-17.5}}
 \newcommand{\BayesNSEfeitoICsup}{\num{-6.5}}
@@ -15,6 +18,7 @@
 \newcommand{\ConcMedia}{\num{0.65}}
 \newcommand{\CorteSeco}{\num{392}}
 \newcommand{\DPChuvaValidos}{\num{183}}
+\newcommand{\DegrauTmax}{\num{0.14}}
 \newcommand{\DifIniTmaxCabrobo}{\num{5.1}}
 \newcommand{\DifIniTmaxRemanso}{\num{3.2}}
 \newcommand{\DifIniTminCabrobo}{\num{0.9}}
@@ -270,6 +274,8 @@
 \newcommand{\PTFPWInicioVal}{\num{0.16}}
 \newcommand{\PTFPWSI}{\ensuremath{=}\,\num{0.71}}
 \newcommand{\PTFPWSIVal}{\num{0.71}}
+\newcommand{\PTFPWTmaxAjustada}{\ensuremath{=}\,\num{0.001}}
+\newcommand{\PTFPWTmaxAjustadaVal}{\num{0.001}}
 \newcommand{\PTFPWTmaxAteDoisMilOito}{\ensuremath{=}\,\num{0.011}}
 \newcommand{\PTFPWTmaxAteDoisMilOitoVal}{\num{0.011}}
 \newcommand{\PTFPWTminAteDoisMilOito}{\ensuremath{<}\,\num{0.001}}
@@ -465,6 +471,14 @@
 \newcommand{\QOniBrutaVal}{\num{0.23}}
 \newcommand{\QOniDet}{\ensuremath{=}\,\num{0.23}}
 \newcommand{\QOniDetVal}{\num{0.23}}
+\newcommand{\QQuebraTmaxCabrobo}{\ensuremath{=}\,\num{0.043}}
+\newcommand{\QQuebraTmaxCabroboVal}{\num{0.043}}
+\newcommand{\QQuebraTmaxRemanso}{\ensuremath{<}\,\num{0.001}}
+\newcommand{\QQuebraTmaxRemansoVal}{\num{< 0.001}}
+\newcommand{\QQuebraTminCabrobo}{\ensuremath{=}\,\num{0.099}}
+\newcommand{\QQuebraTminCabroboVal}{\num{0.099}}
+\newcommand{\QQuebraTminRemanso}{\ensuremath{=}\,\num{0.099}}
+\newcommand{\QQuebraTminRemansoVal}{\num{0.099}}
 \newcommand{\QRTmaxQcincozero}{\num{0.28}}
 \newcommand{\QRTmaxQcincozeroICinf}{\num{0.18}}
 \newcommand{\QRTmaxQcincozeroICsup}{\num{0.37}}
@@ -517,6 +531,10 @@
 \newcommand{\QTFPWVentoVal}{\num{< 0.001}}
 \newcommand{\QuebraQ}{2003/04}
 \newcommand{\QuebraSnhtChuva}{2006/07}
+\newcommand{\QuebraTmaxCabrobo}{2001}
+\newcommand{\QuebraTmaxRemanso}{1975}
+\newcommand{\QuebraTminCabrobo}{1988}
+\newcommand{\QuebraTminRemanso}{1992}
 \newcommand{\RGradBruta}{\num{-0.21}}
 \newcommand{\RGradBrutaICinf}{\num{-0.47}}
 \newcommand{\RGradBrutaICsup}{\num{0.09}}
@@ -565,6 +583,10 @@
 \newcommand{\STLMesesTmin}{\num{654}}
 \newcommand{\STLPreenchTmax}{\num{60}}
 \newcommand{\STLPreenchTmin}{\num{58}}
+\newcommand{\SaltoTmaxCabrobo}{\num{0.27}}
+\newcommand{\SaltoTmaxRemanso}{\num{1.93}}
+\newcommand{\SaltoTminCabrobo}{\num{0.39}}
+\newcommand{\SaltoTminRemanso}{\num{0.64}}
 \newcommand{\SenCDD}{\num{3.1}}
 \newcommand{\SenCDDICinf}{\num{-4.1}}
 \newcommand{\SenCDDICsup}{\num{8.8}}
@@ -635,9 +657,15 @@
 \newcommand{\SenTXxICinf}{\num{0.06}}
 \newcommand{\SenTXxICsup}{\num{0.40}}
 \newcommand{\SenTmax}{\num{0.28}}
+\newcommand{\SenTmaxAjustada}{\num{0.19}}
+\newcommand{\SenTmaxAjustadaICinf}{\num{0.10}}
+\newcommand{\SenTmaxAjustadaICsup}{\num{0.29}}
 \newcommand{\SenTmaxAteDoisMilOito}{\num{0.24}}
 \newcommand{\SenTmaxAteDoisMilOitoICinf}{\num{0.08}}
 \newcommand{\SenTmaxAteDoisMilOitoICsup}{\num{0.36}}
+\newcommand{\SenTmaxDesdeSetentaCinco}{\num{0.30}}
+\newcommand{\SenTmaxDesdeSetentaCincoICinf}{\num{0.19}}
+\newcommand{\SenTmaxDesdeSetentaCincoICsup}{\num{0.38}}
 \newcommand{\SenTmaxICinf}{\num{0.17}}
 \newcommand{\SenTmaxICsup}{\num{0.36}}
 \newcommand{\SenTmed}{\num{0.33}}
@@ -647,6 +675,9 @@
 \newcommand{\SenTminAteDoisMilOito}{\num{0.44}}
 \newcommand{\SenTminAteDoisMilOitoICinf}{\num{0.28}}
 \newcommand{\SenTminAteDoisMilOitoICsup}{\num{0.58}}
+\newcommand{\SenTminDesdeSetentaCinco}{\num{0.40}}
+\newcommand{\SenTminDesdeSetentaCincoICinf}{\num{0.33}}
+\newcommand{\SenTminDesdeSetentaCincoICsup}{\num{0.46}}
 \newcommand{\SenTminICinf}{\num{0.32}}
 \newcommand{\SenTminICsup}{\num{0.45}}
 \newcommand{\SenUR}{\num{0.3}}

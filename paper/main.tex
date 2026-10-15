@@ -59,7 +59,8 @@ hidrológicos (julho--junho) cumprem o critério de completude, o último deles
 queda também aparece na referência regional (\SenReferencia{}~mm por década), e parte do excesso
 local pode ser instrumental. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de modo semelhante
-em toda a distribuição. Essas tendências resistem às análises de sensibilidade, inclusive à
+em toda a distribuição; corrigindo uma possível quebra da Tmáx em \QuebraTmaxCabrobo{}, a máxima
+ainda sobe \SenTmaxAjustada{}~°C por década. Essas tendências resistem às análises de sensibilidade, inclusive à
 inclusão dos anos chuvosos recentes que não cumprem o critério (\SenChuvaFCASete{}~mm por
 década). Em seguida, avaliamos o que a queda da chuva implica para anos tão secos quanto 2012/13
 (\ChuvaDozeTreze{}~mm, praticamente empatado com \RankAnotres{} como segundo mais seco, atrás de
@@ -91,7 +92,9 @@ rainfall declined by \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsu
 (trend-free pre-whitened Mann--Kendall, $p$\,\PTFPWChuva). The decline is also present in the
 regional reference (\SenReferencia{}~mm per decade), and part of the local excess may be
 instrumental. Both rainfall intensity and the number of wet days decreased. Minimum and maximum
-temperatures rose by \SenTmin{} and \SenTmax{}~°C per decade, similarly across the distribution.
+temperatures rose by \SenTmin{} and \SenTmax{}~°C per decade, similarly across the distribution;
+correcting a possible break in maximum temperature in \QuebraTmaxCabrobo{}, the maximum still rises
+by \SenTmaxAjustada{}~°C per decade.
 These trends are robust to sensitivity analyses, including the recent wet years that fail the
 completeness criterion (\SenChuvaFCASete{}~mm per decade). We then assess what the rainfall
 decline implies for years as dry as 2012/13 (\ChuvaDozeTreze{}~mm, virtually tied with
@@ -658,11 +661,31 @@ de mudança: há indício de uma estação chuvosa que começa mais tarde e é m
 comparação com a A307 sugere uma quebra por volta de 2009, repetimos a análise só até 2008: a
 Tmín ainda sobe \SenTminAteDoisMilOito{}~°C por década
 \IC{\SenTminAteDoisMilOitoICinf}{\SenTminAteDoisMilOitoICsup} e a Tmáx,
-\SenTmaxAteDoisMilOito{} \IC{\SenTmaxAteDoisMilOitoICinf}{\SenTmaxAteDoisMilOitoICsup}. A frequência
+\SenTmaxAteDoisMilOito{} \IC{\SenTmaxAteDoisMilOitoICinf}{\SenTmaxAteDoisMilOitoICsup}.
+
+A comparação com as vizinhas depois de 1971 aponta quebras só na Tmáx (\NquebrasTemp{} dos
+\NtestesTemp{} testes): frente a Cabrobó, a diferença sobe \SaltoTmaxCabrobo{}~°C a partir de
+\QuebraTmaxCabrobo{} ($q$\,\QQuebraTmaxCabrobo), e frente a Remanso, \SaltoTmaxRemanso{}~°C a
+partir de \QuebraTmaxRemanso{} ($q$\,\QQuebraTmaxRemanso). A Tmín não tem quebra significativa
+frente a nenhuma das duas ($q$\,\QQuebraTminCabrobo{} e $q$\,\QQuebraTminRemanso). O corte em 2008
+não elimina a quebra de \QuebraTmaxCabrobo{}, então testamos a Tmáx sob três hipóteses. Se a
+\Est{} mudou, subtraindo o salto a partir de \QuebraTmaxCabrobo{}, a tendência é
+\SenTmaxAjustada{}~°C por década \IC{\SenTmaxAjustadaICinf}{\SenTmaxAjustadaICsup}
+($p$\,\PTFPWTmaxAjustada). Num ajuste agnóstico, com tendência e degrau na mesma data por mínimos
+quadrados, ela é \BTmaxDegrau{} \IC{\BTmaxDegrauICinf}{\BTmaxDegrauICsup}, e o degrau estimado é
+de só \DegrauTmax{}~°C. A quebra de \QuebraTmaxRemanso{} fica no início da série, e a Tmáx de
+1973 também destoa de Cabrobó; começando em 1975, a Tmáx sobe \SenTmaxDesdeSetentaCinco{}
+\IC{\SenTmaxDesdeSetentaCincoICinf}{\SenTmaxDesdeSetentaCincoICsup} e a Tmín,
+\SenTminDesdeSetentaCinco{} \IC{\SenTminDesdeSetentaCincoICinf}{\SenTminDesdeSetentaCincoICsup}~°C
+por década. O aquecimento da Tmáx se mantém em todas as hipóteses, mas sua magnitude é incerta
+entre cerca de \SenTmaxAjustada{} e \SenTmaxDesdeSetentaCinco{}~°C por década. A Tmín, sem quebra
+frente às vizinhas, é o resultado de temperatura mais firme.
+
+A frequência
 de noites frias (TN10p) variou \SenTNumzerop{} pontos percentuais por década e a de dias quentes
 (TX90p), \SenTXnovezerop{}. Na chuva, caem os índices de intensidade, Rx1day
 (\SenRxumday{}~mm/década), SDII (\SenSDII{}~mm/dia/década) e R95p (\SenRnovecincop{}~mm/década),
-mas também a frequência: o número de dias com chuva (R1mm) diminui \SenRummm{} dias por década
+mas também a frequência: o número de dias com chuva (R1mm) varia \SenRummm{} dias por década
 \IC{\SenRummmICinf}{\SenRummmICsup} ($q$ Hamed--Rao \QHRRummmVal; $q$ TFPW \QTFPWRummmVal).
 A amplitude térmica, a UR, o CDD e o CWD não mostram tendência detectável. O vento variou
 \SenVento{}~m/s por década. Como quedas de vento em estações convencionais muitas vezes vêm de
@@ -738,8 +761,10 @@ pelo teste com pré-branqueamento, de que a estação chuvosa começa mais tarde
 A forma do ciclo anual, medida pelo índice de sazonalidade e pela concentração, não mudou, e o
 aumento de anos sem estação chuvosa definida não é estatisticamente significativo.
 
-O aquecimento atinge toda a distribuição da temperatura e resiste ao corte da série em 2008,
-antes da possível quebra frente à A307. Com noites frias ficando mais raras, a demanda
+O aquecimento atinge toda a distribuição da temperatura. Na Tmín, que não tem quebra frente às
+vizinhas, ele é o resultado mais firme do trabalho; na Tmáx, resiste ao corte da série em 2008 e à
+correção da quebra frente a Cabrobó, embora com magnitude menor (\SenTmaxAjustada{}~°C por
+década). Com noites frias ficando mais raras, a demanda
 evaporativa aumenta; por isso o SPEI, que incorpora a temperatura, é uma medida mais completa do
 estresse hídrico do que o SPI. Menos chuva e mais evaporação apontam na mesma direção para o
 balanço hídrico local.
@@ -782,9 +807,11 @@ complexos aplicados à mesma série.
   efeito.
   \item \textbf{Homogeneidade da temperatura.} A Tmáx anterior a 1971 difere das vizinhas e foi
   excluída. No período analisado, \NquebrasTemp{} dos \NtestesTemp{} testes contra as vizinhas
-  indicam quebra, ambos na Tmáx, e Tmáx e Tmín mostram indício de quebra frente à A307. A
-  tendência se mantém com dados só até 2008, mas parte do aquecimento pode ser instrumental,
-  sobretudo na Tmáx.
+  indicam quebra, ambos na Tmáx, e Tmáx e Tmín mostram indício de quebra frente à A307. Não
+  homogeneizamos as séries: com duas vizinhas, também elas sujeitas a quebras, não é possível
+  atribuir cada salto a uma estação. As sensibilidades mostram que o aquecimento da Tmáx
+  persiste, mas sua magnitude fica entre cerca de \SenTmaxAjustada{} e \SenTmaxDesdeSetentaCinco{}~°C
+  por década conforme a hipótese.
   \item \textbf{Forma da distribuição.} No caso não estacionário, a candidata de menor AIC é a
   normal, que tem suporte em valores negativos; isso não afeta a cauda em torno de 151~mm, mas a
   torna inadequada para valores muito baixos. A Gamma com coeficiente de variação constante tem
@@ -818,7 +845,9 @@ complexos aplicados à mesma série.
   estações vizinhas, com magnitude menor (\SenReferencia{}~mm por década), e envolve tanto a
   intensidade quanto o número de dias chuvosos.
   \item As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de forma
-  consistente em toda a distribuição.
+  consistente em toda a distribuição. A Tmín não tem quebra frente às vizinhas; na Tmáx, a
+  correção de uma possível quebra reduz a tendência para \SenTmaxAjustada{}~°C por década, sem
+  eliminá-la.
   \item O ano hidrológico mais seco desde 1963 foi \AnoMinimo{}. 2012/13 foi o
   \RankDozeTreze{}º, praticamente empatado com \RankAnotres{}, e os três primeiros estão na
   sequência seca de 2011/12 a 2016/17.

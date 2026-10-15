@@ -750,8 +750,8 @@ function bloco_p2_indices(L)
 end
 
 # ============================================================================= P2: homogeneidade da temperatura
-"Diferença anual de Tmáx/Tmín 82983 − vizinha (Cabrobó, Remanso): SNHT + Pettitt."
-function bloco_p2_homog_temp(L)
+"Diferença anual de Tmáx/Tmín 82983 − vizinha (Cabrobó, Remanso): SNHT + Pettitt; sensibilidade da Tmáx às quebras."
+function bloco_p2_homog_temp(L, X)
     titulo("P2 — Homogeneidade da temperatura da 82983 (diferenças com vizinhas)")
     dir = joinpath(RAIZ, "data", "raw", "bdmep")
     # segmento inicial (antes da lacuna de 1966–70), lido do arquivo bruto, sem o corte de INICIO_TEMP
@@ -786,6 +786,38 @@ function bloco_p2_homog_temp(L)
     mostra(h; titulo = "SNHT nas diferenças anuais de temperatura")
     salva_ptab(h, "homogeneidade_temperatura")
     registra!("NquebrasTemp", count(<(0.05), h.q)); registra!("NtestesTemp", nrow(h))
+    for r in eachrow(h)
+        k = (r.variavel == "Tmáx" ? "Tmax" : "Tmin") * (r.vizinha == "Cabrobó" ? "Cabrobo" : "Remanso")
+        registra!("Quebra" * k, string(r.quebra_snht + 1))            # primeiro ano depois da quebra (texto: sem separador de milhar)
+        registra!("Salto" * k, r.salto; dig = 2); registra_p!("QQuebra" * k, r.q)
+    end
+
+    # --- sensibilidade da tendência da Tmáx às quebras frente às vizinhas. A comparação não
+    #     diz qual estação mudou, então se usam três hipóteses complementares:
+    #     (a) a 82983 mudou: subtrai-se o salto da diferença com Cabrobó a partir da quebra;
+    #     (b) agnóstica: MQO com tendência + degrau na data da quebra (absorve qualquer salto,
+    #         inclusive climático, e por isso é conservadora);
+    #     (c) começo da série: a Tmáx de 1973–74 difere das duas vizinhas; usa-se 1975 em diante.
+    anu = X.anu; s = dropmissing(anu[:, [:ano, :tmax]])
+    hc = h[(h.variavel .== "Tmáx") .& (h.vizinha .== "Cabrobó"), :]
+    if nrow(hc) == 1
+        a0 = hc.quebra_snht[1] + 1; sal = hc.salto[1]
+        aj = s.tmax .- sal .* (s.ano .>= a0)
+        ta = tendencia_completa(s.ano, aj; nome = "Tmáx ajustada")
+        registra_ic!("SenTmaxAjustada", ta.sen_decada, ta.sen_ic_inf, ta.sen_ic_sup; dig = 2)
+        registra_p!("PTFPWTmaxAjustada", ta.p_mk_tfpw)
+        dd = DataFrame(y = s.tmax, t = (s.ano .- mean(s.ano)) ./ 10, d = Float64.(s.ano .>= a0))
+        m = lm(@formula(y ~ t + d), dd); ic = confint(m)
+        registra_ic!("BTmaxDegrau", coef(m)[2], ic[2, 1], ic[2, 2]; dig = 2)
+        registra!("DegrauTmax", coef(m)[3]; dig = 2)
+        @printf("Tmáx: Sen ajustada = %.2f [%.2f; %.2f] | MQO com degrau em %d: b = %.2f [%.2f; %.2f], degrau = %.2f\n",
+                ta.sen_decada, ta.sen_ic_inf, ta.sen_ic_sup, a0, coef(m)[2], ic[2, 1], ic[2, 2], coef(m)[3])
+    end
+    for (vv, k) in ((:tmax, "Tmax"), (:tmin, "Tmin"))
+        ss = dropmissing(anu[anu.ano .>= 1975, [:ano, vv]])
+        tt = tendencia_completa(ss.ano, ss[!, vv]; nome = k * " desde 1975")
+        registra_ic!("Sen" * k * "DesdeSetentaCinco", tt.sen_decada, tt.sen_ic_inf, tt.sen_ic_sup; dig = 2)
+    end
     return h
 end
 
@@ -924,7 +956,7 @@ function executa_paper()
     S = bloco_sensibilidade(L, E, R)
     Z = bloco_p2_sazonalidade(L)
     X = bloco_p2_indices(L)
-    HT = bloco_p2_homog_temp(L)
+    HT = bloco_p2_homog_temp(L, X)
     QR = bloco_p2_quantilica(L)
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)

@@ -201,6 +201,13 @@ for col, k in (("tmin", "Tmin"), ("tmax", "Tmax")):
     s = an[["ano", col]].dropna()
     ts = stats.theilslopes(s[col], s.ano, alpha=0.95)
     compara(f"Sen {k} (°C/década)", 10 * ts.slope, "Sen" + k, tol_abs=0.006)
+    s75 = s[s.ano >= 1975]; t75 = stats.theilslopes(s75[col], s75.ano, alpha=0.95)
+    compara(f"Sen {k} desde 1975", 10 * t75.slope, "Sen" + k + "DesdeSetentaCinco", tol_abs=0.006)
+# Tmáx sem o salto frente a Cabrobó (ano e salto do SNHT do artigo; a checagem é do ajuste e do Sen)
+s = an[["ano", "tmax"]].dropna()
+a0, sal = int(float(mac("QuebraTmaxCabrobo"))), float(mac("SaltoTmaxCabrobo"))
+ts = stats.theilslopes(s.tmax - sal * (s.ano >= a0), s.ano, alpha=0.95)
+compara("Sen Tmáx ajustada", 10 * ts.slope, "SenTmaxAjustada", tol_abs=0.011)
 # Tmín anual recalculada do bruto (média dos dias, anos com ≥ 300 dias, ≥ 1971) — checagem da agregação
 dd = d[d.ano >= 1971]
 ta = dd.groupby("ano").tmin.agg(["mean", "count"]); ta = ta[ta["count"] >= 300]

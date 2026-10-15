@@ -17,7 +17,7 @@ Reanálises desta rodada: Python/SciPy, independentes do código Julia, sobre
 | Ponto | Situação | Comentário |
 |---|---|---|
 | M1 — período de retorno depende da distribuição | **Resolvido** | Média por pesos de Akaike das 4 candidatas, com bootstrap; Gamma como sensibilidade. Implementação testada (8 testes unitários) e conferida em Python (39/39). Ver R2.1, que refina a conclusão. |
-| M2 — quebras da Tmáx × vizinhas | **Aberto** | Só a limitação foi corrigida. Resultados e resumo ainda não tratam a quebra de 2000. |
+| M2 — quebras da Tmáx × vizinhas | **Resolvido (15/10)** | Testes reportados em Resultados; Tmáx sob 3 hipóteses: salto subtraído 0,19 [0,10; 0,29], degrau agnóstico 0,23 [0,06; 0,41], desde 1975 0,30 [0,19; 0,38]. Resumo, Discussão, Limitação e Conclusão citam a faixa; Tmín (sem quebra) destacada como resultado mais firme. `verifica.py` 47/47. |
 | M3 — significância depende da década de 2010 | **Aberto** | O resumo ainda diz que as tendências "resistem às análises de sensibilidade" sem a análise "até 2010/11". |
 | M4 — confirmação com dados independentes | **Aberto** | — |
 | Menores 1 (Tabela 2) e 2 (faixa com log-normal) | **Resolvidos** | — |
