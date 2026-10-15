@@ -1,5 +1,5 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-10-15 20:19 | 842 macros
+% 2026-10-15 20:43 | 931 macros
 \newcommand{\AICChuvaDegrau}{\num{481.4}}
 \newcommand{\AICChuvaLinear}{\num{476.1}}
 \newcommand{\AnoCorteValidacao}{2005/06}
@@ -36,6 +36,11 @@
 \newcommand{\DifPosTmaxRemanso}{\num{0.5}}
 \newcommand{\DifPosTminCabrobo}{\num{0.2}}
 \newcommand{\DifPosTminRemanso}{\num{-0.2}}
+\newcommand{\DistCavalos}{\num{23}}
+\newcommand{\DistJuazeiro}{\num{3}}
+\newcommand{\DistJunco}{\num{33}}
+\newcommand{\DistLagoaBoi}{\num{37}}
+\newcommand{\DistLagoaGrande}{\num{51}}
 \newcommand{\DistRejeitadasAD}{lognormal}
 \newcommand{\DuracaoMediana}{\num{135}}
 \newcommand{\DuracaoSeca}{\num{2.0}}
@@ -103,6 +108,11 @@
 \newcommand{\MelhorAICNS}{normal}
 \newcommand{\MelhorAICNSForma}{fixa}
 \newcommand{\MesMaisChuvoso}{jan}
+\newcommand{\MinComumAna}{\num{30}}
+\newcommand{\NAnaAntesDepoisSig}{\num{1}}
+\newcommand{\NAnaNeg}{\num{5}}
+\newcommand{\NAnaNegSig}{\num{4}}
+\newcommand{\NAnaQSig}{\num{2}}
 \newcommand{\NBootNSMedia}{\num{2000}}
 \newcommand{\NCDD}{\num{46}}
 \newcommand{\NCWD}{\num{47}}
@@ -110,6 +120,11 @@
 \newcommand{\NChuvaDesdeSetentaUm}{\num{44}}
 \newcommand{\NChuvaFCASete}{\num{50}}
 \newcommand{\NChuvaSemSeca}{\num{41}}
+\newcommand{\NComumCavalos}{\num{47}}
+\newcommand{\NComumJuazeiro}{\num{35}}
+\newcommand{\NComumJunco}{\num{39}}
+\newcommand{\NComumLagoaBoi}{\num{40}}
+\newcommand{\NComumLagoaGrande}{\num{42}}
 \newcommand{\NDTR}{\num{42}}
 \newcommand{\NDistRejeitadasAD}{\num{1}}
 \newcommand{\NFaseNeutro}{\num{17}}
@@ -120,6 +135,8 @@
 \newcommand{\NFaseNinoDet}{\num{14}}
 \newcommand{\NNN}{\num{19}}
 \newcommand{\NNS}{\num{8}}
+\newcommand{\NPostosAna}{\num{5}}
+\newcommand{\NPostosAnaCandidatos}{\num{11}}
 \newcommand{\NRnovecincop}{\num{47}}
 \newcommand{\NRummm}{\num{47}}
 \newcommand{\NRxumday}{\num{47}}
@@ -177,6 +194,16 @@
 \newcommand{\ORSemEstacaoICsup}{\num{2.60}}
 \newcommand{\ObsEum}{\num{2}}
 \newcommand{\ObsPdez}{\num{7}}
+\newcommand{\PAntesDepoisAnaCavalos}{\ensuremath{=}\,\num{0.84}}
+\newcommand{\PAntesDepoisAnaCavalosVal}{\num{0.84}}
+\newcommand{\PAntesDepoisAnaJuazeiro}{\ensuremath{=}\,\num{0.16}}
+\newcommand{\PAntesDepoisAnaJuazeiroVal}{\num{0.16}}
+\newcommand{\PAntesDepoisAnaJunco}{\ensuremath{=}\,\num{0.003}}
+\newcommand{\PAntesDepoisAnaJuncoVal}{\num{0.003}}
+\newcommand{\PAntesDepoisAnaLagoaBoi}{\ensuremath{=}\,\num{0.53}}
+\newcommand{\PAntesDepoisAnaLagoaBoiVal}{\num{0.53}}
+\newcommand{\PAntesDepoisAnaLagoaGrande}{\ensuremath{=}\,\num{0.47}}
+\newcommand{\PAntesDepoisAnaLagoaGrandeVal}{\num{0.47}}
 \newcommand{\PDozeTreze}{\num{0.012}}
 \newcommand{\PFisher}{\ensuremath{=}\,\num{0.31}}
 \newcommand{\PFisherVal}{\num{0.31}}
@@ -267,6 +294,16 @@
 \newcommand{\PPettittTmin}{\ensuremath{=}\,\num{0.007}}
 \newcommand{\PPettittTminVal}{\num{0.007}}
 \newcommand{\PPreditiva}{\num{0.017}}
+\newcommand{\PQAnaCavalos}{\ensuremath{=}\,\num{0.15}}
+\newcommand{\PQAnaCavalosVal}{\num{0.15}}
+\newcommand{\PQAnaJuazeiro}{\ensuremath{=}\,\num{0.15}}
+\newcommand{\PQAnaJuazeiroVal}{\num{0.15}}
+\newcommand{\PQAnaJunco}{\ensuremath{=}\,\num{0.003}}
+\newcommand{\PQAnaJuncoVal}{\num{0.003}}
+\newcommand{\PQAnaLagoaBoi}{\ensuremath{=}\,\num{0.51}}
+\newcommand{\PQAnaLagoaBoiVal}{\num{0.51}}
+\newcommand{\PQAnaLagoaGrande}{\ensuremath{=}\,\num{0.034}}
+\newcommand{\PQAnaLagoaGrandeVal}{\num{0.034}}
 \newcommand{\PSS}{\num{0.50}}
 \newcommand{\PSSICinf}{\num{0.27}}
 \newcommand{\PSSICsup}{\num{0.73}}
@@ -301,6 +338,16 @@
 \newcommand{\PSemEstacaoVal}{\num{0.16}}
 \newcommand{\PSenGrad}{\ensuremath{=}\,\num{0.80}}
 \newcommand{\PSenGradVal}{\num{0.80}}
+\newcommand{\PSnhtAnaCavalos}{\ensuremath{=}\,\num{0.48}}
+\newcommand{\PSnhtAnaCavalosVal}{\num{0.48}}
+\newcommand{\PSnhtAnaJuazeiro}{\ensuremath{<}\,\num{0.001}}
+\newcommand{\PSnhtAnaJuazeiroVal}{\num{< 0.001}}
+\newcommand{\PSnhtAnaJunco}{\ensuremath{=}\,\num{0.002}}
+\newcommand{\PSnhtAnaJuncoVal}{\num{0.002}}
+\newcommand{\PSnhtAnaLagoaBoi}{\ensuremath{=}\,\num{0.037}}
+\newcommand{\PSnhtAnaLagoaBoiVal}{\num{0.037}}
+\newcommand{\PSnhtAnaLagoaGrande}{\ensuremath{=}\,\num{0.67}}
+\newcommand{\PSnhtAnaLagoaGrandeVal}{\num{0.67}}
 \newcommand{\PSnhtChuva}{\ensuremath{=}\,\num{0.37}}
 \newcommand{\PSnhtChuvaVal}{\num{0.37}}
 \newcommand{\PSnhtParesMin}{\num{0.06}}
@@ -492,7 +539,17 @@
 \newcommand{\ProbRegNtreszero}{\num{48}}
 \newcommand{\ProbRegNumzero}{\num{19}}
 \newcommand{\QAntes}{\num{1.04}}
+\newcommand{\QAntesAnaCavalos}{\num{1.14}}
+\newcommand{\QAntesAnaJuazeiro}{\num{1.15}}
+\newcommand{\QAntesAnaJunco}{\num{1.19}}
+\newcommand{\QAntesAnaLagoaBoi}{\num{1.10}}
+\newcommand{\QAntesAnaLagoaGrande}{\num{1.07}}
 \newcommand{\QDepois}{\num{0.84}}
+\newcommand{\QDepoisAnaCavalos}{\num{1.12}}
+\newcommand{\QDepoisAnaJuazeiro}{\num{1.34}}
+\newcommand{\QDepoisAnaJunco}{\num{0.95}}
+\newcommand{\QDepoisAnaLagoaBoi}{\num{1.17}}
+\newcommand{\QDepoisAnaLagoaGrande}{\num{0.99}}
 \newcommand{\QGradBruta}{\ensuremath{=}\,\num{0.23}}
 \newcommand{\QGradBrutaVal}{\num{0.23}}
 \newcommand{\QGradDet}{\ensuremath{=}\,\num{0.23}}
@@ -591,6 +648,11 @@
 \newcommand{\QTFPWURVal}{\num{0.33}}
 \newcommand{\QTFPWVento}{\ensuremath{<}\,\num{0.001}}
 \newcommand{\QTFPWVentoVal}{\num{< 0.001}}
+\newcommand{\QuebraAnaCavalos}{2015/16}
+\newcommand{\QuebraAnaJuazeiro}{2012/13}
+\newcommand{\QuebraAnaJunco}{1984/85}
+\newcommand{\QuebraAnaLagoaBoi}{2019/20}
+\newcommand{\QuebraAnaLagoaGrande}{1994/95}
 \newcommand{\QuebraQ}{2003/04}
 \newcommand{\QuebraSnhtChuva}{2006/07}
 \newcommand{\QuebraTmaxCabrobo}{2001}
@@ -655,6 +717,23 @@
 \newcommand{\SaltoTmaxRemanso}{\num{1.93}}
 \newcommand{\SaltoTminCabrobo}{\num{0.39}}
 \newcommand{\SaltoTminRemanso}{\num{0.64}}
+\newcommand{\SenAnaCavalos}{\num{-46}}
+\newcommand{\SenAnaCavalosICinf}{\num{-70}}
+\newcommand{\SenAnaCavalosICsup}{\num{-13}}
+\newcommand{\SenAnaJuazeiro}{\num{-69}}
+\newcommand{\SenAnaJuazeiroICinf}{\num{-105}}
+\newcommand{\SenAnaJuazeiroICsup}{\num{-32}}
+\newcommand{\SenAnaJunco}{\num{-18}}
+\newcommand{\SenAnaJuncoICinf}{\num{-61}}
+\newcommand{\SenAnaJuncoICsup}{\num{13}}
+\newcommand{\SenAnaLagoaBoi}{\num{-69}}
+\newcommand{\SenAnaLagoaBoiICinf}{\num{-104}}
+\newcommand{\SenAnaLagoaBoiICsup}{\num{-35}}
+\newcommand{\SenAnaLagoaGrande}{\num{-48}}
+\newcommand{\SenAnaLagoaGrandeICinf}{\num{-96}}
+\newcommand{\SenAnaLagoaGrandeICsup}{\num{-8}}
+\newcommand{\SenAnaMax}{\num{-18}}
+\newcommand{\SenAnaMin}{\num{-69}}
 \newcommand{\SenCDD}{\num{3.1}}
 \newcommand{\SenCDDICinf}{\num{-4.1}}
 \newcommand{\SenCDDICsup}{\num{8.8}}
@@ -701,8 +780,18 @@
 \newcommand{\SenInicioICinf}{\num{1.9}}
 \newcommand{\SenInicioICsup}{\num{15.5}}
 \newcommand{\SenQ}{\num{-6.1}}
+\newcommand{\SenQAnaCavalos}{\num{-3.5}}
+\newcommand{\SenQAnaJuazeiro}{\num{3.4}}
+\newcommand{\SenQAnaJunco}{\num{-8.8}}
+\newcommand{\SenQAnaLagoaBoi}{\num{2.7}}
+\newcommand{\SenQAnaLagoaGrande}{\num{-5.7}}
 \newcommand{\SenQICinf}{\num{-10.8}}
 \newcommand{\SenQICsup}{\num{-1.8}}
+\newcommand{\SenRefCavalos}{\num{-60}}
+\newcommand{\SenRefJuazeiro}{\num{-69}}
+\newcommand{\SenRefJunco}{\num{-62}}
+\newcommand{\SenRefLagoaBoi}{\num{-65}}
+\newcommand{\SenRefLagoaGrande}{\num{-60}}
 \newcommand{\SenReferencia}{\num{-42}}
 \newcommand{\SenReferenciaICinf}{\num{-69}}
 \newcommand{\SenReferenciaICsup}{\num{-10}}

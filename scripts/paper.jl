@@ -555,6 +555,66 @@ function bloco_validacao(L, E; corte = 2005)
     return tab
 end
 
+# ============================================================================= M4: pluviômetros independentes (ANA)
+"""
+Verificação independente da tendência da chuva com pluviômetros da rede da ANA (outros
+operadores, outros instrumentos). Cada posto passa pelo mesmo critério de completude da 82983
+(FCA ≤ 5 %, com a climatologia diária do próprio posto em 1991–2020). Entram os postos com
+≥ `min_comum` anos válidos em comum com a 82983. Nos anos comuns, compara-se a tendência dos
+dois e testa-se a razão Q = 82983/posto: tendência (Sen, MK), quebra (SNHT) e diferença de
+média antes e depois de 2003/04, quando a estação automática foi instalada no sítio da 82983.
+"""
+function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
+    titulo("Pluviômetros independentes da rede da ANA")
+    ref = Dict(a => Float64(p) for (a, p) in zip(E.v.ano_hidro, E.v.prec))
+    linhas = NamedTuple[]
+    for cod in sort(collect(keys(POSTOS_ANA)))
+        arq = joinpath(RAIZ, "data", "raw", "ana", "ana_$(cod).csv"); isfile(arq) || continue
+        info = POSTOS_ANA[cod]
+        d = CSV.read(arq, DataFrame; missingstring = "")
+        d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
+        dh, _ = hidro_longo(d; ref = REF)
+        v = dh[dh.valido, :]
+        com = sort([a for a in v.ano_hidro if haskey(ref, a)])
+        dist = dist_km(info.lat, info.lon, LAT_82983, LON_82983)
+        push!(linhas, (codigo = cod, posto = info.nome, operador = info.resp, dist_km = dist, n_validos = nrow(v),
+                       n_comum = length(com), usado = length(com) >= min_comum))
+        length(com) >= min_comum || continue
+        yp = [only(v.prec[v.ano_hidro .== a]) for a in com]; yr = [ref[a] for a in com]
+        tp = theil_sen(Float64.(com), yp); tr = theil_sen(Float64.(com), yr)
+        q = yr ./ yp; tq = theil_sen(Float64.(com), q); mq = mann_kendall(Float64.(com), q)
+        sn = snht_teste(Float64.(com), q)
+        antes = q[com .< ano_a307]; depois = q[com .>= ano_a307]
+        pw = length(depois) >= 3 ? pvalue(UnequalVarianceTTest(antes, depois)) : NaN
+        k = info.chave
+        registra!("Dist" * k, dist; dig = 0); registra!("NComum" * k, length(com))
+        registra_ic!("SenAna" * k, 10tp.declive, 10tp.ic_inf, 10tp.ic_sup; dig = 0)
+        registra!("SenRef" * k, 10tr.declive; dig = 0)
+        registra!("SenQAna" * k, 1000tq.declive; dig = 1); registra_p!("PQAna" * k, mq.p)
+        registra_p!("PSnhtAna" * k, sn.p); registra!("QuebraAna" * k, rotulo_hidro(Int(sn.ultimo_antes) + 1))
+        registra!("QAntesAna" * k, mean(antes); dig = 2); registra!("QDepoisAna" * k, mean(depois); dig = 2)
+        registra_p!("PAntesDepoisAna" * k, pw)
+        linhas[end] = merge(linhas[end], (sen_posto = 10tp.declive, sen_posto_inf = 10tp.ic_inf, sen_posto_sup = 10tp.ic_sup,
+                                          sen_82983 = 10tr.declive, sen_Q_pct = 1000tq.declive, p_Q_mk = mq.p,
+                                          p_snht = sn.p, quebra_apos = Int(sn.ultimo_antes), Q_antes = mean(antes),
+                                          Q_depois = mean(depois), p_antes_depois = pw))
+    end
+    tab = DataFrame([merge((sen_posto = missing, sen_posto_inf = missing, sen_posto_sup = missing, sen_82983 = missing,
+                            sen_Q_pct = missing, p_Q_mk = missing, p_snht = missing, quebra_apos = missing,
+                            Q_antes = missing, Q_depois = missing, p_antes_depois = missing), l) for l in linhas])
+    sort!(tab, :dist_km)
+    mostra(tab; titulo = "Postos da ANA: tendência nos anos comuns com a 82983 e razão Q = 82983/posto")
+    salva_ptab(tab, "ana_postos")
+    u = tab[tab.usado, :]
+    registra!("NPostosAnaCandidatos", nrow(tab)); registra!("NPostosAna", nrow(u))
+    registra!("MinComumAna", min_comum)
+    registra!("NAnaNeg", count(<(0), u.sen_posto)); registra!("NAnaNegSig", count(<(0), u.sen_posto_sup))
+    registra!("SenAnaMin", minimum(u.sen_posto); dig = 0); registra!("SenAnaMax", maximum(u.sen_posto); dig = 0)
+    registra!("NAnaQSig", count(<(0.05), u.p_Q_mk)); registra!("NAnaAntesDepoisSig", count(<(0.05), u.p_antes_depois))
+    return tab
+end
+
 # ============================================================================= SPI / SPEI / corridas
 function bloco_indices(L, E)
     titulo("SPI, SPEI e teoria de corridas")
@@ -1055,6 +1115,7 @@ function executa_paper()
     B = bloco_bayes(L, E)
     N = bloco_nao_estacionario(L, E, V)
     VF = bloco_validacao(L, E)
+    AN = bloco_ana(L, E)
     I = bloco_indices(L, E)
     M = bloco_markov(L, I)
     S = bloco_sensibilidade(L, E, R)
@@ -1065,7 +1126,7 @@ function executa_paper()
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)
     println("\nMacros: ", escreve_macros())
-    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
+    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
 end
 
 using Serialization

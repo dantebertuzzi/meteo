@@ -259,6 +259,15 @@ def hidro_validos(df):
         if aus / nm <= 0.05: out[a] = np.nansum([pp.get(x, np.nan) for x in dias])
     return out
 cand = dict(zip(V.ah.astype(int), V.tot))
+# ---------------------------------------------------------------- 7b. pluviômetros da ANA (anos comuns com a 82983)
+for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos")):
+    da = pd.read_csv(f"{RAIZ}/data/raw/ana/ana_{cod}.csv", parse_dates=["data"])
+    va = hidro_validos(da[["data", "prec"]])
+    com_ = sorted(a_ for a_ in va if a_ in cand)
+    compara(f"n comum 82983 × {k}", len(com_), "NComum" + k, tol_abs=0)
+    t_ = stats.theilslopes([va[a_] for a_ in com_], com_)
+    compara(f"Sen {k} nos anos comuns", 10 * t_.slope, "SenAna" + k, tol_abs=0.6)
+
 viz = {}
 for f in glob.glob(f"{RAIZ}/data/raw/bdmep/dados_8*_D_*.csv"):
     cod = os.path.basename(f).split("_")[1]

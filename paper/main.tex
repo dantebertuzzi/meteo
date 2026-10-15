@@ -56,8 +56,10 @@ detectável nas últimas seis décadas. Usamos a série diária da estação con
 hidrológicos (julho--junho) cumprem o critério de completude, de \PrimeiroAnoValido{} a
 \UltimoAnoValido{}. A chuva anual caiu \SenChuva{}~mm por década
 \IC{\SenChuvaICinf}{\SenChuvaICsup} (Mann--Kendall com pré-branqueamento, $p$\,\PTFPWChuva). A
-queda também aparece na referência regional (\SenReferencia{}~mm por década), e parte do excesso
-local pode ser instrumental. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
+queda também aparece na referência regional (\SenReferencia{}~mm por década) e em
+\NAnaNegSig{} de \NPostosAna{} pluviômetros independentes da rede da ANA. O mais próximo, a 3~km,
+reproduz a tendência da \Est{} nos mesmos anos (\SenAnaJuazeiro{} contra \SenRefJuazeiro{}~mm por
+década), sem mudança relativa quando a estação automática foi instalada. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de modo semelhante
 em toda a distribuição; corrigindo uma possível quebra da Tmáx em \QuebraTmaxCabrobo{}, a máxima
 ainda sobe \SenTmaxAjustada{}~°C por década. A magnitude da queda da chuva é estável nas análises
@@ -92,8 +94,11 @@ detectably over the last six decades. We use the daily record of the INMET conve
 (July--June) meet the completeness criterion, from \PrimeiroAnoValido{} to \UltimoAnoValido{}. Annual
 rainfall declined by \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsup}
 (trend-free pre-whitened Mann--Kendall, $p$\,\PTFPWChuva). The decline is also present in the
-regional reference (\SenReferencia{}~mm per decade), and part of the local excess may be
-instrumental. Both rainfall intensity and the number of wet days decreased. Minimum and maximum
+regional reference (\SenReferencia{}~mm per decade) and at \NAnaNegSig{} of \NPostosAna{}
+independent rain gauges of the national water agency (ANA) network. The nearest one, 3~km away,
+reproduces the trend of station \Est{} over the same years (\SenAnaJuazeiro{} versus
+\SenRefJuazeiro{}~mm per decade), with no relative shift when the automatic station was
+installed. Both rainfall intensity and the number of wet days decreased. Minimum and maximum
 temperatures rose by \SenTmin{} and \SenTmax{}~°C per decade, similarly across the distribution;
 correcting a possible break in maximum temperature in \QuebraTmaxCabrobo{}, the maximum still rises
 by \SenTmaxAjustada{}~°C per decade.
@@ -179,8 +184,11 @@ A série principal é a diária da estação convencional \Est{} do INMET, obtid
 Dados Meteorológicos (BDMEP) para 1961--2025: chuva, temperaturas máxima, mínima e média
 compensada, umidade relativa, vento, insolação e evaporação. A estação automática A307, no
 mesmo sítio, tem dados horários de 2003 a 2024 e é usada como série de validação. As
-estações convencionais vizinhas (\cref{fig:area}) servem de referência regional. Os índices
-mensais ONI, TNA e TSA vêm do NOAA Physical Sciences Laboratory.
+estações convencionais vizinhas (\cref{fig:area}) servem de referência regional. Como
+verificação independente, usamos também a chuva diária de pluviômetros da rede hidrometeorológica
+da Agência Nacional de Águas (ANA), operados por outras instituições e com outros instrumentos,
+obtida no serviço Hidroweb. Os índices mensais ONI, TNA e TSA vêm do NOAA Physical Sciences
+Laboratory.
 
 \subsection{Critérios de completude}
 Um ano hidrológico (julho--junho) é válido se a \emph{fração climatológica ausente} (FCA)
@@ -252,6 +260,48 @@ mudança de composição da referência, tem quebra após a correção de Benjam
 o que torna plausível, mas não demonstrável com estes dados, uma mudança na rotina ou na
 exposição do pluviômetro convencional. A diferença também pode ser um gradiente espacial real.
 Por isso a P1 é apresentada também com a inclinação regional, que exclui a parte local da queda.
+
+\paragraph{\Est{} \texorpdfstring{$\times$}{x} pluviômetros da ANA.}
+As vizinhas acima são do próprio INMET. Para uma verificação com instrumentos e operadores
+diferentes, consideramos \NPostosAnaCandidatos{} pluviômetros da rede da ANA a até cerca de 70~km
+de Petrolina, com registro longo. Cada um passou pelo mesmo critério de completude da \Est{}, com
+a climatologia do próprio posto, e entraram os \NPostosAna{} com pelo menos \MinComumAna{} anos
+hidrológicos válidos em comum com ela. Nos anos comuns, comparamos as tendências e testamos a
+razão $Q = Y_{\Est}/Y_{\text{posto}}$ (\cref{tab:ana}). Todos os postos têm tendência negativa, e em
+\NAnaNegSig{} deles o intervalo exclui zero, com declives de \SenAnaMin{} a \SenAnaMax{}~mm por
+década. O mais informativo é Juazeiro, a \DistJuazeiro{}~km, do outro lado do rio: nos mesmos
+\NComumJuazeiro{} anos, ele cai \SenAnaJuazeiro{}~mm por década
+\IC{\SenAnaJuazeiroICinf}{\SenAnaJuazeiroICsup}, contra \SenRefJuazeiro{} na \Est{}. A razão entre
+os dois não tem tendência ($p$\,\PQAnaJuazeiro) nem muda significativamente entre antes e
+depois de 2003/04 ($Q$ de \QAntesAnaJuazeiro{} para \QDepoisAnaJuazeiro{}; $p$\,\PAntesDepoisAnaJuazeiro);
+se algo, a \Est{} passa a registrar relativamente mais, o contrário do que uma perda instrumental
+produziria. O SNHT
+localiza esse aumento em \QuebraAnaJuazeiro{}, o que, se algo, atenua a tendência da \Est{}. Frente a Junco e a Lagoa
+Grande, a razão cai (\NAnaQSig{} dos \NPostosAna{} testes com $p<0{,}05$), e frente a Junco também
+há diferença antes e depois de 2003/04. Mas a razão com Junco tem sua quebra
+principal em \QuebraAnaJunco{}, duas décadas antes da estação automática, Junco tem a menor
+tendência do grupo, e os outros três postos não confirmam o excesso local. Em conjunto, os pluviômetros independentes confirmam que a queda da chuva é real e
+regional, e não dão apoio consistente a uma mudança instrumental na \Est{} em 2003/04.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Pluviômetros independentes da rede da ANA: tendência da chuva anual (Sen, mm por
+  década, IC de 95\,\%) nos anos hidrológicos válidos em comum com a \Est{}, tendência da \Est{}
+  nos mesmos anos e teste de tendência (Mann--Kendall) na razão $Q$ = \Est{}/posto.}
+  \label{tab:ana}
+  \small
+  \begin{tabular}{@{}lrrrrr@{}}
+    \toprule
+    Posto (operador ANA) & km & $n$ & Sen posto \IC{inf}{sup} & Sen \Est{} & $p$ ($Q$) \\
+    \midrule
+    Juazeiro & \DistJuazeiro & \NComumJuazeiro & \SenAnaJuazeiro{} \IC{\SenAnaJuazeiroICinf}{\SenAnaJuazeiroICsup} & \SenRefJuazeiro & \PQAnaJuazeiroVal \\
+    Campo dos Cavalos & \DistCavalos & \NComumCavalos & \SenAnaCavalos{} \IC{\SenAnaCavalosICinf}{\SenAnaCavalosICsup} & \SenRefCavalos & \PQAnaCavalosVal \\
+    Junco & \DistJunco & \NComumJunco & \SenAnaJunco{} \IC{\SenAnaJuncoICinf}{\SenAnaJuncoICsup} & \SenRefJunco & \PQAnaJuncoVal \\
+    Lagoa do Boi & \DistLagoaBoi & \NComumLagoaBoi & \SenAnaLagoaBoi{} \IC{\SenAnaLagoaBoiICinf}{\SenAnaLagoaBoiICsup} & \SenRefLagoaBoi & \PQAnaLagoaBoiVal \\
+    Lagoa Grande & \DistLagoaGrande & \NComumLagoaGrande & \SenAnaLagoaGrande{} \IC{\SenAnaLagoaGrandeICinf}{\SenAnaLagoaGrandeICsup} & \SenRefLagoaGrande & \PQAnaLagoaGrandeVal \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \paragraph{Temperatura antes de 1971.}
 Antes da lacuna de 1966--1970, a Tmáx da \Est{} difere em média \DifIniTmaxCabrobo{}~°C da de
@@ -845,9 +895,12 @@ e mais quente desde a década de 1960. A chuva anual caiu \SenChuva{}~mm por dé
 intervalo que exclui zero com folga, e a magnitude da queda é estável entre subamostras, inclusive
 com os anos chuvosos recentes e sem os anos da seca de 2011/12 a 2016/17. A detecção, porém,
 depende da década de 2010: até 2010/11, a mesma queda não seria significativa. Ela não é só local: a referência formada pelas vizinhas cai
-\SenReferencia{}~mm por década. A parte exclusiva da \Est{} coincide, com significância marginal,
-com a instalação da estação automática em \QuebraQ{}. Um leitor cético pode atribuir essa parte a
-uma mudança instrumental, mas não a queda regional. A diminuição aparece tanto nos índices de
+\SenReferencia{}~mm por década, e \NAnaNegSig{} de \NPostosAna{} pluviômetros independentes da ANA
+confirmam a queda. Contra a referência do INMET, a parte exclusiva da \Est{} coincide, com
+significância marginal, com a instalação da estação automática em \QuebraQ{}; mas o pluviômetro
+independente mais próximo, a \DistJuazeiro{}~km, reproduz a tendência da \Est{} nos mesmos anos e
+não mostra mudança relativa nessa data. Uma contribuição instrumental não pode ser descartada, mas
+não é necessária para explicar a queda. A diminuição aparece tanto nos índices de
 intensidade (Rx1day, SDII, R95p) quanto no número de dias de chuva, e há indício, não confirmado
 pelo teste com pré-branqueamento, de que a estação chuvosa começa mais tarde e ficou mais curta.
 A forma do ciclo anual, medida pelo índice de sazonalidade e pela concentração, não mudou, e o
@@ -894,9 +947,11 @@ complexos aplicados à mesma série.
   ajuste. $T$ descreve a frequência de anos abaixo do limiar, e não a raridade daquele ano em
   particular.
   \item \textbf{Homogeneidade da chuva.} A queda da chuva na \Est{} é em parte regional e em
-  parte local: a razão com a referência varia \SenQ{}\,\% por década, com indício marginal de
-  quebra após \QuebraQ{}. Não sabemos se esse excedente é climático ou instrumental. O cenário com inclinação regional (\cref{tab:retorno,tab:prob}) delimita esse
-  efeito.
+  parte local: a razão com a referência do INMET varia \SenQ{}\,\% por década, com indício marginal
+  de quebra após \QuebraQ{}. Os pluviômetros da ANA não confirmam essa quebra de forma consistente
+  (o mais próximo não a mostra; dois mais distantes sugerem um excesso local), de modo que não
+  sabemos se o excedente é climático ou instrumental. O cenário com inclinação regional
+  (\cref{tab:retorno,tab:prob}) delimita esse efeito.
   \item \textbf{Homogeneidade da temperatura.} A Tmáx anterior a 1971 difere das vizinhas e foi
   excluída. No período analisado, \NquebrasTemp{} dos \NtestesTemp{} testes contra as vizinhas
   indicam quebra, ambos na Tmáx, e Tmáx e Tmín mostram indício de quebra frente à A307. Não
@@ -918,7 +973,9 @@ complexos aplicados à mesma série.
   diz por que a chuva caiu. Os valores para 2025 e a continuidade da tendência são extrapolações.
   \item \textbf{Teleconexões.} Não detectamos efeito do ENSO nem do gradiente do Atlântico; com
   uma estação e \NanosValidos{} anos, o poder para isso é baixo.
-  \item \textbf{Representatividade espacial.} Os resultados são de um ponto. Dados em grade
+  \item \textbf{Representatividade espacial.} Os resultados são de um ponto, verificados com
+  \NPostosAna{} pluviômetros independentes num raio de cerca de 50~km. Os períodos de retorno e
+  os demais índices não foram calculados para esses postos, e dados em grade
   \parencite{xavier2016,funk2015} permitiriam estender a análise à região.
   \item \textbf{Linha de base externa.} As normais climatológicas oficiais do INMET para
   1991--2020 não foram comparadas; usamos a normal calculada da própria estação.
@@ -934,8 +991,9 @@ complexos aplicados à mesma série.
 \begin{enumerate}
   \item A chuva anual em Petrolina caiu \SenChuva{}~mm por década
   \IC{\SenChuvaICinf}{\SenChuvaICsup} desde a década de 1960. A queda é compartilhada pelas
-  estações vizinhas, com magnitude menor (\SenReferencia{}~mm por década), e envolve tanto a
-  intensidade quanto o número de dias chuvosos.
+  estações vizinhas do INMET, com magnitude menor (\SenReferencia{}~mm por década), e confirmada
+  por pluviômetros independentes da ANA; o mais próximo reproduz a tendência nos mesmos anos. Ela
+  envolve tanto a intensidade quanto o número de dias chuvosos.
   \item As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de forma
   consistente em toda a distribuição. A Tmín não tem quebra frente às vizinhas; na Tmáx, a
   correção de uma possível quebra reduz a tendência para \SenTmaxAjustada{}~°C por década, sem
@@ -956,7 +1014,8 @@ complexos aplicados à mesma série.
 
 % ============================================================================= disponibilidade
 \section*{Disponibilidade de dados e código}
-Os dados brutos são públicos (INMET/BDMEP e NOAA PSL). O código Julia, com testes unitários, e
+Os dados brutos são públicos (INMET/BDMEP, ANA/Hidroweb e NOAA PSL); a chuva dos postos da ANA
+é baixada por \texttt{scripts/baixa\_ana.jl}. O código Julia, com testes unitários, e
 o script que regenera todas as figuras e todos os números deste texto (\texttt{scripts/paper.jl},
 que escreve \texttt{paper/resultados.tex}), além de uma verificação independente em Python
 (\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos, estão em \url{https://github.com/dantebertuzzi/meteo} e

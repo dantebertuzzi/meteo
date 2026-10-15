@@ -22,6 +22,7 @@ Requer Julia 1.13 e uma distribuição TeX com `biblatex`/`biber`.
 ```bash
 julia --project=. -e 'using Pkg; Pkg.instantiate()'
 julia --project=. main.jl                    # A307: limpeza, agregação, preenchimento (~6 min)
+julia --project=. scripts/baixa_ana.jl       # opcional: rebaixa os pluviômetros da ANA (já em data/raw/ana/)
 julia --project=. -t 4 scripts/paper.jl      # análises do artigo → paper/resultados.tex + figuras (~3 min)
 julia --project=. test/runtests.jl           # testes unitários dos métodos implementados à mão
 cd paper && latexmk -pdf main.tex            # artigo
@@ -55,6 +56,7 @@ INMET_*_A307_*.CSV     dados horários da A307 (INMET, pacotes anuais)
 main.jl, src/0*.jl     pipeline da A307 (auditoria, agregação, preenchimento, diagnóstico de ausentes)
 src/paper/             módulos do artigo (SPI/SPEI, retorno, Markov, homogeneidade, P2, figuras)
 scripts/paper.jl       roda todas as análises do artigo
+scripts/baixa_ana.jl   baixa a chuva diária dos pluviômetros da ANA (Hidroweb)
 scripts/verifica.py    verificação independente em Python dos números do artigo
 test/runtests.jl       testes contra valores publicados (FAO-56) e propriedades conhecidas
 paper/                 main.tex, refs.bib, resultados.tex (gerado), figuras/ (geradas)

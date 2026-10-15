@@ -7,6 +7,6 @@ for f in ["01_importacao", "02_limpeza", "02b_preenchimento", "03_descritiva", "
           "05_distribuicoes", "06_extremos"]
     include(joinpath(_SRC, f * ".jl"))
 end
-for f in ["utilidades", "indices_seca", "dados_longos", "retorno", "markov", "homogeneidade", "p2", "figuras"]
+for f in ["utilidades", "indices_seca", "dados_longos", "postos_ana", "retorno", "markov", "homogeneidade", "p2", "figuras"]
     include(joinpath(@__DIR__, f * ".jl"))
 end
