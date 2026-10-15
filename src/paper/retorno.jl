@@ -147,6 +147,70 @@ function gamma_inclinacao_fixa(y, x, b)
             p_em = (x0, xi) -> cdf(Gamma(exp(θ[1]), exp(θ[2] + b * xi) / exp(θ[1])), x0))
 end
 
+# ----------------------------------------------------------------------------- não estacionário: média entre candidatas
+"""
+    ns_candidata(D, y, x; b)
+
+Ajusta por MV a família `D` com parâmetro de posição log-linear no covariável x:
+    Normal e Gamma: log(média) = a + b·x;   Weibull: log(escala) = a + b·x;
+    LogNormal: média de log y = a + b·x.
+A forma (ou o desvio-padrão) é constante, de modo que as quatro candidatas têm a
+mesma tendência multiplicativa, exp(b) − 1 por unidade de x. Com `b` dado, a
+inclinação é fixada (p.ex. na taxa regional) e só a e a forma são estimados.
+"""
+function ns_candidata(D, y, x; b = nothing)
+    function dist(θ, xi)
+        η = θ[2] + (isnothing(b) ? θ[3] : b) * xi; s = exp(θ[1])
+        D === Normal    ? Normal(exp(η), s) :
+        D === LogNormal ? LogNormal(η, s) :
+        D === Gamma     ? Gamma(s, exp(η) / s) :
+        D === Weibull   ? Weibull(s, exp(η)) : error("família não suportada: $D")
+    end
+    nll(θ) = (v = -sum(logpdf(dist(θ, xi), yi) for (yi, xi) in zip(y, x)); isfinite(v) ? v : 1e12)
+    d0 = ajusta_mle(D, y)
+    s0 = D === Normal ? std(y) : D === LogNormal ? std(log.(y)) : shape(d0)
+    a0 = D === LogNormal ? mean(log.(y)) : D === Weibull ? log(scale(d0)) : log(mean(y))
+    θ0 = isnothing(b) ? [log(s0), a0, 0.0] : [log(s0), a0]
+    r = optimize(nll, θ0, NelderMead(), Optim.Options(iterations = 20_000, g_tol = 1e-12))
+    r = optimize(nll, Optim.minimizer(r), BFGS())         # refina a partir do simplex
+    θ = Optim.minimizer(r)
+    return (D = D, ll = -Optim.minimum(r), npar = length(θ), b = isnothing(b) ? θ[3] : b,
+            F = (x0, xi) -> cdf(dist(θ, xi), x0))
+end
+
+"""
+    ns_media_akaike(y, x; b)
+
+Ajusta as candidatas não estacionárias e devolve a tabela (AIC e pesos de Akaike)
+e `p_em(x0, xi)`, a média de F(x0) no ponto xi ponderada pelos pesos — o mesmo
+esquema do caso estacionário, para que os dois sejam comparáveis.
+"""
+function ns_media_akaike(y, x; b = nothing, candidatas = CANDIDATAS)
+    fits = [ns_candidata(D, y, x; b) for D in candidatas]
+    aic = [2f.npar - 2f.ll for f in fits]
+    w = exp.(-(aic .- minimum(aic)) ./ 2); w ./= sum(w)
+    p_em(x0, xi) = sum(w[j] * fits[j].F(x0, xi) for j in eachindex(fits))
+    tab = DataFrame(distribuicao = [string(nameof(D)) for D in candidatas],
+                    efeito_pct = [100(exp(f.b) - 1) for f in fits], loglik = [f.ll for f in fits],
+                    AIC = aic, dAIC = aic .- minimum(aic), peso_akaike = w)
+    return (fits = fits, tab = tab, w = w, p_em = p_em)
+end
+
+"""
+Bootstrap não paramétrico dos anos (pares (x, y)) da média por pesos de Akaike:
+as candidatas e os pesos são reajustados a cada réplica. Devolve uma matriz
+réplicas × pontos, com p = F(x₀) em cada xi de `xs`.
+"""
+function ns_media_akaike_boot(y, x, x0, xs; b = nothing, B = 2000, rng = MersenneTwister(SEMENTE))
+    n = length(y); R = Vector{Vector{Float64}}()
+    for _ in 1:B
+        i = rand(rng, 1:n, n)
+        m = try ns_media_akaike(y[i], x[i]; b) catch; continue end
+        push!(R, [m.p_em(x0, xi) for xi in xs])
+    end
+    return permutedims(reduce(hcat, R))
+end
+
 """
 P(≥ 1 ano com chuva ≤ x₀ nos próximos n anos) quando p varia ano a ano:
     1 − Πⱼ (1 − pⱼ).

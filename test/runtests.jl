@@ -179,3 +179,21 @@ end
     @test loglikelihood(d, x) >= loglikelihood(LogNormal(params(d)[1], 1.02params(d)[2]), x)
     @test loglikelihood(d, x) >= loglikelihood(LogNormal(params(d)[1], 0.98params(d)[2]), x)
 end
+
+@testset "Não estacionário: candidatas e média de Akaike" begin
+    rng = MersenneTwister(3)
+    x = collect(range(-3, 3, length = 60)); y = [rand(rng, Gamma(6.0, 500exp(-0.12xi) / 6.0)) for xi in x]
+    # a Gamma genérica reproduz o ajuste dedicado já usado no artigo
+    g = gamma_nao_estacionaria(y, x); c = ns_candidata(Gamma, y, x)
+    @test c.ll ≈ g.ll rtol = 1e-6
+    @test c.F(200.0, 1.0) ≈ g.p_em(200.0, 1.0) rtol = 1e-4
+    # inclinação fixada em zero reproduz o EMV estacionário de cada família
+    for D in CANDIDATAS
+        @test ns_candidata(D, y, x; b = 0.0).ll ≈ loglikelihood(ajusta_mle(D, y), y) rtol = 1e-6
+    end
+    # a média é uma combinação convexa das candidatas
+    m = ns_media_akaike(y, x)
+    @test sum(m.w) ≈ 1
+    ps = [f.F(200.0, 2.0) for f in m.fits]
+    @test minimum(ps) - 1e-12 <= m.p_em(200.0, 2.0) <= maximum(ps) + 1e-12
+end

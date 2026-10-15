@@ -65,8 +65,11 @@ década). Em seguida, avaliamos o que a queda da chuva implica para anos tão se
 (\ChuvaDozeTreze{}~mm, praticamente empatado com \RankAnotres{} como segundo mais seco, atrás de
 \AnoMinimo{}). Supondo clima estacionário, um ano assim teria período de retorno da ordem de
 \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. Com a média do último ano
-observado (\UltimoAnoNS), passa a \TBayesNSUlt{} anos \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup};
-com só a inclinação regional, a \TRegionalDoisMilVinteCinco{} anos em 2025. Esses intervalos são
+observado (\UltimoAnoNS), passa a \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup};
+com só a inclinação regional, a \TRegionalMedia{} anos \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
+em 2025. Ambos são médias por pesos de Akaike entre quatro distribuições; entre elas, o valor não
+estacionário vai de \TNSModelosMin{} a \TNSModelosMax{} anos, e a escolha da distribuição pesa
+tanto quanto a amostra. Esses intervalos são
 largos, e mostrar o tamanho dessa incerteza é parte do resultado: com uma estação e cerca de meio
 século de anos válidos, a frequência de anos extremos só pode ser conhecida em ordem de grandeza.
 Pelo mesmo motivo, os dados não separam a persistência de anos secos da tendência, nem detectam a
@@ -94,8 +97,11 @@ decline implies for years as dry as 2012/13 (\ChuvaDozeTreze{}~mm, virtually tie
 \RankAnotres{} as the second driest, after \AnoMinimo{}). Under a stationary climate, such a
 year would have a return period of the order of \TMediaAkaikeB{} years
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. At the mean of the last observed year
-(\UltimoAnoNS) it becomes \TBayesNSUlt{} years \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup}; with
-the regional slope only, \TRegionalDoisMilVinteCinco{} years in 2025. These intervals are wide,
+(\UltimoAnoNS) it becomes \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; with
+the regional slope only, \TRegionalMedia{} years \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
+in 2025. Both are Akaike-weighted averages over four distributions; across them, the
+non-stationary value ranges from \TNSModelosMin{} to \TNSModelosMax{} years, so the choice of
+distribution matters as much as the sample. These intervals are wide,
 and quantifying that uncertainty is part of the result: with one station and about half a
 century of valid years, the frequency of extreme years can only be known to an order of
 magnitude. For the same reason, the data cannot separate persistence of dry years from the trend,
@@ -295,16 +301,26 @@ já observados, e ele próprio está na amostra de ajuste. O período de retorno
 selecionado dessa forma deve ser lido como a frequência de anos \emph{ao menos tão secos quanto
 o limiar}, e não como uma estimativa não viesada da raridade daquele ano específico.
 
-\paragraph{Não estacionariedade.} A média passa a variar no tempo, com forma constante:
+\paragraph{Não estacionariedade.} O parâmetro de posição de cada candidata passa a variar no
+tempo, com forma constante:
 \begin{equation}
-  Y_t \sim \mathrm{Gamma}\big(k,\ \mu_t/k\big), \qquad \log \mu_t = a + b\,\tau_t,
+  \log \lambda_t = a + b\,\tau_t,
 \end{equation}
-com $\tau_t$ o tempo em décadas centrado. A versão bayesiana usa $b \sim \mathcal N(0,\,0{,}2)$,
-que admite variações de até cerca de 40\,\% por década. O valor principal é avaliado no último
-ano hidrológico válido; valores para 2025 extrapolam a tendência para além dos dados e são
-apresentados como cenário. Como sensibilidades, $b$ é fixado na inclinação estimada para a série
-de referência regional, e o modelo é reajustado com o critério FCA $\le$ 7,5\,\%. Quando $p$
-varia ano a ano, a \cref{eq:pn} vira $1-\prod_{j=1}^{n}(1-p_{t_0+j})$.
+com $\tau_t$ o tempo em décadas centrado e $\lambda_t$ a média (normal e Gamma), a escala
+(Weibull) ou a mediana (log-normal). Assim, as quatro candidatas têm a mesma tendência
+multiplicativa, $e^{b}-1$ por década, e diferem na forma como a variabilidade acompanha a média:
+a normal mantém o desvio-padrão constante; a Gamma, a Weibull e a log-normal mantêm o coeficiente
+de variação. Como no caso estacionário, o resultado principal é a média de $p$ ponderada pelos
+pesos de Akaike das candidatas não estacionárias, com IC por bootstrap não paramétrico dos anos,
+em que as quatro candidatas e os pesos são reajustados a cada réplica. A Gamma não estacionária,
+$Y_t \sim \mathrm{Gamma}(k,\ \mu_t/k)$, também é ajustada de forma bayesiana, com
+$b \sim \mathcal N(0,\,0{,}2)$, que admite variações de até cerca de 40\,\% por década, e serve
+como sensibilidade. Ela também define os estados sem tendência da persistência e das
+teleconexões. O valor principal é avaliado no último ano hidrológico válido; valores para 2025
+extrapolam a tendência para além dos dados e são apresentados como cenário. Como sensibilidades,
+$b$ é fixado na inclinação estimada para a série de referência regional (de novo como média entre
+as candidatas), e a Gamma é reajustada com o critério FCA $\le$ 7,5\,\%. Quando $p$ varia ano a
+ano, a \cref{eq:pn} vira $1-\prod_{j=1}^{n}(1-p_{t_0+j})$.
 
 \subsection{Persistência}
 Classificamos cada ano hidrológico como seco (tercil inferior) ou não seco e estimamos uma
@@ -397,36 +413,50 @@ severo do registro. O SPEI-12 identifica os mesmos episódios.
 Com \NanosValidos{} anos, as quatro distribuições candidatas diferem pouco. A de menor AIC é a
 \MelhorAIC{}; a Gamma tem peso de Akaike \GammaPesoAkaike{} e $p_{AD}=\GammaPAD$, ou seja, é
 aceitável, mas não a melhor. Sob estacionariedade, o período de retorno de E1 vai de \TNormal{}
-anos (normal) a \TWeibull{} (Weibull), \TGamma{} (Gamma) e \TLogNormal{} (log-normal). A média
-ponderada por AIC é de \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}
-(\cref{tab:retorno}). Empiricamente, \NanosAteDozeTreze{} dos \NanosValidos{} anos tiveram chuva
-$\le$ E1 ($T \approx \TEmpiricoDozeTreze$ anos pela posição de Weibull), o que indica que a cauda
-seca da Gamma é mais fina que a dos dados. Como o modelo não estacionário principal também é
-Gamma, os períodos de retorno não estacionários abaixo provavelmente estão superestimados, isto
-é, um ano como 2012/13 tende a ser algo mais frequente do que indicam.
+anos (normal) a \TWeibull{} (Weibull), \TGamma{} (Gamma) e \TLogNormal{} (log-normal); a
+log-normal, porém, é rejeitada pelo Anderson--Darling, e entre as candidatas não rejeitadas o
+máximo é \TModelosMaxAceitos{} anos. A média ponderada por AIC é de \TMediaAkaikeB{} anos
+\IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} (\cref{tab:retorno}). Empiricamente,
+\NanosAteDozeTreze{} dos \NanosValidos{} anos tiveram chuva $\le$ E1
+($T \approx \TEmpiricoDozeTreze$ anos pela posição de Weibull), o que indica que a cauda seca da
+Gamma é mais fina que a dos dados.
 
 A tendência da chuva anual é forte: \SenChuva{}~mm/década \IC{\SenChuvaICinf}{\SenChuvaICsup}
-(MK $p$\,\PMKChuva; TFPW $p$\,\PTFPWChuva). O modelo Gamma não estacionário é claramente preferido
-($\Delta\mathrm{AIC} = \NSTempoDAIC$; razão de verossimilhança $p$\,\NSTempoP), com variação da
-média de \NSTempoEfeito{}\,\% por década (bayesiano: \BayesNSEfeito{}\,\%
-\IC{\BayesNSEfeitoICinf}{\BayesNSEfeitoICsup}; $P(b<0\mid y) = \ProbBNegativo$). No último ano
-hidrológico válido (\UltimoAnoNS), o período de retorno de E1 é de \TBayesNSUlt{} anos
-\IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} (máxima verossimilhança: \TTempoUlt{} anos). Com a
-inclinação regional, mais lenta (\NSRegionalEfeito{}\,\% por década), ele fica em
-\TRegionalDoisMilVinteCinco{} anos em 2025. A tendência resiste ao critério de completude mais
-frouxo: com FCA $\le$ 7,5\,\%, que inclui os anos recentes e chuvosos \AnosFCASete{}, ela é de
-\SenChuvaFCASete{}~mm/década \IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup}, e o período de
-retorno em \UltimoAnoFCASete{} é de \TFCASeteUlt{} anos.
+(MK $p$\,\PMKChuva; TFPW $p$\,\PTFPWChuva). Na Gamma, o modelo não estacionário é claramente
+preferido ao estacionário ($\Delta\mathrm{AIC} = \NSTempoDAIC$; razão de verossimilhança
+$p$\,\NSTempoP), com variação da média de \NSTempoEfeito{}\,\% por década (bayesiano:
+\BayesNSEfeito{}\,\% \IC{\BayesNSEfeitoICinf}{\BayesNSEfeitoICsup}; $P(b<0\mid y) =
+\ProbBNegativo$). Entre as candidatas não estacionárias, porém, a Gamma tem o segundo pior ajuste,
+à frente só da log-normal. A de menor AIC é a \MelhorAICNS{} (peso \PesoNSNormal{}), seguida da Weibull
+(\PesoNSWeibull{}), da Gamma (\PesoNSGamma{}) e da log-normal (\PesoNSLogNormal{}). A diferença
+está na forma como a variabilidade acompanha a queda da média: a normal mantém o desvio-padrão
+constante, e a Gamma, o coeficiente de variação. Os dados favorecem a primeira, isto é, a
+dispersão absoluta da chuva anual diminuiu menos que a média.
 
-Os modelos bayesianos convergiram ($\hat R \le \RhatMaxNS$; tamanho efetivo de amostra
-$\ge \ESSMin$) e reproduzem a cauda seca observada: a probabilidade preditiva de um mínimo
-simulado ser menor que o observado é \PPCMinEst{} no modelo estacionário e \PPCMinNS{} no não
-estacionário.
+Essa escolha pesa muito na cauda. No último ano hidrológico válido (\UltimoAnoNS), o período de
+retorno de E1 vai de \TNSNormal{} anos (normal) a \TNSWeibull{} (Weibull) e \TNSGamma{} (Gamma).
+O resultado principal, a média ponderada pelos pesos de Akaike, é de \TNSMediaUlt{} anos
+\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}. Com a inclinação regional, mais lenta
+(\NSRegionalEfeito{}\,\% por década), a média entre as candidatas dá \TRegionalMedia{} anos
+\IC{\TRegionalMediaICinf}{\TRegionalMediaICsup} em 2025. Comparado no mesmo esquema, o período de
+retorno passa de \TMediaAkaikeB{} anos sob estacionariedade para \TNSMediaUlt{} com a média
+recente. Dentro da Gamma, a passagem é de \TGamma{} para \TTempoUlt{} anos (máxima
+verossimilhança), ou \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} na versão bayesiana.
+A tendência resiste ao critério de completude mais frouxo: com FCA $\le$ 7,5\,\%, que inclui os
+anos recentes e chuvosos \AnosFCASete{}, ela é de \SenChuvaFCASete{}~mm/década
+\IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup}.
+
+Os modelos bayesianos, todos Gamma, convergiram ($\hat R \le \RhatMaxNS$; tamanho efetivo de
+amostra $\ge \ESSMin$) e reproduzem a cauda seca observada: a probabilidade preditiva de um
+mínimo simulado ser menor que o observado é \PPCMinEst{} no modelo estacionário e \PPCMinNS{} no
+não estacionário. Eles servem como sensibilidade à forma de quantificar a incerteza, não à
+escolha da distribuição.
 
 \begin{table}[htbp]
   \centering
   \caption{Período de retorno (anos) de um ano hidrológico com chuva $\le$ 2012/13 (E1).
-  Intervalos de 95\,\%.}
+  Intervalos de 95\,\%. As médias por pesos de Akaike usam as quatro candidatas, reajustadas a
+  cada réplica do bootstrap dos anos.}
   \label{tab:retorno}
   \small
   \begin{tabular}{@{}llr@{}}
@@ -440,25 +470,30 @@ estacionário.
     Gamma & posterior (priori base) & \TBayes{} \IC{\TBayesICinf}{\TBayesICsup} \\
     Gamma & posterior (priori vaga) & \TBayesVaga{} \IC{\TBayesVagaICinf}{\TBayesVagaICsup} \\
     \midrule
-    \multicolumn{3}{@{}l}{\emph{Não estacionário (Gamma)}} \\
-    \UltimoAnoNS{}, inclinação local & posterior & \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} \\
-    \UltimoAnoNS{}, inclinação local & máxima verossimilhança & \TTempoUlt{} \\
-    \UltimoAnoFCASete{}, FCA $\le$ 7,5\,\% & máxima verossimilhança & \TFCASeteUlt{} \\
-    2025 (cenário), inclinação local & posterior & \TBayesNS{} \IC{\TBayesNSICinf}{\TBayesNSICsup} \\
-    2025 (cenário), inclinação regional & máxima verossimilhança & \TRegionalDoisMilVinteCinco{} \\
+    \multicolumn{3}{@{}l}{\emph{Não estacionário, \UltimoAnoNS{}}} \\
+    Média por pesos de Akaike & bootstrap dos anos & \TNSMediaUlt{} \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} \\
+    Normal / Weibull / Gamma & máxima verossimilhança & \TNSNormal{} / \TNSWeibull{} / \TNSGamma{} \\
+    Gamma & posterior & \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} \\
+    Gamma, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & máxima verossimilhança & \TFCASeteUlt{} \\
+    \midrule
+    \multicolumn{3}{@{}l}{\emph{Não estacionário, 2025 (cenário)}} \\
+    Média por pesos de Akaike, inclinação local & bootstrap dos anos & \TNSMediaDoisMilVinteCinco{} \IC{\TNSMediaDoisMilVinteCincoICinf}{\TNSMediaDoisMilVinteCincoICsup} \\
+    Média por pesos de Akaike, inclinação regional & bootstrap dos anos & \TRegionalMedia{} \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup} \\
+    Gamma, inclinação local & posterior & \TBayesNS{} \IC{\TBayesNSICinf}{\TBayesNSICsup} \\
+    Gamma, inclinação regional & máxima verossimilhança & \TRegionalDoisMilVinteCinco{} \\
     \midrule
     Só \PeriodoCurto{} (\NanosCurto{} anos) & Gamma, perfilada & \TCurto{} \IC{\TCurtoICinf}{\TCurtoICsup} \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-As \cref{fig:retorno,fig:posterior} mostram o efeito da não estacionariedade: com a média
-recente, a curva de retorno se desloca para baixo e a posterior de $T$ se concentra em valores
-menores. Para o mínimo do registro (E1$'$), o modelo Gamma estacionário dá $T=\TMinimo{}$ anos
-\IC{\TMinimoICinf}{\TMinimoICsup}. Ajustando só os \NanosCurto{} anos válidos de \PeriodoCurto{},
-o período de retorno de E1 seria de \TCurto{} anos \IC{\TCurtoICinf}{\TCurtoICsup}. Esse valor
-reflete apenas o período recente e mais seco: é próximo do $T$ não estacionário atual, mas não
-pode ser obtido sem a série longa, que é o que permite separar tendência de variabilidade.
+As \cref{fig:retorno,fig:posterior} mostram o efeito da não estacionariedade na Gamma: com a
+média recente, a curva de retorno se desloca para baixo e a posterior de $T$ se concentra em
+valores menores. Para o mínimo do registro (E1$'$), o modelo Gamma estacionário dá $T=\TMinimo{}$
+anos \IC{\TMinimoICinf}{\TMinimoICsup}. Ajustando só os \NanosCurto{} anos válidos de
+\PeriodoCurto{}, o período de retorno de E1 seria de \TCurto{} anos \IC{\TCurtoICinf}{\TCurtoICsup}.
+Esse valor reflete apenas o período recente e mais seco e não pode ser obtido sem a série longa,
+que é o que permite separar tendência de variabilidade.
 
 \begin{figure}[htbp]
   \centering
@@ -471,30 +506,49 @@ pode ser obtido sem a série longa, que é o que permite separar tendência de v
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figuras/fig07_posterior_T.pdf}
-  \caption{Posterior do período de retorno de E1 sob os modelos estacionário e não
-  estacionário (cenário de 2025). Tracejado: medianas.}
+  \caption{Posterior do período de retorno de E1 sob os modelos Gamma estacionário e não
+  estacionário (cenário de 2025). Tracejado: medianas. A média entre candidatas
+  (\cref{tab:retorno}) dá valores menores que a Gamma.}
   \label{fig:posterior}
 \end{figure}
 
 A \cref{tab:prob} traduz $T$ em probabilidade de pelo menos um ano igual ou mais seco que
-2012/13 nos próximos $n$ anos. No modelo Gamma estacionário, a probabilidade em 30 anos é de
-\ProbDozeTrezeNtreszero{}\,\% \IC{\ProbDozeTrezeNtreszeroICinf}{\ProbDozeTrezeNtreszeroICsup}.
-Mantido o clima do último ano observado, ela é de \ProbNSUltNtreszero{}\,\%
-\IC{\ProbNSUltNtreszeroICinf}{\ProbNSUltNtreszeroICsup}. O cenário em que a tendência continua
-depois de 2025 extrapola uma tendência log-linear para além do período observado. Ele aparece na
-tabela apenas como limite superior condicional, e não como projeção climática.
+2012/13 nos próximos $n$ anos, sob a hipótese de anos independentes. Sob estacionariedade, a
+probabilidade em 30 anos é de \ProbMediaAkaikeNtreszero{}\,\%
+\IC{\ProbMediaAkaikeNtreszeroICinf}{\ProbMediaAkaikeNtreszeroICsup}. Mantido o clima do último ano
+observado, ela é de \ProbNSMediaUltNtreszero{}\,\%
+\IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup}; com só a inclinação regional,
+\ProbRegMediaNtreszero{}\,\% \IC{\ProbRegMediaNtreszeroICinf}{\ProbRegMediaNtreszeroICsup}. As
+linhas da Gamma bayesiana mostram a sensibilidade à distribuição. O cenário em que a tendência
+continua depois de 2025 extrapola uma tendência log-linear para além do período observado e
+aparece apenas como limite superior condicional, e não como projeção climática.
 
 \begin{table}[htbp]
   \centering
   \caption{Probabilidade (\%) de ao menos um ano com chuva $\le$ 2012/13 nos próximos $n$ anos.
-  Estacionário: Gamma, verossimilhança perfilada, IC por bootstrap. Não estacionário: posterior
-  bayesiana, com o clima mantido no nível do ano indicado ou com a tendência continuada.}
+  Média por pesos de Akaike: IC por bootstrap dos anos. Gamma: posterior bayesiana, com o clima
+  mantido no nível do ano indicado ou com a tendência continuada.}
   \label{tab:prob}
   \small
   \begin{tabular}{@{}lcccc@{}}
     \toprule
     Cenário & $n=5$ & $n=10$ & $n=20$ & $n=30$ \\
     \midrule
+    \multicolumn{5}{@{}l}{\emph{Média por pesos de Akaike}} \\
+    Estacionário & \ProbMediaAkaikeNcinco{} \IC{\ProbMediaAkaikeNcincoICinf}{\ProbMediaAkaikeNcincoICsup}
+                 & \ProbMediaAkaikeNumzero{} \IC{\ProbMediaAkaikeNumzeroICinf}{\ProbMediaAkaikeNumzeroICsup}
+                 & \ProbMediaAkaikeNdoiszero{} \IC{\ProbMediaAkaikeNdoiszeroICinf}{\ProbMediaAkaikeNdoiszeroICsup}
+                 & \ProbMediaAkaikeNtreszero{} \IC{\ProbMediaAkaikeNtreszeroICinf}{\ProbMediaAkaikeNtreszeroICsup} \\
+    Clima de \UltimoAnoNS{} mantido & \ProbNSMediaUltNcinco{} \IC{\ProbNSMediaUltNcincoICinf}{\ProbNSMediaUltNcincoICsup}
+                 & \ProbNSMediaUltNumzero{} \IC{\ProbNSMediaUltNumzeroICinf}{\ProbNSMediaUltNumzeroICsup}
+                 & \ProbNSMediaUltNdoiszero{} \IC{\ProbNSMediaUltNdoiszeroICinf}{\ProbNSMediaUltNdoiszeroICsup}
+                 & \ProbNSMediaUltNtreszero{} \IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup} \\
+    Inclinação regional, 2025 & \ProbRegMediaNcinco{} \IC{\ProbRegMediaNcincoICinf}{\ProbRegMediaNcincoICsup}
+                 & \ProbRegMediaNumzero{} \IC{\ProbRegMediaNumzeroICinf}{\ProbRegMediaNumzeroICsup}
+                 & \ProbRegMediaNdoiszero{} \IC{\ProbRegMediaNdoiszeroICinf}{\ProbRegMediaNdoiszeroICsup}
+                 & \ProbRegMediaNtreszero{} \IC{\ProbRegMediaNtreszeroICinf}{\ProbRegMediaNtreszeroICsup} \\
+    \midrule
+    \multicolumn{5}{@{}l}{\emph{Gamma (sensibilidade)}} \\
     Estacionário & \ProbDozeTrezeNcinco{} \IC{\ProbDozeTrezeNcincoICinf}{\ProbDozeTrezeNcincoICsup}
                  & \ProbDozeTrezeNumzero{} \IC{\ProbDozeTrezeNumzeroICinf}{\ProbDozeTrezeNumzeroICsup}
                  & \ProbDozeTrezeNdoiszero{} \IC{\ProbDozeTrezeNdoiszeroICinf}{\ProbDozeTrezeNdoiszeroICsup}
@@ -503,11 +557,6 @@ tabela apenas como limite superior condicional, e não como projeção climátic
                  & \ProbNSUltNumzero{} \IC{\ProbNSUltNumzeroICinf}{\ProbNSUltNumzeroICsup}
                  & \ProbNSUltNdoiszero{} \IC{\ProbNSUltNdoiszeroICinf}{\ProbNSUltNdoiszeroICsup}
                  & \ProbNSUltNtreszero{} \IC{\ProbNSUltNtreszeroICinf}{\ProbNSUltNtreszeroICsup} \\
-    Inclinação regional, 2025 & \ProbRegNcinco{} & \ProbRegNumzero{} & \ProbRegNdoiszero{} & \ProbRegNtreszero{} \\
-    Clima de 2025 mantido & \ProbNSCongNcinco{} \IC{\ProbNSCongNcincoICinf}{\ProbNSCongNcincoICsup}
-                 & \ProbNSCongNumzero{} \IC{\ProbNSCongNumzeroICinf}{\ProbNSCongNumzeroICsup}
-                 & \ProbNSCongNdoiszero{} \IC{\ProbNSCongNdoiszeroICinf}{\ProbNSCongNdoiszeroICsup}
-                 & \ProbNSCongNtreszero{} \IC{\ProbNSCongNtreszeroICinf}{\ProbNSCongNtreszeroICsup} \\
     Tendência continua & \ProbNSContNcinco{} \IC{\ProbNSContNcincoICinf}{\ProbNSContNcincoICsup}
                  & \ProbNSContNumzero{} \IC{\ProbNSContNumzeroICinf}{\ProbNSContNumzeroICsup}
                  & \ProbNSContNdoiszero{} \IC{\ProbNSContNdoiszeroICinf}{\ProbNSContNdoiszeroICsup}
@@ -688,16 +737,16 @@ seca mostra tendência de aumento \parencite{brito2018}; ela também é destacad
 por \textcite{marengo2017} e \textcite{cunha2019}. Em Petrolina, ela corresponde à sequência de
 anos hidrológicos de 2011/12 a 2016/17: os três anos mais secos desde 1963 caem nesse período, e
 o evento de SPI-12 que inclui 2012/13 é o mais severo do registro. A tendência ajuda a entender
-essa sequência. Sob estacionariedade, um ano como 2012/13 teria período de retorno de várias
-décadas a mais de um século, conforme a distribuição; com a média recente, passa a algumas
-décadas. Os anos secos consecutivos também são compatíveis com a queda da média sozinha, sem
+essa sequência. Sob estacionariedade, um ano como 2012/13 teria período de retorno de algumas
+décadas, conforme a distribuição; com a média recente, passa à ordem de uma década. Os anos secos consecutivos também são compatíveis com a queda da média sozinha, sem
 persistência adicional de um ano para o outro.
 
 \paragraph{O que os dados não conseguem dizer.} Esses números de período de retorno são ordens
-de grandeza, e o cenário com inclinação regional (\TRegionalDoisMilVinteCinco{} anos em 2025)
-deve ser lido lado a lado com o principal. A conclusão não estacionária depende de uma tendência
-log-linear ao longo de seis décadas e de uma distribuição cuja cauda seca é mais fina que a dos
-dados. Com uma estação, não é possível separar persistência de tendência. As correlações com o
+de grandeza, e o cenário com inclinação regional (\TRegionalMedia{} anos em 2025) deve ser lido
+lado a lado com o principal. A conclusão não estacionária depende de uma tendência log-linear ao
+longo de seis décadas e, sobretudo, da forma da distribuição: manter o desvio-padrão (normal) ou
+o coeficiente de variação (Gamma) constante leva a \TNSNormal{} ou \TNSGamma{} anos. A média por
+pesos de Akaike incorpora essa incerteza, mas só entre as candidatas consideradas. Com uma estação, não é possível separar persistência de tendência. As correlações com o
 ENSO e com o gradiente do Atlântico têm o sinal esperado, não são significativas e não dependem da
 tendência. Isso não contradiz o papel conhecido desses modos \parencite{hastenrath1977,moura1981}:
 reflete o tamanho da amostra, com \NFaseNino{} a \NFaseNeutro{} anos por fase do ENSO. Responder
@@ -718,13 +767,16 @@ complexos aplicados à mesma série.
   quebra após \QuebraQ{}. Não sabemos se esse excedente é climático ou instrumental. O cenário com inclinação regional (\cref{tab:retorno,tab:prob}) delimita esse
   efeito.
   \item \textbf{Homogeneidade da temperatura.} A Tmáx anterior a 1971 difere das vizinhas e foi
-  excluída. No período analisado, Tmáx e Tmín mostram indício de quebra frente à A307. A tendência
-  se mantém com dados só até 2008, mas parte do aquecimento pode ser instrumental, sobretudo na
-  Tmáx.
-  \item \textbf{Cauda da distribuição.} A Gamma tem cauda seca mais fina que a dos dados
-  ($T$ empírico \TEmpiricoDozeTreze{} contra \TGamma{} anos na Gamma estacionária). Como o modelo
-  não estacionário principal é Gamma, seus períodos de retorno provavelmente estão
-  superestimados.
+  excluída. No período analisado, \NquebrasTemp{} dos \NtestesTemp{} testes contra as vizinhas
+  indicam quebra, ambos na Tmáx, e Tmáx e Tmín mostram indício de quebra frente à A307. A
+  tendência se mantém com dados só até 2008, mas parte do aquecimento pode ser instrumental,
+  sobretudo na Tmáx.
+  \item \textbf{Forma da distribuição.} No caso não estacionário, a candidata de menor AIC é a
+  normal, que tem suporte em valores negativos; isso não afeta a cauda em torno de 151~mm, mas a
+  torna inadequada para valores muito baixos. A Gamma tem cauda seca mais fina que a dos dados
+  ($T$ empírico \TEmpiricoDozeTreze{} contra \TGamma{} anos na Gamma estacionária), e seus
+  períodos de retorno são os mais longos. Os modelos bayesianos e os estados sem tendência da
+  persistência e das teleconexões usam a Gamma.
   \item \textbf{Período efetivo.} A chuva é analisada até \UltimoAnoValido{}. Os anos chuvosos
   \AnosFCASete{} ficam fora pelo critério de completude; incluí-los atenua a tendência, de modo
   que a exclusão favorece o resultado principal.
@@ -757,10 +809,10 @@ complexos aplicados à mesma série.
   sequência seca de 2011/12 a 2016/17.
   \item Com a queda da chuva, um ano tão seco quanto 2012/13 passa de um período de retorno da
   ordem de \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}, sob
-  estacionariedade, para \TBayesNSUlt{} anos \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} com a
-  média do último ano observado (\TRegionalDoisMilVinteCinco{} anos em 2025 com a inclinação
-  regional). Os intervalos cobrem uma ordem de grandeza, e esses números indicam escala, não
-  valores precisos.
+  estacionariedade, para \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a
+  média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). O
+  valor depende da distribuição (\TNSModelosMin{} a \TNSModelosMax{} anos), os intervalos cobrem
+  uma ordem de grandeza, e esses números indicam escala, não valores precisos.
   \item Os dados não separam a persistência de anos secos da tendência nem detectam a influência
   do ENSO; a sequência de 2011/12 a 2016/17 é compatível com a queda da média sozinha.
 \end{enumerate}

@@ -136,6 +136,30 @@ tu = (2020 - anos.mean()) / 10
 Tult = 1 / stats.gamma.cdf(x0, k1, scale=math.exp(a1 + b1 * tu) / k1)
 compara("T NS MV em 2020/21", Tult, "TTempoUlt", tol_rel=0.05)
 
+# média por pesos de Akaike das candidatas não estacionárias (posição log-linear, forma constante)
+def ns_fit(nome):
+    def dist(th):
+        s_, eta = math.exp(th[0]), th[1] + th[2] * t
+        return {"Normal": lambda: stats.norm(np.exp(eta), s_), "LogNormal": lambda: stats.lognorm(s_, scale=np.exp(eta)),
+                "Gamma": lambda: stats.gamma(s_, scale=np.exp(eta) / s_), "Weibull": lambda: stats.weibull_min(s_, scale=np.exp(eta))}[nome]()
+    def at(th, tt):
+        s_, eta = math.exp(th[0]), th[1] + th[2] * tt
+        return {"Normal": stats.norm(math.exp(eta), s_), "LogNormal": stats.lognorm(s_, scale=math.exp(eta)),
+                "Gamma": stats.gamma(s_, scale=math.exp(eta) / s_), "Weibull": stats.weibull_min(s_, scale=math.exp(eta))}[nome]
+    f0 = fits[nome]
+    s0 = {"Normal": x.std(), "LogNormal": np.log(x).std(), "Gamma": f0.args[0], "Weibull": f0.args[0]}[nome]
+    a0 = {"Normal": math.log(x.mean()), "LogNormal": np.log(x).mean(), "Gamma": math.log(x.mean()), "Weibull": math.log(f0.kwds.get("scale", f0.args[-1]))}[nome]
+    nl = lambda th: (lambda v: v if np.isfinite(v) else 1e12)(-np.sum(dist(th).logpdf(x)))
+    o_ = optimize.minimize(nl, [math.log(s0), a0, 0.0], method="Nelder-Mead", options={"xatol": 1e-9, "fatol": 1e-10, "maxiter": 40000})
+    return 6 + 2 * o_.fun, at(o_.x, tu).cdf(x0)
+ns = {k: ns_fit(k) for k in ("Normal", "Weibull", "Gamma", "LogNormal")}
+amin_ns = min(a for a, _ in ns.values())
+wns = {k: math.exp(-(a - amin_ns) / 2) for k, (a, _) in ns.items()}; sw = sum(wns.values())
+for k in ("Normal", "Weibull", "Gamma"):
+    compara(f"T NS {k} em 2020/21", 1 / ns[k][1], "TNS" + k, tol_rel=0.05)
+compara("peso de Akaike NS da normal", wns["Normal"] / sw, "PesoNSNormal", tol_abs=0.006)
+compara("T NS média por AIC em 2020/21", sw / sum(wns[k] * ns[k][1] for k in ns), "TNSMediaUlt", tol_rel=0.05)
+
 # ---------------------------------------------------------------- 5. SPI-12 de junho (2012/13, 2016/17)
 mens = d.groupby(["ano", "mes"]).agg(prec=("prec", "sum"), aus=("prec", lambda s: s.isna().sum()), n=("prec", "size")).reset_index()
 mens["dias"] = [dias_mes[m] + (1 if m == 2 and (a % 4 == 0 and (a % 100 != 0 or a % 400 == 0)) else 0) for a, m in zip(mens.ano, mens.mes)]
@@ -239,7 +263,8 @@ for k in M:
             if isinstance(e, float) and not (lo - 1e-9 <= e <= hi + 1e-9):
                 inc.append(f"{k[:-5]}: {e} fora de [{lo}; {hi}]")
         except Exception: pass
-for base in ("ProbDozeTreze", "ProbNSUlt", "ProbNSCong", "ProbNSCont", "ProbEst", "ProbReg"):
+for base in ("ProbDozeTreze", "ProbNSUlt", "ProbNSCong", "ProbNSCont", "ProbEst", "ProbReg",
+             "ProbMediaAkaike", "ProbNSMediaUlt", "ProbRegMedia"):
     vals = [mac(base + s) for s in ("Ncinco", "Numzero", "Ndoiszero", "Ntreszero") if base + s in M]
     if vals != sorted(vals): inc.append(f"{base}: probabilidades não crescem com n: {vals}")
 

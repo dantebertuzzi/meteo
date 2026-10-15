@@ -197,7 +197,16 @@ function bloco_retorno(L, E)
     end
     # estimativa pontual = amostra completa; o bootstrap fornece só o intervalo (percentis)
     registra_ic!("TMediaAkaikeB", 1 / p_med, 1 / quantile(pm, 0.975), 1 / quantile(pm, 0.025); sig = 2)
+    for nh in HORIZONTES
+        registra_ic!("ProbMediaAkaikeN" * string(nh), 100prob_ao_menos_um(p_med, nh),
+                     100quantile(prob_ao_menos_um.(pm, nh), 0.025), 100quantile(prob_ao_menos_um.(pm, nh), 0.975); dig = 0)
+    end
     registra!("TModelosMin", minimum(cmp.T_x1213); sig = 2); registra!("TModelosMax", maximum(cmp.T_x1213); sig = 2)
+    # faixa só entre as candidatas não rejeitadas pelo Anderson–Darling (p ≥ 0,05)
+    aceitas = cmp.p_AD_boot .>= 0.05
+    registra!("TModelosMaxAceitos", maximum(cmp.T_x1213[aceitas]); sig = 2)
+    registra!("DistRejeitadasAD", join(lowercase.(cmp.distribuicao[.!aceitas]), ", "))
+    registra!("NDistRejeitadasAD", count(!, aceitas))
     g = only(cmp.modelo[cmp.distribuicao .== "Gamma"]); ig = findfirst(==("Gamma"), cmp.distribuicao)
     registra!("GammaForma", shape(g); dig = 2); registra!("GammaEscala", scale(g); dig = 1)
     registra!("GammaPesoAkaike", cmp.peso_akaike[ig]; dig = 2); registra!("GammaPAD", cmp.p_AD_boot[ig]; dig = 2)
@@ -325,6 +334,46 @@ function bloco_nao_estacionario(L, E, V)
     end
     nf = ismissing(b_reg) ? nothing : gamma_inclinacao_fixa(y, t, b_reg)
 
+    # --- resultado principal: média por pesos de Akaike das candidatas não estacionárias,
+    #     no mesmo esquema do caso estacionário (a Gamma sozinha fica como sensibilidade)
+    ult = maximum(v.ano_hidro); registra!("UltimoAnoNS", rotulo_hidro(ult))
+    ma = ns_media_akaike(y, t)
+    ma.tab.T_ult = [1 / f.F(E.x1213, tc(ult)) for f in ma.fits]
+    ma.tab.T_2025 = [1 / f.F(E.x1213, tc(2025)) for f in ma.fits]
+    sort!(ma.tab, :AIC)
+    mostra(ma.tab; titulo = "Candidatas não estacionárias (posição log-linear no tempo)")
+    salva_ptab(ma.tab, "nao_estacionarias_candidatas")
+    registra!("MelhorAICNS", lowercase(ma.tab.distribuicao[1]))
+    for r in eachrow(ma.tab)
+        registra!("TNS" * r.distribuicao, r.T_ult; sig = 2)
+        registra!("PesoNS" * r.distribuicao, r.peso_akaike; dig = 2)
+    end
+    registra!("TNSModelosMin", minimum(ma.tab.T_ult); sig = 2); registra!("TNSModelosMax", maximum(ma.tab.T_ult); sig = 2)
+    pbm = ns_media_akaike_boot(y, t, E.x1213, [tc(ult), tc(2025)])
+    registra!("NBootNSMedia", size(pbm, 1))
+    for (j, (rot, a)) in enumerate((("Ult", ult), ("DoisMilVinteCinco", 2025)))
+        p0 = ma.p_em(E.x1213, tc(a))
+        registra_ic!("TNSMedia" * rot, 1 / p0, 1 / quantile(pbm[:, j], 0.975), 1 / quantile(pbm[:, j], 0.025); sig = 2)
+    end
+    pu_m = ma.p_em(E.x1213, tc(ult))
+    for nh in HORIZONTES
+        registra_ic!("ProbNSMediaUltN" * string(nh), 100prob_ao_menos_um(pu_m, nh),
+                     100quantile(prob_ao_menos_um.(pbm[:, 1], nh), 0.025),
+                     100quantile(prob_ao_menos_um.(pbm[:, 1], nh), 0.975); dig = 0)
+    end
+    # inclinação regional, também como média entre as candidatas
+    if !ismissing(b_reg)
+        mr = ns_media_akaike(y, t; b = b_reg)
+        pbr = ns_media_akaike_boot(y, t, E.x1213, [tc(2025)]; b = b_reg)
+        p0 = mr.p_em(E.x1213, tc(2025))
+        registra_ic!("TRegionalMedia", 1 / p0, 1 / quantile(pbr[:, 1], 0.975), 1 / quantile(pbr[:, 1], 0.025); sig = 2)
+        for nh in HORIZONTES
+            registra_ic!("ProbRegMediaN" * string(nh), 100prob_ao_menos_um(p0, nh),
+                         100quantile(prob_ao_menos_um.(pbr[:, 1], nh), 0.025),
+                         100quantile(prob_ao_menos_um.(pbr[:, 1], nh), 0.975); dig = 0)
+        end
+    end
+
     # --- bayesiano não estacionário
     po = posterior_ns(y, t)
     rh = maximum(diagnostico_cadeias(po.ch, s) for s in (:logk, :a, :b))
@@ -340,9 +389,8 @@ function bloco_nao_estacionario(L, E, V)
     ppcns, _ = ppc_minimo(s -> (k = exp(po.logk[s]); [Gamma(k, exp(po.a[s] + po.b[s] * ti) / k) for ti in t]),
                           (ndraws = nd,), minimum(y))
     registra!("PPCMinNS", ppcns; dig = 2)
-    # último ano hidrológico válido: o valor principal, sem extrapolar além dos dados
-    ult = maximum(v.ano_hidro); registra!("UltimoAnoNS", rotulo_hidro(ult))
-    pu = [pdraw(i, ult) for i in 1:nd]
+    # último ano hidrológico válido (sensibilidade Gamma bayesiana), sem extrapolar além dos dados
+    pu =[pdraw(i, ult) for i in 1:nd]
     registra_ic!("TBayesNSUlt", median(1 ./ pu), quantile(1 ./ pu, 0.025), quantile(1 ./ pu, 0.975); sig = 2)
     registra!("TTempoUlt", 1 / nt.p_em(E.x1213, tc(ult)); sig = 2)
     for nh in HORIZONTES
@@ -400,7 +448,7 @@ function bloco_nao_estacionario(L, E, V)
     salva_ptab(DataFrame(ano = collect(anos), T_local = [1 / nt.p_em(E.x1213, tc(a)) for a in anos],
                          T_regional = [isnothing(nf) ? missing : 1 / nf.p_em(E.x1213, tc(a)) for a in anos],
                          T_bayes_med = [median(1 ./ [pdraw(i, a) for i in 1:20:nd]) for a in anos]), "periodo_retorno_no_tempo")
-    return (tend = tend, tab = tab, oni = oni, nt = nt, nf = nf, po = po, cen = tcen, tT = tT)
+    return (tend = tend, tab = tab, oni = oni, nt = nt, nf = nf, po = po, cen = tcen, tT = tT, ma = ma)
 end
 
 # ============================================================================= SPI / SPEI / corridas

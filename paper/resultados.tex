@@ -1,5 +1,5 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-10-14 22:44 | 648 macros
+% 2026-10-15 19:32 | 708 macros
 \newcommand{\AnoMinimo}{2016/17}
 \newcommand{\AnosCobertosSPI}{\num{41}}
 \newcommand{\AnosFCASete}{1981/82, 2021/22, 2023/24}
@@ -28,6 +28,7 @@
 \newcommand{\DifPosTmaxRemanso}{\num{0.5}}
 \newcommand{\DifPosTminCabrobo}{\num{0.2}}
 \newcommand{\DifPosTminRemanso}{\num{-0.2}}
+\newcommand{\DistRejeitadasAD}{lognormal}
 \newcommand{\DuracaoMediana}{\num{135}}
 \newcommand{\DuracaoSeca}{\num{2.0}}
 \newcommand{\DuracaoSecaICinf}{\num{1.4}}
@@ -73,10 +74,13 @@
 \newcommand{\MDTVento}{\num{0.08}}
 \newcommand{\MediaChuvaValidos}{\num{481}}
 \newcommand{\MelhorAIC}{Weibull}
+\newcommand{\MelhorAICNS}{normal}
 \newcommand{\MesMaisChuvoso}{jan}
+\newcommand{\NBootNSMedia}{\num{2000}}
 \newcommand{\NCDD}{\num{46}}
 \newcommand{\NCWD}{\num{47}}
 \newcommand{\NDTR}{\num{42}}
+\newcommand{\NDistRejeitadasAD}{\num{1}}
 \newcommand{\NFaseNeutro}{\num{17}}
 \newcommand{\NFaseNeutroDet}{\num{17}}
 \newcommand{\NFaseNina}{\num{16}}
@@ -277,6 +281,10 @@
 \newcommand{\PeriodoTmin}{1973–2023}
 \newcommand{\PeriodoUR}{1971–2021}
 \newcommand{\PeriodoVento}{1973–2023}
+\newcommand{\PesoNSGamma}{\num{0.07}}
+\newcommand{\PesoNSLogNormal}{\num{0.01}}
+\newcommand{\PesoNSNormal}{\num{0.72}}
+\newcommand{\PesoNSWeibull}{\num{0.21}}
 \newcommand{\PrimeiroAnoValido}{1963/64}
 \newcommand{\ProbBNegativo}{\num{1.000}}
 \newcommand{\ProbBayesNcinco}{\num{7}}
@@ -307,6 +315,18 @@
 \newcommand{\ProbEstNdoiszero}{\num{22}}
 \newcommand{\ProbEstNtreszero}{\num{31}}
 \newcommand{\ProbEstNumzero}{\num{12}}
+\newcommand{\ProbMediaAkaikeNcinco}{\num{12}}
+\newcommand{\ProbMediaAkaikeNcincoICinf}{\num{2}}
+\newcommand{\ProbMediaAkaikeNcincoICsup}{\num{23}}
+\newcommand{\ProbMediaAkaikeNdoiszero}{\num{41}}
+\newcommand{\ProbMediaAkaikeNdoiszeroICinf}{\num{9}}
+\newcommand{\ProbMediaAkaikeNdoiszeroICsup}{\num{66}}
+\newcommand{\ProbMediaAkaikeNtreszero}{\num{55}}
+\newcommand{\ProbMediaAkaikeNtreszeroICinf}{\num{13}}
+\newcommand{\ProbMediaAkaikeNtreszeroICsup}{\num{80}}
+\newcommand{\ProbMediaAkaikeNumzero}{\num{23}}
+\newcommand{\ProbMediaAkaikeNumzeroICinf}{\num{4}}
+\newcommand{\ProbMediaAkaikeNumzeroICsup}{\num{41}}
 \newcommand{\ProbMinimoNcinco}{\num{4}}
 \newcommand{\ProbMinimoNcincoICinf}{\num{0}}
 \newcommand{\ProbMinimoNcincoICsup}{\num{12}}
@@ -343,6 +363,18 @@
 \newcommand{\ProbNSContNumzero}{\num{47}}
 \newcommand{\ProbNSContNumzeroICinf}{\num{14}}
 \newcommand{\ProbNSContNumzeroICsup}{\num{87}}
+\newcommand{\ProbNSMediaUltNcinco}{\num{34}}
+\newcommand{\ProbNSMediaUltNcincoICinf}{\num{5}}
+\newcommand{\ProbNSMediaUltNcincoICsup}{\num{58}}
+\newcommand{\ProbNSMediaUltNdoiszero}{\num{82}}
+\newcommand{\ProbNSMediaUltNdoiszeroICinf}{\num{20}}
+\newcommand{\ProbNSMediaUltNdoiszeroICsup}{\num{97}}
+\newcommand{\ProbNSMediaUltNtreszero}{\num{92}}
+\newcommand{\ProbNSMediaUltNtreszeroICinf}{\num{28}}
+\newcommand{\ProbNSMediaUltNtreszeroICsup}{\num{99}}
+\newcommand{\ProbNSMediaUltNumzero}{\num{57}}
+\newcommand{\ProbNSMediaUltNumzeroICinf}{\num{10}}
+\newcommand{\ProbNSMediaUltNumzeroICsup}{\num{82}}
 \newcommand{\ProbNSUltNcinco}{\num{15}}
 \newcommand{\ProbNSUltNcincoICinf}{\num{4}}
 \newcommand{\ProbNSUltNcincoICsup}{\num{42}}
@@ -357,6 +389,18 @@
 \newcommand{\ProbNSUltNumzeroICsup}{\num{66}}
 \newcommand{\ProbPersistencia}{\num{0.91}}
 \newcommand{\ProbPersistenciaDet}{\num{0.26}}
+\newcommand{\ProbRegMediaNcinco}{\num{26}}
+\newcommand{\ProbRegMediaNcincoICinf}{\num{6}}
+\newcommand{\ProbRegMediaNcincoICsup}{\num{39}}
+\newcommand{\ProbRegMediaNdoiszero}{\num{70}}
+\newcommand{\ProbRegMediaNdoiszeroICinf}{\num{23}}
+\newcommand{\ProbRegMediaNdoiszeroICsup}{\num{86}}
+\newcommand{\ProbRegMediaNtreszero}{\num{84}}
+\newcommand{\ProbRegMediaNtreszeroICinf}{\num{33}}
+\newcommand{\ProbRegMediaNtreszeroICsup}{\num{95}}
+\newcommand{\ProbRegMediaNumzero}{\num{46}}
+\newcommand{\ProbRegMediaNumzeroICinf}{\num{12}}
+\newcommand{\ProbRegMediaNumzeroICsup}{\num{63}}
 \newcommand{\ProbRegNcinco}{\num{10}}
 \newcommand{\ProbRegNdoiszero}{\num{35}}
 \newcommand{\ProbRegNtreszero}{\num{48}}
@@ -632,13 +676,29 @@
 \newcommand{\TMinimoICinf}{\num{34}}
 \newcommand{\TMinimoICsup}{\num{820}}
 \newcommand{\TModelosMax}{\num{140}}
+\newcommand{\TModelosMaxAceitos}{\num{81}}
 \newcommand{\TModelosMin}{\num{29}}
+\newcommand{\TNSGamma}{\num{36}}
+\newcommand{\TNSLogNormal}{\num{36}}
+\newcommand{\TNSMediaDoisMilVinteCinco}{\num{9.7}}
+\newcommand{\TNSMediaDoisMilVinteCincoICinf}{\num{5.0}}
+\newcommand{\TNSMediaDoisMilVinteCincoICsup}{\num{67}}
+\newcommand{\TNSMediaUlt}{\num{12}}
+\newcommand{\TNSMediaUltICinf}{\num{6.3}}
+\newcommand{\TNSMediaUltICsup}{\num{91}}
+\newcommand{\TNSModelosMax}{\num{36}}
+\newcommand{\TNSModelosMin}{\num{10}}
+\newcommand{\TNSNormal}{\num{10}}
+\newcommand{\TNSWeibull}{\num{26}}
 \newcommand{\TNormal}{\num{29}}
 \newcommand{\TOniNeutro}{\num{90}}
 \newcommand{\TOniNina}{\num{130}}
 \newcommand{\TOniNino}{\num{62}}
 \newcommand{\TPreditiva}{\num{59}}
 \newcommand{\TRegionalDoisMilVinteCinco}{\num{47}}
+\newcommand{\TRegionalMedia}{\num{17}}
+\newcommand{\TRegionalMediaICinf}{\num{11}}
+\newcommand{\TRegionalMediaICsup}{\num{76}}
 \newcommand{\TSeveridadeEmp}{\num{41}}
 \newcommand{\TSeveridadeRef}{\num{85}}
 \newcommand{\TTempoDoisMilVinteCinco}{\num{26}}
