@@ -83,7 +83,7 @@ da A307. Um revisor pode argumentar que parte do resultado central é instrument
 - [x] Páginas de McKee 1993 marcadas `VERIFICAR` em `refs.bib`.
 - [ ] Normais oficiais INMET 1991–2020 (portal estava fora do ar) — ou manter como limitação 8.
 - [ ] DOI do Zenodo (hoje "a ser atribuído", L703).
-- [ ] Commitar o projeto (nada está commitado).
+- [x] Commitar o projeto (commit 0b9c955, 15/10/2026).
 
 ## Como regenerar
 
