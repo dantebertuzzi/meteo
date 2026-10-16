@@ -43,7 +43,28 @@ function fig_area(P)
         text!(ax, lon, lat; text = nome, fontsize = 7, offset = off, align = al, color = COR_TEXTO)
     end
     xlims!(ax, -42.6, -37.9); ylims!(ax, -11.4, -7.4)
-    Label(fig[2, 1], "* vizinha não usada na referência regional (ρ < 0,5 ou < 15 anos em comum)"; fontsize = 7, color = COR_TEXTO2, halign = :left)
+    ax.title = "(a) Estações convencionais do INMET"
+    # (b) zoom: pluviômetros independentes da ANA usados na verificação; rótulos posicionados à mão
+    if hasproperty(P, :AN)
+        bx = Axis(fig[1, 2]; title = "(b) Pluviômetros da ANA", xlabel = "Longitude (°)", aspect = DataAspect(),
+                  xtickformat = v -> fmt_br.(v, d = 1), ytickformat = v -> fmt_br.(v, d = 1))
+        scatter!(bx, [-40.5233], [-9.3886]; color = COR_LARANJA, markersize = 9, strokecolor = :white, strokewidth = 0.8)
+        text!(bx, -40.5233, -9.3886; text = "Petrolina 82983", fontsize = 7, offset = (-6, 4), align = (:right, :bottom), color = COR_TEXTO)
+        pos_ana = Dict("Juazeiro" => ((:left, :top), (5, -3)), "Campo dos Cavalos" => ((:right, :center), (-6, 0)),
+                       "Junco" => ((:right, :center), (-6, 0)), "Lagoa do Boi" => ((:center, :top), (0, -6)),
+                       "Lagoa Grande" => ((:left, :center), (6, 0)))
+        for r in eachrow(P.AN[P.AN.usado, :])
+            info = POSTOS_ANA[r.codigo]
+            scatter!(bx, [info.lon], [info.lat]; color = COR_AQUA, marker = :utriangle, markersize = 8, strokecolor = :white, strokewidth = 0.6)
+            al, off = get(pos_ana, info.nome, ((:left, :bottom), (4, 2)))
+            text!(bx, info.lon, info.lat; text = info.nome, fontsize = 7, offset = off, align = al, color = COR_TEXTO)
+        end
+        xlims!(bx, -41.25, -39.85); ylims!(bx, -9.85, -8.85)
+        colsize!(fig.layout, 1, Relative(0.55))
+    end
+    Label(fig[2, 1:2], "(a) círculos: estações do INMET; * vizinha não usada na referência regional (ρ < 0,5 ou < 15 anos em comum).\n" *
+          "(b) triângulos: pluviômetros independentes da rede da ANA usados na verificação.";
+          fontsize = 7, color = COR_TEXTO2, halign = :left, justification = :left)
     salva_pfig(fig, "fig01_area")
 end
 
