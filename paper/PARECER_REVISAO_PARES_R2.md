@@ -21,7 +21,7 @@ Reanálises desta rodada: Python/SciPy, independentes do código Julia, sobre
 | M3 — significância depende da década de 2010 | **Resolvido (15/10)** | Nova tabela de sensibilidade (todos, sem 2011/12–2016/17, até 2010/11, desde 1971/72, FCA ≤ 7,5 %) e comparação linear × degrau (AIC 476,1 × 481,4). Resumo PT/EN e Discussão dizem que a magnitude é estável, mas a detecção depende da década de 2010 (até 2010/11: p = 0,21). `verifica.py` 50/50. |
 | M4 — confirmação com dados independentes | **Resolvido (15/10)** | 11 pluviômetros da ANA (Hidroweb) a até ~70 km, mesmo critério FCA; 5 com ≥ 30 anos comuns. Todos caem nos anos comuns, 4/5 com IC excluindo zero (−69 a −18 mm/déc.). Juazeiro (3 km): −69 contra −69 da 82983, razão sem tendência e sem mudança em 2003/04. Junco e Lagoa Grande sugerem excesso local. `verifica.py` 57/57. |
 | Menores 1 (Tabela 2) e 2 (faixa com log-normal) | **Resolvidos** | — |
-| Menores 3–8 | **3–6 resolvidos (15/10); 7–8 abertos** | Resolvidos: datas condicionais da estação, contagem com vento, período efetivo no resumo, FCA de 2023/24. Abertos: push do código (ação do autor) e literatura local. |
+| Menores 3–8 | **3–6 resolvidos (15/10); 7–8 abertos** | Resolvidos: datas condicionais da estação, contagem com vento, período efetivo no resumo, FCA de 2023/24. Literatura local resolvida em 15/10 (Costa 2020, Carvalho 2020, Jatobá 2017, Teixeira 2010, conferidos no Crossref/PDF; parágrafo de comparação na Discussão). Aberto: push do código (ação do autor). |
 
 ---
 
