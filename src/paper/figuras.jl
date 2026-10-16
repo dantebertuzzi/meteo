@@ -214,7 +214,7 @@ function fig_posterior(P)
     po = P.N.po; tc = (2025 - mean(P.E.v.ano_hidro)) / 10
     pn = [cdf(Gamma(exp(po.logk[i]), exp(po.a[i] + po.b[i] * tc) / exp(po.logk[i])), P.E.x1213) for i in eachindex(po.b)]
     fig = figura(190)
-    ax = Axis(fig[1, 1]; xlabel = "Período de retorno T (anos, escala log) de um ano com chuva ≤ 2012/13", ylabel = "densidade posterior",
+    ax = Axis(fig[1, 1]; xlabel = "Período de retorno T (anos, escala log) de um ano com chuva ≤ 2012/13", ylabel = "densidade posterior", ytickformat = v -> fmt_br.(v; d = 1),
               xticks = (log10.([5, 10, 20, 50, 100, 200, 500, 1000]), ["5", "10", "20", "50", "100", "200", "500", "1000"]))
     for (p, cor, nm) in ((pe, COR_AZUL, "estacionário"), (pn, COR_LARANJA, "não estacionário (2025)"))
         lt = log10.(1 ./ p)

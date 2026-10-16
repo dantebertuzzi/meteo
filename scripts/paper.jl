@@ -428,6 +428,12 @@ function bloco_nao_estacionario(L, E, V)
     registra_ic!("SenChuvaFCASete", tr75.sen_decada, tr75.sen_ic_inf, tr75.sen_ic_sup; dig = 0)
     registra!("NSFCASeteEfeito", 100(exp(n75.b) - 1); dig = 1)
     registra!("TFCASeteUlt", 1 / n75.p_em(E.x1213, tc(maximum(d75.ano_hidro))); sig = 2)
+    # estimador principal (média de Akaike das oito candidatas) com o critério FCA ≤ 7,5 %: inclui os
+    # anos chuvosos depois de 2020/21, onde o T do fim da série é mais sensível
+    m75 = ns_media_akaike(y75, t75); u75 = tc(maximum(d75.ano_hidro))
+    pb75 = ns_media_akaike_boot(y75, t75, E.x1213, [u75])
+    registra_ic!("TNSMediaFCASeteUlt", 1 / m75.p_em(E.x1213, u75), 1 / quantile(pb75[:, 1], 0.975), 1 / quantile(pb75[:, 1], 0.025); sig = 2)
+    registra!("TNSMediaFCASeteUltStd", 1 / m75.p_em(E.x1213, tc(ult)); sig = 2)          # mesmo modelo, avaliado em 2020/21
     registra!("UltimoAnoFCASete", rotulo_hidro(maximum(d75.ano_hidro)))
     for r in eachrow(d75[in.(d75.ano_hidro, Ref(novos)), :])
         registra!("FCA" * nome_macro(rotulo_hidro(r.ano_hidro)), 100r.fca; dig = 1)   # FCA (%) dos anos acrescentados
@@ -829,7 +835,7 @@ function bloco_p2_sazonalidade(L)
     end
     mostra(clim; titulo = "Climatologia mensal da 82983 (meses válidos)")
     salva_ptab(clim, "climatologia_mensal")
-    registra!("MesMaisChuvoso", ("jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez")[argmax(clim.prec_9120)])
+    registra!("MesMaisChuvoso", ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")[argmax(clim.prec_9120)])
     registra!("ChuvaMarNormal", clim.prec_9120[3]; dig = 0)
     return (s = s, tend = tend, clim = clim)
 end

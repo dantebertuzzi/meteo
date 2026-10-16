@@ -59,7 +59,7 @@ hidrológicos (julho--junho) cumprem o critério de completude, de \PrimeiroAnoV
 queda também aparece na referência regional (\SenReferencia{}~mm por década) e em
 \NAnaNegSig{} de \NPostosAna{} pluviômetros independentes da rede da ANA. O mais próximo, a 3~km,
 reproduz a tendência da \Est{} nos mesmos anos (\SenAnaJuazeiro{} contra \SenRefJuazeiro{}~mm por
-década), sem mudança relativa quando a estação automática foi instalada. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
+década), sem mudança relativa significativa quando a estação automática foi instalada. Caem tanto a intensidade da chuva quanto o número de dias chuvosos.
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de modo semelhante
 em toda a distribuição; corrigindo uma possível quebra da Tmáx em \QuebraTmaxCabrobo{}, a máxima
 ainda sobe \SenTmaxAjustada{}~°C por década. A magnitude da queda da chuva é estável nas análises
@@ -72,7 +72,8 @@ de sensibilidade, inclusive com os anos chuvosos recentes que não cumprem o cri
 \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. Com a média do último ano
 observado (\UltimoAnoNS), passa a \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup};
 com só a inclinação regional, a \TRegionalMedia{} anos \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
-em 2025. Ambos são médias por pesos de Akaike entre quatro distribuições. O valor depende de
+em 2025. Ambos são médias por pesos de Akaike entre quatro distribuições, cada uma com forma fixa
+ou variável no tempo. O valor depende de
 a variabilidade acompanhar ou não a queda da média: os dados indicam que o desvio-padrão da chuva
 anual ficou estável, e, com essa hipótese livre, as quatro distribuições dão de \TNSVarMin{} a
 \TNSVarMax{} anos. Esses intervalos são
@@ -97,8 +98,8 @@ rainfall declined by \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsu
 regional reference (\SenReferencia{}~mm per decade) and at \NAnaNegSig{} of \NPostosAna{}
 independent rain gauges of the national water agency (ANA) network. The nearest one, 3~km away,
 reproduces the trend of station \Est{} over the same years (\SenAnaJuazeiro{} versus
-\SenRefJuazeiro{}~mm per decade), with no relative shift when the automatic station was
-installed. Both rainfall intensity and the number of wet days decreased. Minimum and maximum
+\SenRefJuazeiro{}~mm per decade), with no significant relative shift when the automatic station
+was installed. Both rainfall intensity and the number of wet days decreased. Minimum and maximum
 temperatures rose by \SenTmin{} and \SenTmax{}~°C per decade, similarly across the distribution;
 correcting a possible break in maximum temperature in \QuebraTmaxCabrobo{}, the maximum still rises
 by \SenTmaxAjustada{}~°C per decade.
@@ -113,7 +114,8 @@ year would have a return period of the order of \TMediaAkaikeB{} years
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}. At the mean of the last observed year
 (\UltimoAnoNS) it becomes \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; with
 the regional slope only, \TRegionalMedia{} years \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup}
-in 2025. Both are Akaike-weighted averages over four distributions. The value depends on
+in 2025. Both are Akaike-weighted averages over four distributions, each with a fixed or
+time-varying shape. The value depends on
 whether variability scales with the declining mean: the data indicate a stable standard
 deviation of annual rainfall, and with that assumption relaxed all four distributions give
 \TNSVarMin{} to \TNSVarMax{} years. These intervals are wide,
@@ -516,7 +518,12 @@ fixa, o período de retorno de E1 vai de \TNSNormal{} anos (normal) a \TNSWeibul
 candidata de menor AIC é a \MelhorAICNS{} com forma \MelhorAICNSForma{} (peso \PesoNSNormal{}), e as
 versões com forma variável somam peso \PesoNSVarTotal{}. O resultado principal, a média ponderada
 pelos pesos de Akaike das oito candidatas, é de \TNSMediaUlt{} anos
-\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; só com as de forma fixa, \TNSMediaFixaUlt{} anos. Com a inclinação regional, mais lenta
+\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup}; só com as de forma fixa, \TNSMediaFixaUlt{} anos. Como esse
+valor é avaliado no fim de uma década seca, repetimos o ajuste com o critério FCA $\le$ 7,5\,\%,
+que inclui os anos chuvosos \AnosFCASete{}: a média de Akaike dá \TNSMediaFCASeteUlt{} anos
+\IC{\TNSMediaFCASeteUltICinf}{\TNSMediaFCASeteUltICsup} em \UltimoAnoFCASete{} e
+\TNSMediaFCASeteUltStd{} em \UltimoAnoNS{}, de modo que o resultado principal não depende da
+exclusão desses anos. Com a inclinação regional, mais lenta
 (\NSRegionalEfeito{}\,\% por década), a média entre as candidatas dá \TRegionalMedia{} anos
 \IC{\TRegionalMediaICinf}{\TRegionalMediaICsup} em 2025. Comparado no mesmo esquema, o período de
 retorno passa de \TMediaAkaikeB{} anos sob estacionariedade para \TNSMediaUlt{} com a média
@@ -605,8 +612,9 @@ com um limiar não viesado e indica que a Gamma de forma fixa subestima a cauda 
 \begin{table}[htbp]
   \centering
   \caption{Período de retorno (anos) de um ano hidrológico com chuva $\le$ 2012/13 (E1).
-  Intervalos de 95\,\%. As médias por pesos de Akaike usam as quatro candidatas, reajustadas a
-  cada réplica do bootstrap dos anos.}
+  Intervalos de 95\,\%. As médias por pesos de Akaike usam as quatro candidatas no caso
+  estacionário e oito (quatro famílias, com forma fixa e variável) no não estacionário, reajustadas
+  a cada réplica do bootstrap dos anos.}
   \label{tab:retorno}
   \small
   \begin{tabular}{@{}llr@{}}
@@ -625,6 +633,7 @@ com um limiar não viesado e indica que a Gamma de forma fixa subestima a cauda 
     Normal / Weibull / Gamma, forma fixa & máxima verossimilhança & \TNSNormal{} / \TNSWeibull{} / \TNSGamma{} \\
     Normal / Weibull / Gamma, forma variável & máxima verossimilhança & \TNSNormalVar{} / \TNSWeibullVar{} / \TNSGammaVar{} \\
     Gamma & posterior & \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} \\
+    Média por pesos de Akaike, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & bootstrap dos anos & \TNSMediaFCASeteUlt{} \IC{\TNSMediaFCASeteUltICinf}{\TNSMediaFCASeteUltICsup} \\
     Gamma, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & máxima verossimilhança & \TFCASeteUlt{} \\
     \midrule
     \multicolumn{3}{@{}l}{\emph{Não estacionário, 2025 (cenário)}} \\
@@ -777,7 +786,7 @@ anos não tem tendência significativa (razão de chances \ORSemEstacao{} por d�
 \IC{\ORSemEstacaoICinf}{\ORSemEstacaoICsup}; $p$\,\PSemEstacao). Nos demais anos, a evidência
 sobre as datas é mista (\cref{fig:estacao}). O início atrasa \SenInicio{} dias por década
 \IC{\SenInicioICinf}{\SenInicioICsup} (MK $p$\,\PMKInicio; Hamed--Rao $p$\,\PHRInicio; TFPW
-$p$\,\PTFPWInicio), e a duração diminui \SenDuracao{} dias por década
+$p$\,\PTFPWInicio), e a duração varia \SenDuracao{} dias por década
 \IC{\SenDuracaoICinf}{\SenDuracaoICsup} (MK $p$\,\PMKDuracao; Hamed--Rao $p$\,\PHRDuracao; TFPW
 $p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, e só o teste com pré-branqueamento não é
 significativo. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
@@ -964,8 +973,8 @@ complexos aplicados à mesma série.
   \item \textbf{Seleção do evento.} 2012/13 foi escolhido por ser extremo e está na amostra de
   ajuste. $T$ descreve a frequência de anos abaixo do limiar, e não a raridade daquele ano em
   particular.
-  \item \textbf{Homogeneidade da chuva.} A queda da chuva na \Est{} é em parte regional e em
-  parte local: a razão com a referência do INMET varia \SenQ{}\,\% por década, com indício marginal
+  \item \textbf{Homogeneidade da chuva.} A queda da chuva na \Est{} é regional, mas pode ter
+  também uma parte local: a razão com a referência do INMET varia \SenQ{}\,\% por década, com indício marginal
   de quebra após \QuebraQ{}. Os pluviômetros da ANA não confirmam essa quebra de forma consistente
   (o mais próximo não a mostra; dois mais distantes sugerem um excesso local), de modo que não
   sabemos se o excedente é climático ou instrumental. O cenário com inclinação regional
