@@ -455,7 +455,8 @@ total de 2012/13); \emph{E1$'$}, um ano $\le$ \ChuvaMinima{}~mm (o mínimo do re
   \includegraphics[width=\textwidth]{figuras/fig04_chuva_anual.pdf}
   \caption{Chuva por ano hidrológico na \Est{} (anos válidos). Em laranja, os anos com chuva
   $\le$ 2012/13. Linhas: média da normal não estacionária, a candidata de menor AIC (contínua),
-  e média com a inclinação regional (tracejada). As demais candidatas têm médias quase iguais.}
+  e média com a inclinação regional (tracejada), ambas só até o último ano válido. As demais
+  candidatas têm médias quase iguais.}
   \label{fig:chuva}
 \end{figure}
 
@@ -652,7 +653,8 @@ que é o que permite separar tendência de variabilidade.
   \includegraphics[width=\textwidth]{figuras/fig06_periodo_retorno.pdf}
   \caption{Curva de período de retorno da chuva anual (cauda seca): médias por pesos de Akaike
   estacionária e não estacionária (no último ano válido) e, como sensibilidade, a Gamma não
-  estacionária. Pontos: anos observados. A curva não estacionária chega a zero perto de 200 anos
+  estacionária. Pontos: anos observados (posição de Weibull); como reúnem anos de uma série com
+  tendência, formam uma distribuição marginal e só são comparáveis à curva estacionária. A curva não estacionária chega a zero perto de 200 anos
   porque a normal admite valores negativos; só a parte em torno dos limiares do texto é
   interpretável. Os intervalos estão na \cref{tab:retorno}.}
   \label{fig:retorno}
@@ -661,8 +663,8 @@ que é o que permite separar tendência de variabilidade.
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figuras/fig07_posterior_T.pdf}
-  \caption{Posterior do período de retorno de E1 sob os modelos Gamma estacionário e não
-  estacionário (cenário de 2025). Tracejado: medianas. A média entre candidatas
+  \caption{Sensibilidade: posterior do período de retorno de E1 sob os modelos Gamma
+  bayesianos estacionário e não estacionário (cenário de 2025). Tracejado: medianas. A média entre candidatas
   (\cref{tab:retorno}) dá valores menores que a Gamma.}
   \label{fig:posterior}
 \end{figure}
@@ -886,8 +888,9 @@ na Tmín e \STLDeltaTmax{}~°C na Tmáx entre 1971 e 2025, coerente com os decli
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{figuras/fig09_tendencias.pdf}
-  \caption{Tendências por década (declive de Sen e IC de 95\,\%). Os índices de chuva estão
-  em percentual da média da série.}
+  \caption{Tendências por década (declive de Sen e IC de 95\,\%). No painel (c), os índices
+  de chuva estão em percentual da média da série. O R95p, que tem anos sem nenhum dia acima do
+  P95 e distribuição muito assimétrica, aparece em mm por década no painel (d).}
   \label{fig:tend}
 \end{figure}
 

@@ -135,7 +135,7 @@ function fig_chuva_anual(P)
     ax = Axis(fig[1, 1]; ylabel = "Chuva no ano hidrológico (mm)", xticks = 1960:10:2020, ytickformat = v -> fmt_br.(v))
     seco = v.prec .<= P.E.x1213 .+ 0.5
     barplot!(ax, v.ano_hidro, Float64.(v.prec); color = [s ? COR_SECO : (COR_CINZA, 0.55) for s in seco], gap = 0.25)
-    anos = 1963:2024
+    anos = first(v.ano_hidro):last(v.ano_hidro)      # sem extrapolar além do último ano válido
     lines!(ax, collect(anos), [exp(nn.θ[2] + nn.θ[3] * (a - m) / 10) for a in anos]; color = COR_TEXTO, linewidth = 1.3,
            label = "média não estacionária (normal)")
     if !isnothing(P.N.nf)
@@ -253,11 +253,13 @@ function fig_tendencias(P)
     t = P.X.tend
     grupos = [("(a) Temperatura (°C/década)", ["Tmáx (°C)", "Tmín (°C)", "Tméd (°C)", "DTR (°C)", "TXx (°C)", "TNn (°C)"], false),
               ("(b) Frequência de extremos (p.p./década)", ["TX90p (% dias)", "TN10p (% dias)"], false),
-              ("(c) Chuva: % da média/década", ["R1mm (dias)", "Rx1day (mm)", "SDII (mm/dia)", "R95p (mm)", "CWD (dias)", "CDD (dias)"], true)]
-    fig = figura(300)
+              ("(c) Chuva: % da média/década", ["R1mm (dias)", "Rx1day (mm)", "SDII (mm/dia)", "CWD (dias)", "CDD (dias)"], true),
+              # R95p tem anos com zero e é muito assimétrico: a escala relativa não se aplica
+              ("(d) Chuva acima do P95 (mm/década)", ["R95p (mm)"], false)]
+    fig = figura(370)
     for (k, (tit, vs, rel)) in enumerate(grupos)
         ax = Axis(fig[k, 1]; title = tit, yticks = (1:length(vs), [first(split(v, " (")) for v in vs]), yreversed = true,
-                  xtickformat = v -> fmt_br.(v; d = rel ? 0 : 1), ygridvisible = false, xgridvisible = true, xgridcolor = (COR_CINZA, 0.25))
+                  xtickformat = v -> fmt_br.(v; d = (rel || k == 4) ? 0 : 1), ygridvisible = false, xgridvisible = true, xgridcolor = (COR_CINZA, 0.25))
         for (i, v) in enumerate(vs)
             r = t[t.variavel .== v, :][1, :]
             esc = rel ? 100 / mean(skipmissing(v in ("CDD (dias)",) ? P.X.anu.CDD_civil :
@@ -269,7 +271,10 @@ function fig_tendencias(P)
         end
         vlines!(ax, [0.0]; color = COR_TEXTO2, linewidth = 0.6)
     end
-    Label(fig[4, 1], "Ponto: declive de Sen; barra: IC 95 %. Cheio (azul): q < 0,05 (MK-TFPW, Benjamini–Hochberg); vazio (cinza): não significativo.";
+    for (k, (_, vs, _)) in enumerate(grupos)        # altura proporcional ao número de linhas
+        rowsize!(fig.layout, k, Auto(0.3 + 0.12length(vs)))
+    end
+    Label(fig[5, 1], "Ponto: declive de Sen; barra: IC 95 %. Cheio (azul): q < 0,05 (MK-TFPW, Benjamini–Hochberg); vazio (cinza): não significativo.";
           fontsize = 7, color = COR_TEXTO2, halign = :left)
     salva_pfig(fig, "fig09_tendencias")
 end
@@ -330,7 +335,7 @@ function fig_padroes(P)
     l = P.L.d[P.L.d.ano .>= INICIO_TEMP, :]
     fig = figura(190)
     for (k, (df, tit)) in enumerate(((l, "(a) 82983, 1971–2025"), (a, "(b) A307, 2003–2024")))
-        ps = sort(missingpatternstats(select(df, vars)); by = r -> -r.n)[1:min(6, end)]
+        ps = filter(r -> r.pct >= 0.05, sort(missingpatternstats(select(df, vars)); by = r -> -r.n))[1:min(6, end)]
         np = length(ps)
         ax = Axis(fig[1, 2k-1]; title = tit, xticks = (1:length(vars), nomes), yticks = (1:np, ["" for _ in 1:np]),
                   yreversed = true, xgridvisible = false, ygridvisible = false, xticklabelsize = 8)
@@ -348,7 +353,7 @@ function fig_padroes(P)
         xlims!(ax2, 0, 115); hideydecorations!(ax2); linkyaxes!(ax, ax2)
         colsize!(fig.layout, 2k, Relative(0.17))
     end
-    Label(fig[2, :], "Quadrado laranja: variável ausente no padrão; cinza: presente. Seis padrões mais frequentes (missingpatternstats, MissingPatterns.jl).";
+    Label(fig[2, :], "Laranja: variável ausente no padrão; cinza: presente. Até seis padrões mais frequentes com ≥ 0,05 % dos dias (MissingPatterns.jl).";
           fontsize = 7, color = COR_TEXTO2, halign = :left)
     salva_pfig(fig, "fig12_padroes_ausencia")
 end

@@ -126,3 +126,20 @@ internacional (Theoretical and Applied Climatology, International Journal of Cli
 limitante seria a originalidade e o escopo de um ponto: a resposta provável é de revisão maior,
 com pedido de extensão regional (postos da ANA ou grade). O que eleva o trabalho é o rigor e a
 transparência, e não a novidade do resultado.
+
+---
+
+## Resolução — 17/10/2026
+
+- **R5.1:** o R95p saiu do painel relativo e ganhou o painel (d), em mm/década (−41 [−57; −21]).
+  A legenda da Fig. 11 explica o motivo. Os painéis têm altura proporcional ao número de linhas.
+- **F2:** na Fig. 4, as médias não estacionárias terminam no último ano válido (2020/21), e a
+  legenda diz isso.
+- **F3:** a legenda da Fig. 6 explica que os pontos são a distribuição marginal, comparável só à
+  curva estacionária.
+- **F4:** a legenda da Fig. 7 começa com "Sensibilidade:" e diz que são modelos Gamma bayesianos.
+- **F1:** a Fig. 3 mostra só padrões com ≥ 0,05 % dos dias; o painel da A307 fica com três.
+
+Nenhum número mudou: `verifica.py` 57/57, artigo com 24 p. Com os ajustes, o critério "Figuras"
+passa de 8,0 para 8,5, e a nota ponderada vai de 8,63 para 8,65, o que **mantém a nota final em
+8,6 / 10**.
