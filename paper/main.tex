@@ -53,7 +53,7 @@ O regime de chuva e de temperatura de Petrolina (PE), no semiárido do Nordeste,
 detectável desde a década de 1960. Usamos a série diária da estação convencional do INMET
 \Est{} (1961--2025), com \NanosValidos{} anos hidrológicos (julho--junho) válidos, verificada com
 a estação automática do mesmo sítio, \NvizinhasUsadas{} estações vizinhas e \NPostosAna{}
-pluviômetros independentes da ANA. A chuva anual caiu \SenChuva{}~mm por década
+pluviômetros independentes da ANA. A chuva anual teve tendência de \SenChuva{}~mm por década
 \IC{\SenChuvaICinf}{\SenChuvaICsup} (Mann--Kendall com pré-branqueamento, $p$\,\PTFPWChuva),
 com chuva menos intensa e, com evidência mais fraca, menos dias chuvosos. A queda aparece na
 referência regional (\SenReferencia{}~mm por década) e em \NAnaNegSig{} dos \NPostosAna{}
@@ -68,7 +68,7 @@ por década), mas sua significância depende da década de 2010: com dados só a
 \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média de \UltimoAnoNS{}, ambos por média de Akaike
 entre distribuições candidatas. Nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
 \TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos, e uma análise regional com as
-\NRegEstacoes{} estações dá \TRegEst{} e \TRegNS{} anos. Esses intervalos largos fazem parte do resultado: mesmo
+\NRegEstacoes{} estações dá \TRegEst{} anos sob estacionariedade e \TRegNS{} com a média de \UltimoAnoNS{}. Esses intervalos largos fazem parte do resultado: mesmo
 juntando estações vizinhas, cujos anos secos coincidem, a frequência de anos extremos só pode ser
 conhecida em ordem de grandeza, e os dados não separam a persistência de anos secos da tendência
 nem detectam a influência do ENSO.
@@ -83,7 +83,7 @@ Rainfall and temperature in Petrolina, in the semi-arid Northeast of Brazil, hav
 detectably since the 1960s. We use the daily record of the INMET conventional station \Est{}
 (1961--2025), with \NanosValidos{} valid hydrological years (July--June), checked against the
 collocated automatic station, \NvizinhasUsadas{} neighbouring stations and \NPostosAna{}
-independent rain gauges of the national water agency (ANA). Annual rainfall declined by
+independent rain gauges of the national water agency (ANA). Annual rainfall had a trend of
 \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsup} (trend-free pre-whitened
 Mann--Kendall, $p$\,\PTFPWChuva), with lower intensity and, on weaker evidence, fewer wet days.
 The decline is present in the regional reference (\SenReferencia{}~mm per decade) and at
@@ -98,7 +98,7 @@ return period is of the order of \TMediaAkaikeB{} years \IC{\TMediaAkaikeBICinf}
 under a stationary climate and \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} at
 the mean of \UltimoAnoNS{}, both Akaike-weighted averages over candidate distributions; at the
 \NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years,
-and a regional analysis of the \NRegEstacoes{} stations gives \TRegEst{} and \TRegNS{} years. These
+and a regional analysis of the \NRegEstacoes{} stations gives \TRegEst{} years (stationary) and \TRegNS{} years (mean of \UltimoAnoNS{}). These
 wide intervals are part of the result: even pooling neighbouring stations, whose dry years
 coincide, the frequency of extreme years can only be known to an order of magnitude, and the data cannot
 separate persistence of dry years from the trend nor detect an ENSO influence.
@@ -261,7 +261,7 @@ hidrológicos válidos em comum com ela. Nos anos comuns, comparamos as tendênc
 razão $Q = Y_{\Est}/Y_{\text{posto}}$ (\cref{tab:ana}). Todos os postos têm tendência negativa, e em
 \NAnaNegSig{} deles o intervalo exclui zero, com declives de \SenAnaMin{} a \SenAnaMax{}~mm por
 década. O mais informativo é Juazeiro, a \DistJuazeiro{}~km, do outro lado do rio: nos mesmos
-\NComumJuazeiro{} anos, ele cai \SenAnaJuazeiro{}~mm por década
+\NComumJuazeiro{} anos, sua tendência é de \SenAnaJuazeiro{}~mm por década
 \IC{\SenAnaJuazeiroICinf}{\SenAnaJuazeiroICsup}, contra \SenRefJuazeiro{} na \Est{}. A razão entre
 os dois não tem tendência ($p$\,\PQAnaJuazeiro) nem muda significativamente entre antes e
 depois de 2003/04 ($Q$ de \QAntesAnaJuazeiro{} para \QDepoisAnaJuazeiro{}; $p$\,\PAntesDepoisAnaJuazeiro);
@@ -537,7 +537,7 @@ todas as versões. Ela não vem só da seca de 2011/12 a 2016/17, pois sem esses
 significativa, embora mais fraca ($p$\,\PTFPWChuvaSemSeca). Também resiste aos anos chuvosos
 recentes. Com o critério FCA $\le$ 7,5\,\%, que inclui \AnosFCASete{}, e acrescentando 2022/23, cujo
 total observado (\ChuvaObsVinteDois{}~mm, com \DiasAusVinteDois{} dias sem registro) é um limite
-inferior de um ano chuvoso, a queda passa a \SenChuvaRecentes{}~mm por década
+inferior de um ano chuvoso, a tendência passa a \SenChuvaRecentes{}~mm por década
 \IC{\SenChuvaRecentesICinf}{\SenChuvaRecentesICsup} ($p$\,\PTFPWChuvaRecentes). Essa é a estimativa
 mais conservadora, e também não depende do início da série. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
 intervalo inclui zero e o teste não rejeita a ausência de tendência ($p$\,\PTFPWChuvaAteDezOnze).
@@ -581,7 +581,7 @@ anos passa a \TNSAnaMin{}--\TNSAnaMax{} (mediana \TNSAnaMediana{}), contra \TMed
 a direção é a mesma em todos os postos (\cref{fig:retestacoes}).
 
 Os postos têm também os anos de 2021/22 a \UltimoAnoAna{}, que a \Est{} não tem válidos, e esses
-anos são chuvosos. Com eles, as tendências dos postos caem de uma mediana de
+anos são chuvosos. Com eles, as tendências dos postos passam de uma mediana de
 \SenAnaAteUltMediana{} para \SenAnaTodosMediana{}~mm por década, e o intervalo exclui zero em
 \NAnaTodosNegSig{} dos \NAnaRetorno{}. O resultado regional é o mesmo da \Est{}: a frequência de
 anos muito secos aumentou em toda a vizinhança, e a magnitude da queda da chuva depende de quanto
@@ -982,9 +982,9 @@ clara de aquecimento desigual entre os quantis; todos excluem zero.
 \section{Discussão}\label{sec:discussao}
 
 \paragraph{O regime mudou.} O resultado mais firme deste trabalho é que Petrolina ficou mais seca
-e mais quente desde a década de 1960. A chuva anual caiu \SenChuva{}~mm por década, com
+e mais quente desde a década de 1960. A tendência da chuva anual é de \SenChuva{}~mm por década, com
 intervalo que exclui zero com folga, e a queda persiste em todas as subamostras: sem os anos da seca de 2011/12 a 2016/17 e com os
-anos chuvosos recentes, que a reduzem a \SenChuvaRecentes{}~mm por década. A detecção, porém,
+anos chuvosos recentes, que a atenuam para \SenChuvaRecentes{}~mm por década. A detecção, porém,
 depende da década de 2010: até 2010/11, a mesma queda não seria significativa. Ela não é só local: a referência formada pelas vizinhas cai
 \SenReferencia{}~mm por década, e \NAnaNegSig{} de \NPostosAna{} pluviômetros independentes da ANA
 confirmam a queda. Contra a referência do INMET, a parte exclusiva da \Est{} coincide, com
@@ -1103,7 +1103,7 @@ anos.
   modelos bayesianos e os estados sem tendência da persistência e das teleconexões usam a Gamma
   com forma fixa.
   \item \textbf{Período efetivo.} A chuva é analisada até \UltimoAnoValido{}. Os anos de 2021/22
-  a 2023/24 são chuvosos e ficam fora pelo critério de completude; incluí-los reduz a tendência
+  a 2023/24 são chuvosos e ficam fora pelo critério de completude; incluí-los atenua a tendência
   de \SenChuva{} para \SenChuvaRecentes{}~mm por década, e nos postos da ANA, que os têm, as
   tendências também ficam menores. Se a recuperação continuar, a tendência de longo prazo será
   menor que a estimativa principal.
@@ -1130,11 +1130,11 @@ anos.
 \section{Conclusões}\label{sec:conclusoes}
 
 \begin{enumerate}
-  \item A chuva anual em Petrolina caiu \SenChuva{}~mm por década
+  \item A chuva anual em Petrolina teve tendência de \SenChuva{}~mm por década
   \IC{\SenChuvaICinf}{\SenChuvaICsup} desde a década de 1960. A queda é compartilhada pelas
   estações vizinhas do INMET, com magnitude menor (\SenReferencia{}~mm por década), e confirmada
   por pluviômetros independentes da ANA; o mais próximo reproduz a tendência nos mesmos anos. Com
-  os anos chuvosos de 2021/22 a 2023/24, a queda fica em \SenChuvaRecentes{}~mm por década. Ela
+  os anos chuvosos de 2021/22 a 2023/24, a tendência fica em \SenChuvaRecentes{}~mm por década. Ela
   envolve a intensidade e, com evidência mais fraca, o número de dias chuvosos.
   \item As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de forma
   consistente em toda a distribuição. A Tmín não tem quebra frente às vizinhas; na Tmáx, a
@@ -1148,8 +1148,8 @@ anos.
   estacionariedade, para \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a
   média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). Nos
   \NAnaRetorno{} pluviômetros da ANA, ele também cai, de \TEstAnaMin{}--\TEstAnaMax{} para
-  \TNSAnaMin{}--\TNSAnaMax{} anos, e a análise regional dá \TRegEst{} e \TRegNS{} anos, com
-  intervalos só um pouco mais estreitos. O
+  \TNSAnaMin{}--\TNSAnaMax{} anos, e a análise regional dá \TRegEst{} anos sob estacionariedade
+  e \TRegNS{} com a média de \UltimoAnoNS{}, com intervalos só um pouco mais estreitos. O
   valor é estável entre as distribuições quando a variabilidade não é forçada a cair junto com
   a média (\TNSVarMin{} a \TNSVarMax{} anos), os intervalos cobrem
   uma ordem de grandeza, e esses números indicam escala, não valores precisos.
@@ -1158,6 +1158,18 @@ anos.
 \end{enumerate}
 
 % ============================================================================= disponibilidade
+\section*{Disponibilidade de dados e código}
+Os dados brutos são públicos (INMET/BDMEP, normais do INMET, ANA/Hidroweb e NOAA PSL); a chuva
+dos postos da ANA é baixada por \texttt{scripts/baixa\_ana.jl}, e as normais do INMET, por
+\texttt{scripts/extrai\_normais\_inmet.py}. O código Julia, com testes unitários, e
+o script que regenera todas as figuras e todos os números deste texto (\texttt{scripts/paper.jl},
+que escreve \texttt{paper/resultados.tex}), além de uma verificação independente em Python
+(\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos, estão em \url{https://github.com/dantebertuzzi/meteo} e
+no depósito do Zenodo deste trabalho, \href{https://doi.org/10.5281/zenodo.23438824}{doi:10.5281/zenodo.23438824}. O código está sob licença
+MIT e o texto sob CC-BY 4.0.
+
+\printbibliography[title={Referências}]
+
 \clearpage
 \appendix
 \renewcommand{\thefigure}{A\arabic{figure}}
@@ -1193,17 +1205,5 @@ da temperatura.
   \label{fig:quant}
 \end{figure}
 
-\clearpage
-\section*{Disponibilidade de dados e código}
-Os dados brutos são públicos (INMET/BDMEP, normais do INMET, ANA/Hidroweb e NOAA PSL); a chuva
-dos postos da ANA é baixada por \texttt{scripts/baixa\_ana.jl}, e as normais do INMET, por
-\texttt{scripts/extrai\_normais\_inmet.py}. O código Julia, com testes unitários, e
-o script que regenera todas as figuras e todos os números deste texto (\texttt{scripts/paper.jl},
-que escreve \texttt{paper/resultados.tex}), além de uma verificação independente em Python
-(\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos, estão em \url{https://github.com/dantebertuzzi/meteo} e
-no depósito do Zenodo deste trabalho, \href{https://doi.org/10.5281/zenodo.23438824}{doi:10.5281/zenodo.23438824}. O código está sob licença
-MIT e o texto sob CC-BY 4.0.
-
-\printbibliography[title={Referências}]
 
 \end{document}
