@@ -164,3 +164,22 @@ passa de 8,0 para 8,5, e a nota ponderada vai de 8,63 para 8,65, o que **mantém
 - **Efeito na avaliação:** a crítica de "um ponto só" fica respondida para a P1, e a originalidade
   sobe. A estimativa principal da tendência (−60) passa a vir acompanhada de uma faixa honesta
   (−43 a −60), conforme a recuperação recente entra ou não na série.
+
+## Análise regional de frequência (1b) — 17/10/2026
+
+- Modelo de índice de cheia com tendência (Hosking e Wallis 1997): Yᵢₜ = μᵢ·Zₜ, com 6 estações
+  (82983 e 5 postos da ANA desde 1963/64; 310 anos-estação), as 8 candidatas e média de Akaike.
+  O IC vem de bootstrap de anos inteiros (400 réplicas), que preserva a correlação espacial.
+  Funções em `src/paper/retorno.jl` (`regional_*`), com 8 testes unitários novos (total 81/81).
+- **Resultado:** T de E1 na escala da 82983 = 31 [17; 160] anos estacionário e 16 [6,5; 65] em
+  2020/21 (14 em 2024/25), contra 38 [19; 220] e 12 [5,0; 88] na 82983 sozinha. Tendência regional
+  de −7,3 %/década.
+- **Os intervalos estreitam pouco**, porque os anos secos coincidem entre estações vizinhas: o
+  tamanho efetivo da amostra é muito menor que 6×. Isso é declarado no texto.
+- **Heterogeneidade na tendência:** as inclinações por estação vão de −11,5 % a −0,6 %/década
+  (ΔAIC = −1,9 a favor de inclinações por estação, por verossimilhança combinada). Campo dos
+  Cavalos e Junco são bem mais fracos.
+- **Avaliação:** a P1 passa a ter uma estimativa regional coerente com a da 82983. A contribuição
+  metodológica (análise regional não estacionária com bootstrap por ano em séries do semiárido)
+  eleva o critério de originalidade de 6,5 para cerca de 7,5, e a **nota ponderada vai de 8,65
+  para cerca de 8,8**.

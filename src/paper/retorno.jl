@@ -297,3 +297,100 @@ function ppc_minimo(dist_por_draw, nobs, min_obs; rng = MersenneTwister(SEMENTE)
     mins = [minimum(rand(rng, d) for d in dist_por_draw(s)) for s in 1:nobs.ndraws]
     return mean(mins .<= min_obs), mins
 end
+
+# ----------------------------------------------------------------------------- análise regional de frequência
+"""
+    regional_candidata(D, y, x, s; nsites, forma_var = false, b_por_site = false)
+
+Modelo de índice de cheia com tendência: Yᵢₜ = μᵢ·Zₜ, com Z da família `D` com
+posição log-linear no tempo (como em `ns_candidata`) e forma fixa ou log-linear no
+tempo, comum a todas as estações. `s` é o índice da estação de cada observação e
+μ₁ = 1 (a estação 1 é a de referência). Com `b_por_site`, cada estação tem sua
+própria inclinação (usado para testar a homogeneidade da tendência).
+Parâmetros: [log s₀, a, b (ou b₁…b_S), (c), log μ₂ … log μ_S].
+"""
+function regional_candidata(D, y, x, s; nsites, forma_var = false, b_por_site = false, θ0 = nothing)
+    nb = b_por_site ? nsites : 1
+    ib = 3:(2 + nb); ic = forma_var ? 3 + nb : 0
+    iμ = (3 + nb + (forma_var ? 1 : 0)):(3 + nb + (forma_var ? 1 : 0) + nsites - 2)
+    function distz(θ, xi, si)
+        η = θ[2] + θ[b_por_site ? ib[si] : ib[1]] * xi
+        sh = exp(θ[1] + (forma_var ? θ[ic] * xi : 0.0))
+        D === Normal    ? Normal(exp(η), sh) :
+        D === LogNormal ? LogNormal(η, sh) :
+        D === Gamma     ? Gamma(sh, exp(η) / sh) :
+        D === Weibull   ? Weibull(sh, exp(η)) : error("família não suportada: $D")
+    end
+    logμ(θ, si) = si == 1 ? 0.0 : θ[iμ[si - 1]]
+    function nll(θ)
+        v = 0.0
+        for (yi, xi, si) in zip(y, x, s)
+            lm = logμ(θ, si)
+            v -= logpdf(distz(θ, xi, si), yi / exp(lm)) - lm
+        end
+        isfinite(v) ? v : 1e12
+    end
+    if isnothing(θ0)
+        # partida: índices = médias por estação relativas à de referência; Z = y/μ
+        m1 = mean(y[s .== 1]); μ0 = [mean(y[s .== k]) / m1 for k in 1:nsites]
+        z = y ./ μ0[s]
+        d0 = ajusta_mle(D, z)
+        s0 = D === Normal ? std(z) : D === LogNormal ? std(log.(z)) : shape(d0)
+        a0 = D === LogNormal ? mean(log.(z)) : D === Weibull ? log(scale(d0)) : log(mean(z))
+        θ0 = [log(s0); a0; zeros(nb); forma_var ? 0.0 : Float64[]; log.(μ0[2:end])]
+    end
+    r = optimize(nll, θ0, NelderMead(), Optim.Options(iterations = 40_000, g_tol = 1e-12))
+    r = optimize(nll, Optim.minimizer(r), BFGS())
+    θ = Optim.minimizer(r)
+    return (D = D, forma_var = forma_var, θ = θ, ll = -Optim.minimum(r), npar = length(θ),
+            b = b_por_site ? θ[ib] : θ[ib[1]], c = forma_var ? θ[ic] : 0.0,
+            μ = [1.0; exp.(θ[iμ])],
+            F = (z0, xi) -> cdf(distz(θ, xi, 1), z0))     # na escala da estação de referência
+end
+
+"""
+Média por pesos de Akaike das candidatas regionais. Com `estacionario = true`, a
+posição e a forma não variam no tempo (x = 0 para todos). Os pesos usam a
+verossimilhança combinada, que trata as estações como independentes; a incerteza
+vem do bootstrap por ano (`regional_media_akaike_boot`), que preserva a correlação
+entre estações.
+"""
+function regional_media_akaike(y, x, s; nsites, estacionario = false, candidatas = CANDIDATAS,
+                               formas = (false, true))
+    xx = estacionario ? zero(x) : x
+    fs = estacionario ? (false,) : formas
+    fits = [regional_candidata(D, y, xx, s; nsites, forma_var = fv) for fv in fs for D in candidatas]
+    npar = [f.npar - (estacionario ? 1 : 0) for f in fits]           # sem tendência, b não conta
+    aic = [2k - 2f.ll for (k, f) in zip(npar, fits)]
+    w = exp.(-(aic .- minimum(aic)) ./ 2); w ./= sum(w)
+    p_em(z0, xi) = sum(w[j] * fits[j].F(z0, estacionario ? 0.0 : xi) for j in eachindex(fits))
+    tab = DataFrame(distribuicao = [string(nameof(f.D)) for f in fits],
+                    forma = [f.forma_var ? "variável" : "fixa" for f in fits],
+                    efeito_pct = [estacionario ? 0.0 : 100(exp(f.b) - 1) for f in fits],
+                    loglik = [f.ll for f in fits], AIC = aic, dAIC = aic .- minimum(aic), peso_akaike = w)
+    return (fits = fits, tab = tab, w = w, p_em = p_em)
+end
+
+"""
+Bootstrap por ano: sorteia anos hidrológicos com reposição e leva todas as
+observações das estações naquele ano, preservando a correlação espacial. Devolve
+p = F(z₀) no ponto `xa` (não estacionário) e o p estacionário, por réplica.
+"""
+function regional_media_akaike_boot(y, x, s, ano, z0, xa; nsites, B = 300, rng = MersenneTwister(SEMENTE))
+    anos = unique(ano); idx = Dict(a => findall(==(a), ano) for a in anos)
+    sorteios = [rand(rng, anos, length(anos)) for _ in 1:B]
+    out = Vector{Union{Nothing, NTuple{2, Float64}}}(nothing, B)
+    Threads.@threads for r in 1:B
+        i = reduce(vcat, [idx[a] for a in sorteios[r]])
+        length(unique(s[i])) == nsites || continue                    # todas as estações precisam aparecer
+        out[r] = try
+            mn = regional_media_akaike(y[i], x[i], s[i]; nsites)
+            me = regional_media_akaike(y[i], x[i], s[i]; nsites, estacionario = true)
+            (mn.p_em(z0, xa), me.p_em(z0, 0.0))
+        catch
+            nothing
+        end
+    end
+    ok = filter(!isnothing, out)
+    return (ns = [o[1] for o in ok], est = [o[2] for o in ok])
+end

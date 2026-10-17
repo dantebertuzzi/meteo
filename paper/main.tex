@@ -66,8 +66,9 @@ por década), mas sua significância depende da década de 2010: com dados só a
 2012/13 (\ChuvaDozeTreze{}~mm), o período de retorno é da ordem de \TMediaAkaikeB{} anos
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} sob clima estacionário e de \TNSMediaUlt{} anos
 \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média de \UltimoAnoNS{}, ambos por média de Akaike
-entre distribuições candidatas; nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
-\TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos. Esses intervalos largos fazem parte do resultado: com uma
+entre distribuições candidatas. Nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
+\TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos, e uma análise regional com as
+\NRegEstacoes{} estações dá \TRegEst{} e \TRegNS{} anos. Esses intervalos largos fazem parte do resultado: com uma
 estação e cerca de meio século de anos válidos, a frequência de anos extremos só pode ser
 conhecida em ordem de grandeza, e os dados não separam a persistência de anos secos da tendência
 nem detectam a influência do ENSO.
@@ -96,7 +97,8 @@ the trend would not be detectable. For a year as dry as 2012/13 (\ChuvaDozeTreze
 return period is of the order of \TMediaAkaikeB{} years \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}
 under a stationary climate and \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} at
 the mean of \UltimoAnoNS{}, both Akaike-weighted averages over candidate distributions; at the
-\NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years. These
+\NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years,
+and a regional analysis of the \NRegEstacoes{} stations gives \TRegEst{} and \TRegNS{} years. These
 wide intervals are part of the result: with one station and about half a century of valid years,
 the frequency of extreme years can only be known to an order of magnitude, and the data cannot
 separate persistence of dry years from the trend nor detect an ENSO influence.
@@ -390,7 +392,11 @@ teleconexões. O valor principal é avaliado no último ano hidrológico válido
 extrapolam a tendência para além dos dados e são apresentados como cenário. Como sensibilidades,
 $b$ é fixado na inclinação estimada para a série de referência regional (de novo como média entre
 as candidatas), e a Gamma é reajustada com o critério FCA $\le$ 7,5\,\%. O mesmo esquema é aplicado aos postos
-da ANA (\cref{sec:dados}), cada um com seus anos válidos desde 1963/64. Quando $p$ varia ano a
+da ANA (\cref{sec:dados}), cada um com seus anos válidos desde 1963/64, e a um modelo regional de
+índice de cheia \parencite{hosking1997}. Nele, $Y_{it} = \mu_i Z_t$, com $\mu_i$ um índice por estação
+($\mu = 1$ na \Est{}) e $Z_t$ com as mesmas candidatas, posição e forma comuns. O ajuste usa a
+verossimilhança combinada, como se as estações fossem independentes, e o IC vem de bootstrap de
+anos inteiros, que preserva a correlação entre elas. Quando $p$ varia ano a
 ano, a \cref{eq:pn} vira $1-\prod_{j=1}^{n}(1-p_{t_0+j})$.
 
 \subsection{Persistência}
@@ -584,14 +590,35 @@ anos são chuvosos. Com eles, as tendências dos postos caem de uma mediana de
 anos muito secos aumentou em toda a vizinhança, e a magnitude da queda da chuva depende de quanto
 da recuperação recente entra na série.
 
+\paragraph{Análise regional de frequência.} Para usar os \NRegObs{} anos-estação juntos, ajustamos
+um modelo de índice de cheia com tendência \parencite{hosking1997}. Em cada estação, a chuva anual
+é o produto de um índice próprio por uma variável padronizada comum a todas, com as mesmas
+candidatas e a mesma média de Akaike. O índice é 1 na \Est{} e vai de \RegIndiceJuazeiro{} em
+Juazeiro a \RegIndiceLagoaGrande{} em Lagoa Grande. A tendência regional é de \RegEfeito{}\,\% por
+década. Na escala da \Est{}, o período de retorno de E1 passa de \TRegEst{} anos
+\IC{\TRegEstICinf}{\TRegEstICsup} sob estacionariedade para \TRegNS{} anos
+\IC{\TRegNSICinf}{\TRegNSICsup} em \UltimoAnoNS{}, e \TRegNSFim{} em \UltimoAnoReg{}
+(\cref{tab:anaretorno}, última linha).
+
+Os intervalos, obtidos por bootstrap de anos inteiros, são só um pouco mais estreitos que os da
+\Est{} sozinha (\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} no caso não estacionário). Como os anos
+secos coincidem nas estações vizinhas, juntar seis séries não equivale a ter seis vezes mais anos.
+A região também não é homogênea na tendência. Com uma inclinação por estação, o AIC por
+verossimilhança combinada, que superestima a evidência, varia \DAICRegSite{}. As inclinações vão de
+\RegEfeitoSiteMin{} a \RegEfeitoSiteMax{}\,\% por década, e Campo dos Cavalos e Junco são bem mais
+fracos que as demais. O resultado regional confirma a ordem de grandeza: anos tão secos quanto
+2012/13 passaram de algumas décadas para uma a duas décadas de período de retorno. Mas ele pouco
+reduz a incerteza.
+
 \begin{table}[htbp]
   \centering
   \caption{Pluviômetros da ANA a partir de 1963/64: tendência da chuva anual (Sen, mm por década)
   até \UltimoAnoNS{} e até o fim de cada série, e período de retorno (anos) de um ano tão seco
   quanto E1 (limiar relativo, em mm), estacionário e não estacionário em \UltimoAnoNS{} (médias
-  por pesos de Akaike; IC de 95\,\% por bootstrap dos anos, \NBootAnaRetorno{} réplicas). Na
-  última linha, a \Est{} para comparação; a tendência até o fim inclui os anos chuvosos recentes
-  (\cref{tab:senschuva}, última linha).}
+  por pesos de Akaike; IC de 95\,\% por bootstrap dos anos, \NBootAnaRetorno{} réplicas). Nas
+  últimas linhas, a \Est{} para comparação (a tendência até o fim inclui os anos chuvosos
+  recentes; \cref{tab:senschuva}, última linha) e a análise regional com as \NRegEstacoes{}
+  estações, na escala da \Est{} (IC por bootstrap de anos inteiros, \NBootReg{} réplicas).}
   \label{tab:anaretorno}
   \footnotesize
   \begin{tabular}{@{}lrrrrrr@{}}
@@ -605,6 +632,7 @@ da recuperação recente entra na série.
     Lagoa Grande & \NAnaRetLagoaGrande & \LimiarAnaLagoaGrande & \SenAnaAteUltLagoaGrande & \SenAnaTodosLagoaGrande & \TEstAnaLagoaGrande{} \IC{\TEstAnaLagoaGrandeICinf}{\TEstAnaLagoaGrandeICsup} & \TNSAnaLagoaGrande{} \IC{\TNSAnaLagoaGrandeICinf}{\TNSAnaLagoaGrandeICsup} \\
     \midrule
     \Est{} (INMET) & \NanosValidos & \ChuvaDozeTreze & \SenChuva & \SenChuvaRecentes & \TMediaAkaikeB{} \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} & \TNSMediaUlt{} \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} \\
+    Regional (\NRegEstacoes{} estações) & \NRegObs & \ChuvaDozeTreze & --- & --- & \TRegEst{} \IC{\TRegEstICinf}{\TRegEstICsup} & \TRegNS{} \IC{\TRegNSICinf}{\TRegNSICsup} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -1073,8 +1101,8 @@ complexos aplicados à mesma série.
   \item \textbf{Representatividade espacial.} A tendência e o período de retorno foram
   verificados em \NPostosAna{} pluviômetros independentes num raio de cerca de 50~km, mas os
   demais índices são só da \Est{}. Os postos são próximos e seus anos secos coincidem, de modo
-  que não equivalem a cinco amostras independentes; uma análise regional de frequência ou dados
-  em grade \parencite{xavier2016,funk2015} permitiriam estender a análise à região.
+  que a análise regional estreita pouco os intervalos, e a tendência não é homogênea entre eles.
+  Dados em grade \parencite{xavier2016,funk2015} permitiriam estender a análise a uma área maior.
   \item \textbf{Linha de base externa.} As normais oficiais do INMET são da mesma estação.
   Elas confirmam a climatologia e a queda entre normais, mas não substituem uma verificação
   independente. A comparação com a climatologia de Bebedouro \parencite{teixeira2010} é só de
@@ -1107,7 +1135,8 @@ complexos aplicados à mesma série.
   estacionariedade, para \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a
   média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). Nos
   \NAnaRetorno{} pluviômetros da ANA, ele também cai, de \TEstAnaMin{}--\TEstAnaMax{} para
-  \TNSAnaMin{}--\TNSAnaMax{} anos. O
+  \TNSAnaMin{}--\TNSAnaMax{} anos, e a análise regional dá \TRegEst{} e \TRegNS{} anos, com
+  intervalos só um pouco mais estreitos. O
   valor é estável entre as distribuições quando a variabilidade não é forçada a cair junto com
   a média (\TNSVarMin{} a \TNSVarMax{} anos), os intervalos cobrem
   uma ordem de grandeza, e esses números indicam escala, não valores precisos.

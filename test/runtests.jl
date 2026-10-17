@@ -213,3 +213,29 @@ end
     @test prob_ao_menos_k([0.1, 0.5, 0.9], 3) ≈ 0.1 * 0.5 * 0.9
     @test prob_ao_menos_k([0.3, 0.6], 1) ≈ 1 - 0.7 * 0.4
 end
+
+@testset "Análise regional de frequência (índice de cheia com tendência)" begin
+    rng = MersenneTwister(11)
+    μ = [1.0, 0.8, 1.3]; nanos = 50
+    x = collect(range(-2.5, 2.5, length = nanos))
+    y = Float64[]; xs = Float64[]; s = Int[]
+    for k in 1:3, xi in x
+        push!(y, μ[k] * rand(rng, Gamma(6.0, 500exp(-0.10xi) / 6.0))); push!(xs, xi); push!(s, k)
+    end
+    f = regional_candidata(Gamma, y, xs, s; nsites = 3)
+    @test f.μ[2] ≈ 0.8 rtol = 0.08                     # recupera os índices
+    @test f.μ[3] ≈ 1.3 rtol = 0.08
+    @test f.b ≈ -0.10 atol = 0.04                       # e a tendência comum
+    # com uma estação só, reproduz o modelo não estacionário de uma estação
+    um = s .== 1
+    @test regional_candidata(Gamma, y[um], xs[um], s[um]; nsites = 1).ll ≈ ns_candidata(Gamma, y[um], xs[um]).ll rtol = 1e-5
+    # inclinação por estação aninha a comum
+    fs = regional_candidata(Gamma, y, xs, s; nsites = 3, b_por_site = true)
+    @test fs.ll >= f.ll - 1e-6
+    @test length(fs.b) == 3
+    # média de Akaike: pesos somam 1; versão estacionária não depende de x
+    m = regional_media_akaike(y, xs, s; nsites = 3)
+    @test sum(m.w) ≈ 1
+    me = regional_media_akaike(y, xs, s; nsites = 3, estacionario = true)
+    @test me.p_em(300.0, -2.0) ≈ me.p_em(300.0, 2.0)
+end

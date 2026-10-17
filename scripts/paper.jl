@@ -723,6 +723,64 @@ function bloco_ana_retorno(L, E, AN; B = 1000)
     return tab
 end
 
+"""
+Análise regional de frequência (índice de cheia com tendência): a 82983 e os postos
+da ANA usados na verificação, desde 1963/64, num modelo com distribuição padronizada
+e tendência comuns e um índice μᵢ por estação (μ = 1 na 82983). Médias por pesos de
+Akaike das candidatas, estacionárias e não estacionárias; IC por bootstrap por ano.
+A homogeneidade da tendência é avaliada contra um modelo com inclinação por estação.
+"""
+function bloco_regional(L, E, AN; B = 400)
+    titulo("Análise regional de frequência (82983 + postos da ANA)")
+    v82 = sort(E.v, :ano_hidro)
+    y = Float64.(v82.prec); ano = collect(v82.ano_hidro); s = fill(1, nrow(v82))
+    nomes = ["82983"]; chaves = ["Est"]
+    u = sort(AN[AN.usado, :], :dist_km)
+    for (k, r) in enumerate(eachrow(u))
+        d = CSV.read(joinpath(RAIZ, "data", "raw", "ana", "ana_$(r.codigo).csv"), DataFrame; missingstring = "")
+        d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
+        dh, _ = hidro_longo(d; ref = REF)
+        v = dh[dh.valido .& (dh.ano_hidro .>= minimum(v82.ano_hidro)), :]
+        append!(y, Float64.(v.prec)); append!(ano, v.ano_hidro); append!(s, fill(k + 1, nrow(v)))
+        push!(nomes, POSTOS_ANA[r.codigo].nome); push!(chaves, POSTOS_ANA[r.codigo].chave)
+    end
+    S = length(nomes); m = mean(v82.ano_hidro); x = (ano .- m) ./ 10; tc(a) = (a - m) / 10
+    ult = maximum(v82.ano_hidro); fim = maximum(ano)
+    mn = regional_media_akaike(y, x, s; nsites = S)
+    me = regional_media_akaike(y, x, s; nsites = S, estacionario = true)
+    sort!(mn.tab, :AIC); mostra(mn.tab; titulo = "Candidatas regionais não estacionárias")
+    salva_ptab(mn.tab, "regional_candidatas")
+    bs = regional_media_akaike_boot(y, x, s, ano, E.x1213, tc(ult); nsites = S, B)
+    pe = me.p_em(E.x1213, 0.0); pn = mn.p_em(E.x1213, tc(ult))
+    registra!("NRegObs", length(y)); registra!("NRegEstacoes", S); registra!("NBootReg", length(bs.ns))
+    registra_ic!("TRegEst", 1 / pe, 1 / quantile(bs.est, 0.975), 1 / quantile(bs.est, 0.025); sig = 2)
+    registra_ic!("TRegNS", 1 / pn, 1 / quantile(bs.ns, 0.975), 1 / quantile(bs.ns, 0.025); sig = 2)
+    registra!("TRegNSFim", 1 / mn.p_em(E.x1213, tc(fim)); sig = 2); registra!("UltimoAnoReg", rotulo_hidro(fim))
+    # tendência regional (média dos efeitos ponderada pelos pesos) e homogeneidade da tendência
+    registra!("RegEfeito", sum(mn.w .* [100(exp(f.b) - 1) for f in mn.fits]); dig = 1)
+    imelhor = argmax(mn.w); fm = mn.fits[imelhor]
+    registra!("RegMelhor", lowercase(string(nameof(fm.D)))); registra!("RegMelhorForma", fm.forma_var ? "variável" : "fixa")
+    registra!("RegMelhorPeso", mn.w[imelhor]; dig = 2)
+    fc = regional_candidata(fm.D, y, x, s; nsites = S, forma_var = fm.forma_var)
+    fs = regional_candidata(fm.D, y, x, s; nsites = S, forma_var = fm.forma_var, b_por_site = true)
+    registra!("DAICRegSite", (2fs.npar - 2fs.ll) - (2fc.npar - 2fc.ll); dig = 1)
+    ef = 100 .* (exp.(fs.b) .- 1)
+    for (k, c) in enumerate(chaves)
+        registra!("RegEfeitoSite" * c, ef[k]; dig = 1); registra!("RegIndice" * c, fm.μ[k]; dig = 2)
+        registra!("NReg" * c, count(==(k), s))
+    end
+    registra!("RegEfeitoSiteMin", minimum(ef); dig = 1); registra!("RegEfeitoSiteMax", maximum(ef); dig = 1)
+    # largura relativa dos intervalos (razão sup/inf de T), regional × 82983 sozinha
+    tab = DataFrame(estacao = nomes, n = [count(==(k), s) for k in 1:S], indice_mu = fm.μ, efeito_pct_proprio = ef)
+    mostra(tab; titulo = "Estações na análise regional")
+    salva_ptab(tab, "regional_estacoes")
+    @printf("T regional: estacionário %.1f [%.1f; %.1f]; não estacionário (%s) %.1f [%.1f; %.1f]\n",
+            1 / pe, 1 / quantile(bs.est, 0.975), 1 / quantile(bs.est, 0.025), rotulo_hidro(ult),
+            1 / pn, 1 / quantile(bs.ns, 0.975), 1 / quantile(bs.ns, 0.025))
+    return (tab = tab, mn = mn, me = me, boot = bs)
+end
+
 # ============================================================================= SPI / SPEI / corridas
 function bloco_indices(L, E)
     titulo("SPI, SPEI e teoria de corridas")
@@ -1273,6 +1331,7 @@ function executa_paper()
     VF = bloco_validacao(L, E)
     AN = bloco_ana(L, E)
     AR = bloco_ana_retorno(L, E, AN)
+    RG = bloco_regional(L, E, AN)
     I = bloco_indices(L, E)
     M = bloco_markov(L, I)
     S = bloco_sensibilidade(L, E, R)
@@ -1283,7 +1342,7 @@ function executa_paper()
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)
     println("\nMacros: ", escreve_macros())
-    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, AR = AR, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
+    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, AR = AR, RG = RG, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
 end
 
 using Serialization
