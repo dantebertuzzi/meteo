@@ -457,6 +457,19 @@ function bloco_nao_estacionario(L, E, V)
     registra_p!("PTFPWChuvaFCASete", tr75.p_mk_tfpw); registra!("NChuvaFCASete", tr75.n)
     push!(tsens, (amostra = "FCA ≤ 7,5 %", n = tr75.n, sen = tr75.sen_decada, ic_inf = tr75.sen_ic_inf,
                   ic_sup = tr75.sen_ic_sup, p_mk = tr75.p_mk, p_tfpw = tr75.p_mk_tfpw))
+    # anos recentes: FCA ≤ 7,5 % e também 2022/23, cujo total observado, mesmo com falhas, já é
+    # chuvoso (limite inferior do total real), de modo que incluí-lo subestima esse ano
+    drec = sort(vcat(d75, L.dh[L.dh.ano_hidro .== 2022, :]), :ano_hidro)
+    trr = analise_tendencia(drec.ano_hidro, Float64.(drec.prec_obs); nome = "FCA ≤ 7,5 % + 2022/23")
+    registra_ic!("SenChuvaRecentes", trr.sen_decada, trr.sen_ic_inf, trr.sen_ic_sup; dig = 0)
+    registra_p!("PTFPWChuvaRecentes", trr.p_mk_tfpw); registra!("NChuvaRecentes", trr.n)
+    r22 = only(eachrow(L.dh[L.dh.ano_hidro .== 2022, :]))
+    registra!("ChuvaObsVinteDois", r22.prec_obs; dig = 0); registra!("DiasAusVinteDois", r22.dias_aus)
+    for a in (2021, 2023)
+        registra!("ChuvaObs" * (a == 2021 ? "VinteUm" : "VinteTres"), only(L.dh.prec_obs[L.dh.ano_hidro .== a]); dig = 0)
+    end
+    push!(tsens, (amostra = "FCA ≤ 7,5 % + 2022/23", n = trr.n, sen = trr.sen_decada, ic_inf = trr.sen_ic_inf,
+                  ic_sup = trr.sen_ic_sup, p_mk = trr.p_mk, p_tfpw = trr.p_mk_tfpw))
     mostra(tsens; titulo = "Sensibilidade da tendência da chuva anual ao período (Sen por década)")
     salva_ptab(tsens, "sensibilidade_tendencia_chuva")
     # tendência linear × degrau único (melhor ponto de corte), ambos com erro normal, por AIC
@@ -621,6 +634,92 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
     registra!("NAnaNeg", count(<(0), u.sen_posto)); registra!("NAnaNegSig", count(<(0), u.sen_posto_sup))
     registra!("SenAnaMin", minimum(u.sen_posto); dig = 0); registra!("SenAnaMax", maximum(u.sen_posto); dig = 0)
     registra!("NAnaQSig", count(<(0.05), u.p_Q_mk)); registra!("NAnaAntesDepoisSig", count(<(0.05), u.p_antes_depois))
+    return tab
+end
+
+"""
+Período de retorno de um ano tão seco quanto E1 nos postos da ANA usados na
+verificação, com o mesmo esquema da 82983 (médias por pesos de Akaike, estacionária
+e não estacionária, IC por bootstrap dos anos), cada posto com todos os seus anos
+válidos. O limiar é relativo: E1 × (média do posto / média da 82983) nos anos
+comuns, porque o 2012/13 do posto mais próximo (Juazeiro) não é válido. O 2012/13
+do próprio posto, quando válido, entra como sensibilidade. O valor não
+estacionário é avaliado no mesmo ano da 82983 (último ano válido dela).
+"""
+function bloco_ana_retorno(L, E, AN; B = 1000)
+    titulo("Período de retorno de E1 nos postos da ANA")
+    ref = Dict(a => Float64(p) for (a, p) in zip(E.v.ano_hidro, E.v.prec))
+    ult = maximum(E.v.ano_hidro)
+    function media_akaike(x, x0)
+        fits = [ajusta_mle(D, x) for D in CANDIDATAS]
+        aic = [2length(params(f)) - 2loglikelihood(f, x) for f in fits]
+        w = exp.(-(aic .- minimum(aic)) ./ 2); w ./= sum(w)
+        return sum(w .* [cdf(f, x0) for f in fits])
+    end
+    linhas = NamedTuple[]
+    for r in eachrow(AN[AN.usado, :])
+        info = POSTOS_ANA[r.codigo]; k = info.chave
+        d = CSV.read(joinpath(RAIZ, "data", "raw", "ana", "ana_$(r.codigo).csv"), DataFrame; missingstring = "")
+        d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
+        dh, _ = hidro_longo(d; ref = REF)
+        # mesmo início da 82983: antes de 1963 há segmentos inomogêneos (p.ex. Lagoa Grande
+        # registra 1 250–1 550 mm/ano em 1955–61, cerca do triplo do restante da série)
+        v = sort(dh[dh.valido .& (dh.ano_hidro .>= minimum(E.v.ano_hidro)), :], :ano_hidro)
+        y = Float64.(v.prec); n = length(y); m = mean(v.ano_hidro)
+        t = (v.ano_hidro .- m) ./ 10; tc(a) = (a - m) / 10
+        com = [a for a in v.ano_hidro if haskey(ref, a)]
+        razao = mean(y[v.ano_hidro .∈ Ref(Set(com))]) / mean(ref[a] for a in com)
+        x0 = E.x1213 * razao
+        # estacionário
+        pe = media_akaike(y, x0)
+        rng = MersenneTwister(SEMENTE); pbe = Float64[]
+        for _ in 1:B
+            yb = y[rand(rng, 1:n, n)]
+            p = try media_akaike(yb, x0) catch; continue end
+            push!(pbe, p)
+        end
+        # não estacionário, no último ano válido da 82983 e no do próprio posto
+        ma = ns_media_akaike(y, t)
+        pn = ma.p_em(x0, tc(ult)); pn_posto = ma.p_em(x0, tc(maximum(v.ano_hidro)))
+        pbn = ns_media_akaike_boot(y, t, x0, [tc(ult)]; B)
+        tend = analise_tendencia(v.ano_hidro, v.prec; nome = info.nome)
+        ate = v.ano_hidro .<= ult
+        tult = analise_tendencia(v.ano_hidro[ate], v.prec[ate]; nome = info.nome * " até " * rotulo_hidro(ult))
+        # sensibilidade: limiar = 2012/13 do próprio posto, quando válido
+        own = v.prec[v.ano_hidro .== 2012]
+        x0_own = isempty(own) ? missing : Float64(only(own))
+        Tn_own = ismissing(x0_own) ? missing : 1 / ma.p_em(x0_own, tc(ult))
+        Te_own = ismissing(x0_own) ? missing : 1 / media_akaike(y, x0_own)
+        l = (codigo = r.codigo, posto = info.nome, dist_km = r.dist_km, n = n,
+             periodo = string(v.rotulo[1], "–", v.rotulo[end]), razao_media = razao, limiar_mm = x0,
+             sen_decada = tend.sen_decada, sen_inf = tend.sen_ic_inf, sen_sup = tend.sen_ic_sup, p_tfpw = tend.p_mk_tfpw,
+             sen_ate_ult = tult.sen_decada, p_tfpw_ate_ult = tult.p_mk_tfpw,
+             T_est = 1 / pe, T_est_inf = 1 / quantile(pbe, 0.975), T_est_sup = 1 / quantile(pbe, 0.025),
+             T_ns = 1 / pn, T_ns_inf = 1 / quantile(pbn[:, 1], 0.975), T_ns_sup = 1 / quantile(pbn[:, 1], 0.025),
+             T_ns_ult_posto = 1 / pn_posto, limiar_proprio = x0_own, T_est_proprio = Te_own, T_ns_proprio = Tn_own)
+        push!(linhas, l)
+        registra!("NAnaRet" * k, n); registra!("PeriodoAnaRet" * k, l.periodo); registra!("LimiarAna" * k, x0; dig = 0)
+        registra_ic!("SenAnaTodos" * k, l.sen_decada, l.sen_inf, l.sen_sup; dig = 0); registra_p!("PTFPWAnaTodos" * k, l.p_tfpw)
+        registra!("SenAnaAteUlt" * k, l.sen_ate_ult; dig = 0); registra_p!("PTFPWAnaAteUlt" * k, l.p_tfpw_ate_ult)
+        registra_ic!("TEstAna" * k, l.T_est, l.T_est_inf, l.T_est_sup; sig = 2)
+        registra_ic!("TNSAna" * k, l.T_ns, l.T_ns_inf, l.T_ns_sup; sig = 2)
+        registra!("TNSAnaUltPosto" * k, l.T_ns_ult_posto; sig = 2)
+        ismissing(Tn_own) || (registra!("TNSAnaProprio" * k, Tn_own; sig = 2); registra!("TEstAnaProprio" * k, Te_own; sig = 2))
+    end
+    tab = sort(DataFrame(linhas), :dist_km)
+    mostra(tab; titulo = "Período de retorno de E1 (limiar relativo) nos postos da ANA")
+    salva_ptab(tab, "ana_retorno")
+    registra!("NAnaRetorno", nrow(tab))
+    registra!("TEstAnaMin", minimum(tab.T_est); sig = 2); registra!("TEstAnaMax", maximum(tab.T_est); sig = 2)
+    registra!("TNSAnaMin", minimum(tab.T_ns); sig = 2); registra!("TNSAnaMax", maximum(tab.T_ns); sig = 2)
+    registra!("TNSAnaMediana", median(tab.T_ns); sig = 2)
+    registra!("SenAnaTodosMediana", median(tab.sen_decada); dig = 0); registra!("SenAnaAteUltMediana", median(tab.sen_ate_ult); dig = 0)
+    registra!("NAnaTodosNegSig", count(<(0), tab.sen_sup)); registra!("NAnaTodosPSig", count(<(0.05), tab.p_tfpw))
+    registra!("UltimoAnoAna", rotulo_hidro(maximum(parse(Int, split(p, "–")[2][1:4]) for p in tab.periodo)))
+    registra!("NAnaRetornoCai", count(tab.T_ns .< tab.T_est))
+    registra!("NAnaProprio", count(!ismissing, tab.T_ns_proprio))
+    registra!("NBootAnaRetorno", B)
     return tab
 end
 
@@ -1173,6 +1272,7 @@ function executa_paper()
     N = bloco_nao_estacionario(L, E, V)
     VF = bloco_validacao(L, E)
     AN = bloco_ana(L, E)
+    AR = bloco_ana_retorno(L, E, AN)
     I = bloco_indices(L, E)
     M = bloco_markov(L, I)
     S = bloco_sensibilidade(L, E, R)
@@ -1183,7 +1283,7 @@ function executa_paper()
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)
     println("\nMacros: ", escreve_macros())
-    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
+    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, AR = AR, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
 end
 
 using Serialization

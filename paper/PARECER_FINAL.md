@@ -143,3 +143,24 @@ transparência, e não a novidade do resultado.
 Nenhum número mudou: `verifica.py` 57/57, artigo com 24 p. Com os ajustes, o critério "Figuras"
 passa de 8,0 para 8,5, e a nota ponderada vai de 8,63 para 8,65, o que **mantém a nota final em
 8,6 / 10**.
+
+---
+
+## Extensão regional (1a) — 17/10/2026
+
+- **Período de retorno nos 5 postos da ANA** (`bloco_ana_retorno`; Tabela 3), com o mesmo esquema
+  da 82983 e evento relativo: E1 × (média do posto ÷ média da 82983 nos anos comuns), porque o
+  2012/13 de Juazeiro não é válido. O período de retorno cai em todos os postos: estacionário de
+  27 a 45 anos, não estacionário em 2020/21 de 11 a 32 (mediana 21), contra 38 → 12 na 82983. O
+  limiar igual ao 2012/13 do próprio posto (4 postos) dá o mesmo padrão.
+- **Achado:** os postos têm os anos de 2021/22 a 2024/25, que são chuvosos. Com eles, as
+  tendências dos postos caem de uma mediana de −57 para −37 mm/década, e Campo dos Cavalos e
+  Junco deixam de ser significativos. A própria 82983 registrou 691, ≥ 607 e 622 mm em 2021/22,
+  2022/23 e 2023/24, anos excluídos pela FCA. Com eles, a tendência é de **−43 [−70; −11] mm/década
+  (p = 0,038)**. Essa linha entrou na Tabela 2, no resumo, na Discussão, na Limitação 6 e na
+  Conclusão 1.
+- **Lagoa Grande:** 1955–61 com 1 250–1 550 mm/ano (cerca do triplo do restante da série), um
+  segmento inomogêneo. Todos os postos começam em 1963/64.
+- **Efeito na avaliação:** a crítica de "um ponto só" fica respondida para a P1, e a originalidade
+  sobe. A estimativa principal da tendência (−60) passa a vir acompanhada de uma faixa honesta
+  (−43 a −60), conforme a recuperação recente entra ou não na série.

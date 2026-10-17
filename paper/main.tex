@@ -60,13 +60,14 @@ referência regional (\SenReferencia{}~mm por década) e em \NAnaNegSig{} dos \N
 pluviômetros da ANA; as normais oficiais da estação registram a mesma queda
 (\NormalOficialChuvaSeisUm{}~mm em 1961--1990, \NormalOficialChuva{}~mm em 1991--2020).
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década; corrigindo uma
-possível quebra da Tmáx, a máxima ainda sobe \SenTmaxAjustada{}~°C por década. A magnitude da
-queda da chuva é estável nas análises de sensibilidade, mas sua significância depende da década
-de 2010: com dados só até 2010/11, a tendência não seria detectável. Para um ano tão seco quanto
+possível quebra da Tmáx, a máxima ainda sobe \SenTmaxAjustada{}~°C por década. A queda resiste às
+análises de sensibilidade, inclusive aos anos chuvosos de 2021/22 a 2023/24 (\SenChuvaRecentes{}~mm
+por década), mas sua significância depende da década de 2010: com dados só até 2010/11, a tendência não seria detectável. Para um ano tão seco quanto
 2012/13 (\ChuvaDozeTreze{}~mm), o período de retorno é da ordem de \TMediaAkaikeB{} anos
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} sob clima estacionário e de \TNSMediaUlt{} anos
 \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média de \UltimoAnoNS{}, ambos por média de Akaike
-entre distribuições candidatas. Esses intervalos largos fazem parte do resultado: com uma
+entre distribuições candidatas; nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
+\TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos. Esses intervalos largos fazem parte do resultado: com uma
 estação e cerca de meio século de anos válidos, a frequência de anos extremos só pode ser
 conhecida em ordem de grandeza, e os dados não separam a persistência de anos secos da tendência
 nem detectam a influência do ENSO.
@@ -88,12 +89,14 @@ The decline is present in the regional reference (\SenReferencia{}~mm per decade
 \NAnaNegSig{} of the \NPostosAna{} ANA gauges; the station's official climate normals record the
 same decline (\NormalOficialChuvaSeisUm{}~mm in 1961--1990, \NormalOficialChuva{}~mm in 1991--2020). Minimum and maximum temperatures rose by \SenTmin{} and
 \SenTmax{}~°C per decade; correcting a possible break in maximum temperature, the maximum still
-rises by \SenTmaxAjustada{}~°C per decade. The magnitude of the rainfall decline is stable across
-sensitivity analyses, but its significance depends on the 2010s: with data only up to 2010/11,
+rises by \SenTmaxAjustada{}~°C per decade. The decline is robust to sensitivity
+analyses, including the wet years 2021/22--2023/24 (\SenChuvaRecentes{}~mm per decade), but its
+significance depends on the 2010s: with data only up to 2010/11,
 the trend would not be detectable. For a year as dry as 2012/13 (\ChuvaDozeTreze{}~mm), the
 return period is of the order of \TMediaAkaikeB{} years \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}
 under a stationary climate and \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} at
-the mean of \UltimoAnoNS{}, both Akaike-weighted averages over candidate distributions. These
+the mean of \UltimoAnoNS{}, both Akaike-weighted averages over candidate distributions; at the
+\NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years. These
 wide intervals are part of the result: with one station and about half a century of valid years,
 the frequency of extreme years can only be known to an order of magnitude, and the data cannot
 separate persistence of dry years from the trend nor detect an ENSO influence.
@@ -386,7 +389,8 @@ como sensibilidade. Ela também define os estados sem tendência da persistênci
 teleconexões. O valor principal é avaliado no último ano hidrológico válido; valores para 2025
 extrapolam a tendência para além dos dados e são apresentados como cenário. Como sensibilidades,
 $b$ é fixado na inclinação estimada para a série de referência regional (de novo como média entre
-as candidatas), e a Gamma é reajustada com o critério FCA $\le$ 7,5\,\%. Quando $p$ varia ano a
+as candidatas), e a Gamma é reajustada com o critério FCA $\le$ 7,5\,\%. O mesmo esquema é aplicado aos postos
+da ANA (\cref{sec:dados}), cada um com seus anos válidos desde 1963/64. Quando $p$ varia ano a
 ano, a \cref{eq:pn} vira $1-\prod_{j=1}^{n}(1-p_{t_0+j})$.
 
 \subsection{Persistência}
@@ -525,11 +529,14 @@ verossimilhança), ou \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} n
 
 \paragraph{Sensibilidade da tendência da chuva.} Como a série válida termina numa década seca e
 sem os anos chuvosos que a sucederam, testamos a tendência em subamostras (\cref{tab:senschuva}).
-A magnitude é estável: de \SenChuvaAteDezOnze{} a \SenChuvaDesdeSetentaUm{}~mm por década em todas
-as versões. Ela não vem só da seca de 2011/12 a 2016/17, pois sem esses anos a queda continua
-significativa, embora mais fraca ($p$\,\PTFPWChuvaSemSeca). Também resiste ao critério de
-completude mais frouxo, que inclui os anos chuvosos \AnosFCASete{}, e não depende do início da
-série. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
+A magnitude varia pouco: de \SenChuvaRecentes{} a \SenChuvaDesdeSetentaUm{}~mm por década em
+todas as versões. Ela não vem só da seca de 2011/12 a 2016/17, pois sem esses anos a queda continua
+significativa, embora mais fraca ($p$\,\PTFPWChuvaSemSeca). Também resiste aos anos chuvosos
+recentes. Com o critério FCA $\le$ 7,5\,\%, que inclui \AnosFCASete{}, e acrescentando 2022/23, cujo
+total observado (\ChuvaObsVinteDois{}~mm, com \DiasAusVinteDois{} dias sem registro) é um limite
+inferior de um ano chuvoso, a queda passa a \SenChuvaRecentes{}~mm por década
+\IC{\SenChuvaRecentesICinf}{\SenChuvaRecentesICsup} ($p$\,\PTFPWChuvaRecentes). Essa é a estimativa
+mais conservadora, e também não depende do início da série. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
 intervalo inclui zero e o teste não rejeita a ausência de tendência ($p$\,\PTFPWChuvaAteDezOnze).
 A queda já estava em curso antes da última década, mas só se torna detectável com ela. Uma
 tendência linear descreve a série melhor que um degrau único no melhor ponto de corte
@@ -552,6 +559,52 @@ como a discutida na \cref{sec:dados}.
     Até 2010/11 & \NChuvaAteDezOnze & \SenChuvaAteDezOnze{} \IC{\SenChuvaAteDezOnzeICinf}{\SenChuvaAteDezOnzeICsup} & \PTFPWChuvaAteDezOnzeVal \\
     A partir de 1971/72 & \NChuvaDesdeSetentaUm & \SenChuvaDesdeSetentaUm{} \IC{\SenChuvaDesdeSetentaUmICinf}{\SenChuvaDesdeSetentaUmICsup} & \PTFPWChuvaDesdeSetentaUmVal \\
     FCA $\le$ 7,5\,\% & \NChuvaFCASete & \SenChuvaFCASete{} \IC{\SenChuvaFCASeteICinf}{\SenChuvaFCASeteICsup} & \PTFPWChuvaFCASeteVal \\
+    FCA $\le$ 7,5\,\% e 2022/23 (total observado) & \NChuvaRecentes & \SenChuvaRecentes{} \IC{\SenChuvaRecentesICinf}{\SenChuvaRecentesICsup} & \PTFPWChuvaRecentesVal \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Extensão aos pluviômetros da ANA.} Para verificar se o resultado é próprio da \Est{},
+repetimos o cálculo nos \NAnaRetorno{} postos da ANA da \cref{tab:ana}, cada um com todos os seus
+anos válidos de 1963/64 a \UltimoAnoAna{} (\cref{tab:anaretorno}). Todos começam em 1963/64,
+como a \Est{}, porque antes disso há segmentos claramente inomogêneos (em Lagoa Grande, por
+exemplo). Como o 2012/13 de Juazeiro não é válido, o evento é relativo: um ano com chuva $\le$ E1
+multiplicado pela razão entre a média do posto e a da \Est{} nos anos comuns, o que dá limiares
+de \LimiarAnaJuazeiro{} a \LimiarAnaLagoaGrande{}~mm. Nos \NAnaRetorno{} postos, o período de
+retorno não estacionário em \UltimoAnoNS{} é menor que o estacionário: de \TEstAnaMin{}--\TEstAnaMax{}
+anos passa a \TNSAnaMin{}--\TNSAnaMax{} (mediana \TNSAnaMediana{}), contra \TMediaAkaikeB{} e
+\TNSMediaUlt{} anos na \Est{}. Com o 2012/13 do próprio posto como limiar, onde ele é válido
+(\NAnaProprio{} postos), o padrão se repete. Os intervalos são tão largos quanto os da \Est{}, mas
+a direção é a mesma em todos os postos.
+
+Os postos têm também os anos de 2021/22 a \UltimoAnoAna{}, que a \Est{} não tem válidos, e esses
+anos são chuvosos. Com eles, as tendências dos postos caem de uma mediana de
+\SenAnaAteUltMediana{} para \SenAnaTodosMediana{}~mm por década, e o intervalo exclui zero em
+\NAnaTodosNegSig{} dos \NAnaRetorno{}. O resultado regional é o mesmo da \Est{}: a frequência de
+anos muito secos aumentou em toda a vizinhança, e a magnitude da queda da chuva depende de quanto
+da recuperação recente entra na série.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Pluviômetros da ANA a partir de 1963/64: tendência da chuva anual (Sen, mm por década)
+  até \UltimoAnoNS{} e até o fim de cada série, e período de retorno (anos) de um ano tão seco
+  quanto E1 (limiar relativo, em mm), estacionário e não estacionário em \UltimoAnoNS{} (médias
+  por pesos de Akaike; IC de 95\,\% por bootstrap dos anos, \NBootAnaRetorno{} réplicas). Na
+  última linha, a \Est{} para comparação; a tendência até o fim inclui os anos chuvosos recentes
+  (\cref{tab:senschuva}, última linha).}
+  \label{tab:anaretorno}
+  \footnotesize
+  \begin{tabular}{@{}lrrrrrr@{}}
+    \toprule
+    Posto & $n$ & Limiar & Sen até \UltimoAnoNS & Sen até o fim & $T$ estacionário & $T$ não estacionário \\
+    \midrule
+    Juazeiro & \NAnaRetJuazeiro & \LimiarAnaJuazeiro & \SenAnaAteUltJuazeiro & \SenAnaTodosJuazeiro & \TEstAnaJuazeiro{} \IC{\TEstAnaJuazeiroICinf}{\TEstAnaJuazeiroICsup} & \TNSAnaJuazeiro{} \IC{\TNSAnaJuazeiroICinf}{\TNSAnaJuazeiroICsup} \\
+    Campo dos Cavalos & \NAnaRetCavalos & \LimiarAnaCavalos & \SenAnaAteUltCavalos & \SenAnaTodosCavalos & \TEstAnaCavalos{} \IC{\TEstAnaCavalosICinf}{\TEstAnaCavalosICsup} & \TNSAnaCavalos{} \IC{\TNSAnaCavalosICinf}{\TNSAnaCavalosICsup} \\
+    Junco & \NAnaRetJunco & \LimiarAnaJunco & \SenAnaAteUltJunco & \SenAnaTodosJunco & \TEstAnaJunco{} \IC{\TEstAnaJuncoICinf}{\TEstAnaJuncoICsup} & \TNSAnaJunco{} \IC{\TNSAnaJuncoICinf}{\TNSAnaJuncoICsup} \\
+    Lagoa do Boi & \NAnaRetLagoaBoi & \LimiarAnaLagoaBoi & \SenAnaAteUltLagoaBoi & \SenAnaTodosLagoaBoi & \TEstAnaLagoaBoi{} \IC{\TEstAnaLagoaBoiICinf}{\TEstAnaLagoaBoiICsup} & \TNSAnaLagoaBoi{} \IC{\TNSAnaLagoaBoiICinf}{\TNSAnaLagoaBoiICsup} \\
+    Lagoa Grande & \NAnaRetLagoaGrande & \LimiarAnaLagoaGrande & \SenAnaAteUltLagoaGrande & \SenAnaTodosLagoaGrande & \TEstAnaLagoaGrande{} \IC{\TEstAnaLagoaGrandeICinf}{\TEstAnaLagoaGrandeICsup} & \TNSAnaLagoaGrande{} \IC{\TNSAnaLagoaGrandeICinf}{\TNSAnaLagoaGrandeICsup} \\
+    \midrule
+    \Est{} (INMET) & \NanosValidos & \ChuvaDozeTreze & \SenChuva & \SenChuvaRecentes & \TMediaAkaikeB{} \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} & \TNSMediaUlt{} \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -913,8 +966,8 @@ clara de aquecimento desigual entre os quantis; todos excluem zero.
 
 \paragraph{O regime mudou.} O resultado mais firme deste trabalho é que Petrolina ficou mais seca
 e mais quente desde a década de 1960. A chuva anual caiu \SenChuva{}~mm por década, com
-intervalo que exclui zero com folga, e a magnitude da queda é estável entre subamostras, inclusive
-com os anos chuvosos recentes e sem os anos da seca de 2011/12 a 2016/17. A detecção, porém,
+intervalo que exclui zero com folga, e a queda persiste em todas as subamostras: sem os anos da seca de 2011/12 a 2016/17 e com os
+anos chuvosos recentes, que a reduzem a \SenChuvaRecentes{}~mm por década. A detecção, porém,
 depende da década de 2010: até 2010/11, a mesma queda não seria significativa. Ela não é só local: a referência formada pelas vizinhas cai
 \SenReferencia{}~mm por década, e \NAnaNegSig{} de \NPostosAna{} pluviômetros independentes da ANA
 confirmam a queda. Contra a referência do INMET, a parte exclusiva da \Est{} coincide, com
@@ -1008,17 +1061,20 @@ complexos aplicados à mesma série.
   na Gamma estacionária), e essa hipótese é rejeitada no caso não estacionário. Ainda assim, os
   modelos bayesianos e os estados sem tendência da persistência e das teleconexões usam a Gamma
   com forma fixa.
-  \item \textbf{Período efetivo.} A chuva é analisada até \UltimoAnoValido{}. Os anos chuvosos
-  \AnosFCASete{} ficam fora pelo critério de completude; incluí-los atenua a tendência, de modo
-  que a exclusão favorece o resultado principal.
+  \item \textbf{Período efetivo.} A chuva é analisada até \UltimoAnoValido{}. Os anos de 2021/22
+  a 2023/24 são chuvosos e ficam fora pelo critério de completude; incluí-los reduz a tendência
+  de \SenChuva{} para \SenChuvaRecentes{}~mm por década, e nos postos da ANA, que os têm, as
+  tendências também ficam menores. Se a recuperação continuar, a tendência de longo prazo será
+  menor que a estimativa principal.
   \item \textbf{Forma da tendência.} O modelo não estacionário supõe tendência log-linear. Ele não
   diz por que a chuva caiu. Os valores para 2025 e a continuidade da tendência são extrapolações.
   \item \textbf{Teleconexões.} Não detectamos efeito do ENSO nem do gradiente do Atlântico; com
   uma estação e \NanosValidos{} anos, o poder para isso é baixo.
-  \item \textbf{Representatividade espacial.} Os resultados são de um ponto, verificados com
-  \NPostosAna{} pluviômetros independentes num raio de cerca de 50~km. Os períodos de retorno e
-  os demais índices não foram calculados para esses postos, e dados em grade
-  \parencite{xavier2016,funk2015} permitiriam estender a análise à região.
+  \item \textbf{Representatividade espacial.} A tendência e o período de retorno foram
+  verificados em \NPostosAna{} pluviômetros independentes num raio de cerca de 50~km, mas os
+  demais índices são só da \Est{}. Os postos são próximos e seus anos secos coincidem, de modo
+  que não equivalem a cinco amostras independentes; uma análise regional de frequência ou dados
+  em grade \parencite{xavier2016,funk2015} permitiriam estender a análise à região.
   \item \textbf{Linha de base externa.} As normais oficiais do INMET são da mesma estação.
   Elas confirmam a climatologia e a queda entre normais, mas não substituem uma verificação
   independente. A comparação com a climatologia de Bebedouro \parencite{teixeira2010} é só de
@@ -1036,7 +1092,8 @@ complexos aplicados à mesma série.
   \item A chuva anual em Petrolina caiu \SenChuva{}~mm por década
   \IC{\SenChuvaICinf}{\SenChuvaICsup} desde a década de 1960. A queda é compartilhada pelas
   estações vizinhas do INMET, com magnitude menor (\SenReferencia{}~mm por década), e confirmada
-  por pluviômetros independentes da ANA; o mais próximo reproduz a tendência nos mesmos anos. Ela
+  por pluviômetros independentes da ANA; o mais próximo reproduz a tendência nos mesmos anos. Com
+  os anos chuvosos de 2021/22 a 2023/24, a queda fica em \SenChuvaRecentes{}~mm por década. Ela
   envolve a intensidade e, com evidência mais fraca, o número de dias chuvosos.
   \item As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de forma
   consistente em toda a distribuição. A Tmín não tem quebra frente às vizinhas; na Tmáx, a
@@ -1048,7 +1105,9 @@ complexos aplicados à mesma série.
   \item Com a queda da chuva, um ano tão seco quanto 2012/13 passa de um período de retorno da
   ordem de \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}, sob
   estacionariedade, para \TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a
-  média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). O
+  média do último ano observado (\TRegionalMedia{} anos em 2025 com a inclinação regional). Nos
+  \NAnaRetorno{} pluviômetros da ANA, ele também cai, de \TEstAnaMin{}--\TEstAnaMax{} para
+  \TNSAnaMin{}--\TNSAnaMax{} anos. O
   valor é estável entre as distribuições quando a variabilidade não é forçada a cair junto com
   a média (\TNSVarMin{} a \TNSVarMax{} anos), os intervalos cobrem
   uma ordem de grandeza, e esses números indicam escala, não valores precisos.
