@@ -55,9 +55,10 @@ detectável desde a década de 1960. Usamos a série diária da estação conven
 a estação automática do mesmo sítio, \NvizinhasUsadas{} estações vizinhas e \NPostosAna{}
 pluviômetros independentes da ANA. A chuva anual caiu \SenChuva{}~mm por década
 \IC{\SenChuvaICinf}{\SenChuvaICsup} (Mann--Kendall com pré-branqueamento, $p$\,\PTFPWChuva),
-com menos dias chuvosos e chuva menos intensa. A queda aparece na referência regional
-(\SenReferencia{}~mm por década), em \NAnaNegSig{} dos pluviômetros da ANA e nas normais oficiais
-da estação (\NormalOficialChuvaSeisUm{}~mm em 1961--1990, \NormalOficialChuva{}~mm em 1991--2020).
+com chuva menos intensa e, com evidência mais fraca, menos dias chuvosos. A queda aparece na
+referência regional (\SenReferencia{}~mm por década) e em \NAnaNegSig{} dos \NPostosAna{}
+pluviômetros da ANA; as normais oficiais da estação registram a mesma queda
+(\NormalOficialChuvaSeisUm{}~mm em 1961--1990, \NormalOficialChuva{}~mm em 1991--2020).
 As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década; corrigindo uma
 possível quebra da Tmáx, a máxima ainda sobe \SenTmaxAjustada{}~°C por década. A magnitude da
 queda da chuva é estável nas análises de sensibilidade, mas sua significância depende da década
@@ -82,10 +83,10 @@ detectably since the 1960s. We use the daily record of the INMET conventional st
 collocated automatic station, \NvizinhasUsadas{} neighbouring stations and \NPostosAna{}
 independent rain gauges of the national water agency (ANA). Annual rainfall declined by
 \SenChuva{}~mm per decade \IC{\SenChuvaICinf}{\SenChuvaICsup} (trend-free pre-whitened
-Mann--Kendall, $p$\,\PTFPWChuva), with fewer wet days and lower intensity. The decline is present
-in the regional reference (\SenReferencia{}~mm per decade), at \NAnaNegSig{} of the ANA gauges and
-in the station's official climate normals (\NormalOficialChuvaSeisUm{}~mm in 1961--1990,
-\NormalOficialChuva{}~mm in 1991--2020). Minimum and maximum temperatures rose by \SenTmin{} and
+Mann--Kendall, $p$\,\PTFPWChuva), with lower intensity and, on weaker evidence, fewer wet days.
+The decline is present in the regional reference (\SenReferencia{}~mm per decade) and at
+\NAnaNegSig{} of the \NPostosAna{} ANA gauges; the station's official climate normals record the
+same decline (\NormalOficialChuvaSeisUm{}~mm in 1961--1990, \NormalOficialChuva{}~mm in 1991--2020). Minimum and maximum temperatures rose by \SenTmin{} and
 \SenTmax{}~°C per decade; correcting a possible break in maximum temperature, the maximum still
 rises by \SenTmaxAjustada{}~°C per decade. The magnitude of the rainfall decline is stable across
 sensitivity analyses, but its significance depends on the 2010s: with data only up to 2010/11,
@@ -479,8 +480,9 @@ log-normal, porém, é rejeitada pelo Anderson--Darling, e entre as candidatas n
 máximo é \TModelosMaxAceitos{} anos. A média ponderada por AIC é de \TMediaAkaikeB{} anos
 \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup} (\cref{tab:retorno}). Empiricamente,
 \NanosAteDozeTreze{} dos \NanosValidos{} anos tiveram chuva $\le$ E1
-($T \approx \TEmpiricoDozeTreze$ anos pela posição de Weibull), o que indica que a cauda seca da
-Gamma é mais fina que a dos dados.
+($T \approx \TEmpiricoDozeTreze$ anos pela posição de Weibull). Essa contagem inclui o próprio
+2012/13 e mistura anos de uma série com tendência, mas a validação fora da amostra
+(\cref{tab:valid}) confirma que a cauda seca da Gamma é mais fina que a dos dados.
 
 A tendência da chuva anual é forte: \SenChuva{}~mm/década \IC{\SenChuvaICinf}{\SenChuvaICsup}
 (MK $p$\,\PMKChuva; TFPW $p$\,\PTFPWChuva). Na Gamma, o modelo não estacionário é claramente
@@ -777,7 +779,7 @@ $p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, e só o teste com pré-bran
 significativo. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
 maior que o efeito estimado, a não significância no TFPW reflete falta de poder, e não ausência
 de mudança: há indício de uma estação chuvosa que começa mais tarde e é mais curta. Essas
-tendências descrevem só os anos com estação definida. Os anos sem estação (\AnosSemEstacao) são
+tendências descrevem só os anos com estação definida. Os anos sem estação são
 secos e se concentram no período recente; ficando de fora, tendem a fazer a mudança nas datas
 parecer menor do que é.
 
@@ -785,7 +787,9 @@ parecer menor do que é.
   \centering
   \includegraphics[width=\textwidth]{figuras/fig03_climatologia.pdf}
   \caption{Climatologia mensal da \Est{}. (a) Chuva média de 1991--2020 com faixa P10--P90 e
-  média de 1961--1990. (b) Temperaturas máxima e mínima médias de 1991--2020.}
+  média de 1961--1990. (b) Temperaturas máxima e mínima médias de 1991--2020. As médias usam os
+  meses válidos da série; a de 1961--1990 difere da normal oficial do INMET (\cref{sec:area}),
+  que adota outros critérios de completude.}
   \label{fig:clima}
 \end{figure}
 
@@ -829,10 +833,17 @@ de noites frias (TN10p) variou \SenTNumzerop{} pontos percentuais por década e 
 (TX90p), \SenTXnovezerop{}. Na chuva, caem os índices de intensidade, Rx1day
 (\SenRxumday{}~mm/década), SDII (\SenSDII{}~mm/dia/década) e R95p (\SenRnovecincop{}~mm/década),
 mas também a frequência: o número de dias com chuva (R1mm) varia \SenRummm{} dias por década
-\IC{\SenRummmICinf}{\SenRummmICsup} ($q$ Hamed--Rao \QHRRummmVal; $q$ TFPW \QTFPWRummmVal).
+\IC{\SenRummmICinf}{\SenRummmICsup}, com evidência mais fraca que a da intensidade ($q$ Hamed--Rao
+\QHRRummmVal; $q$ TFPW \QTFPWRummmVal, acima de 0,05).
 A amplitude térmica, a UR, o CDD e o CWD não mostram tendência detectável. O vento variou
 \SenVento{}~m/s por década. Como quedas de vento em estações convencionais muitas vezes vêm de
-mudanças no anemômetro ou no entorno, não interpretamos esse resultado climaticamente. A
+mudanças no anemômetro ou no entorno, não interpretamos esse resultado climaticamente. Fora da
+família de testes, a ETo de Hargreaves usada no SPEI varia \SenEToPct{}\,\% por década
+\IC{\SenEToPctICinf}{\SenEToPctICsup} ($p$\,\PTFPWETo): no máximo um aumento pequeno e
+não significativo, já que a amplitude térmica não muda. A evaporação do evaporímetro de Piche sobe \SenPichePct{}\,\% por
+década \IC{\SenPichePctICinf}{\SenPichePctICsup} ($p$\,\PTFPWPiche), mas esse instrumento é
+muito sensível à exposição e à manutenção, e a alta contraria a queda do vento; como o vento, não
+a interpretamos climaticamente. A
 decomposição STL das séries mensais (de \STLMesesTmin{} meses, dos quais \STLPreenchTmin{} foram
 preenchidos com a climatologia) dá uma variação da componente de tendência de \STLDeltaTmin{}~°C
 na Tmín e \STLDeltaTmax{}~°C na Tmáx entre 1971 e 2025, coerente com os declives de Sen.
@@ -902,8 +913,8 @@ confirmam a queda. Contra a referência do INMET, a parte exclusiva da \Est{} co
 significância marginal, com a instalação da estação automática em \QuebraQ{}; mas o pluviômetro
 independente mais próximo, a \DistJuazeiro{}~km, reproduz a tendência da \Est{} nos mesmos anos e
 não mostra mudança relativa nessa data. Uma contribuição instrumental não pode ser descartada, mas
-não é necessária para explicar a queda. A diminuição aparece tanto nos índices de
-intensidade (Rx1day, SDII, R95p) quanto no número de dias de chuva, e há indício, não confirmado
+não é necessária para explicar a queda. A diminuição aparece nos índices de
+intensidade (Rx1day, SDII, R95p) e, com evidência mais fraca, no número de dias de chuva, e há indício, não confirmado
 pelo teste com pré-branqueamento, de que a estação chuvosa começa mais tarde e ficou mais curta.
 A forma do ciclo anual, medida pelo índice de sazonalidade e pela concentração, não mudou, e o
 aumento de anos sem estação chuvosa definida não é estatisticamente significativo.
@@ -911,10 +922,10 @@ aumento de anos sem estação chuvosa definida não é estatisticamente signific
 O aquecimento atinge toda a distribuição da temperatura. Na Tmín, que não tem quebra frente às
 vizinhas, ele é o resultado mais firme do trabalho; na Tmáx, resiste ao corte da série em 2008 e à
 correção da quebra frente a Cabrobó, embora com magnitude menor (\SenTmaxAjustada{}~°C por
-década). Com noites frias ficando mais raras, a demanda
-evaporativa aumenta; por isso o SPEI, que incorpora a temperatura, é uma medida mais completa do
-estresse hídrico do que o SPI. Menos chuva e mais evaporação apontam na mesma direção para o
-balanço hídrico local.
+década). O aquecimento tende a aumentar a demanda evaporativa, mas isso aparece pouco nos dados:
+a ETo de Hargreaves tem no máximo um aumento pequeno e não significativo, e a evaporação Piche, que sobe, não é confiável
+para tendência. Por isso o SPEI pouco acrescenta ao SPI nesta série, e a mudança no balanço
+hídrico local vem, com o que se pode medir aqui, sobretudo da queda da chuva.
 
 \paragraph{Comparação com estudos anteriores.} A queda da chuva anual e do número de dias
 chuvosos, e o aquecimento com noites frias mais raras, coincidem com o padrão predominante nas
@@ -1007,7 +1018,7 @@ complexos aplicados à mesma série.
   \IC{\SenChuvaICinf}{\SenChuvaICsup} desde a década de 1960. A queda é compartilhada pelas
   estações vizinhas do INMET, com magnitude menor (\SenReferencia{}~mm por década), e confirmada
   por pluviômetros independentes da ANA; o mais próximo reproduz a tendência nos mesmos anos. Ela
-  envolve tanto a intensidade quanto o número de dias chuvosos.
+  envolve a intensidade e, com evidência mais fraca, o número de dias chuvosos.
   \item As temperaturas mínima e máxima subiram \SenTmin{} e \SenTmax{}~°C por década, de forma
   consistente em toda a distribuição. A Tmín não tem quebra frente às vizinhas; na Tmáx, a
   correção de uma possível quebra reduz a tendência para \SenTmaxAjustada{}~°C por década, sem
@@ -1028,8 +1039,9 @@ complexos aplicados à mesma série.
 
 % ============================================================================= disponibilidade
 \section*{Disponibilidade de dados e código}
-Os dados brutos são públicos (INMET/BDMEP, ANA/Hidroweb e NOAA PSL); a chuva dos postos da ANA
-é baixada por \texttt{scripts/baixa\_ana.jl}. O código Julia, com testes unitários, e
+Os dados brutos são públicos (INMET/BDMEP, normais do INMET, ANA/Hidroweb e NOAA PSL); a chuva
+dos postos da ANA é baixada por \texttt{scripts/baixa\_ana.jl}, e as normais do INMET, por
+\texttt{scripts/extrai\_normais\_inmet.py}. O código Julia, com testes unitários, e
 o script que regenera todas as figuras e todos os números deste texto (\texttt{scripts/paper.jl},
 que escreve \texttt{paper/resultados.tex}), além de uma verificação independente em Python
 (\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos, estão em \url{https://github.com/dantebertuzzi/meteo} e

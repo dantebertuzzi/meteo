@@ -928,6 +928,36 @@ function bloco_p2_indices(L)
         registra_ic!("Sen" * k * "AteDoisMilOito", tt.sen_decada, tt.sen_ic_inf, tt.sen_ic_sup; dig = 2)
         registra_p!("PTFPW" * k * "AteDoisMilOito", tt.p_mk_tfpw)
     end
+
+    # demanda evaporativa, fora da família BH: ETo de Hargreaves (a do SPEI) e evaporação Piche,
+    # médias anuais via anomalias mensais (mesma regra das demais médias)
+    linhas = readlines(ARQ_LONGO); i = findfirst(startswith("Data Medicao"), linhas)
+    bp = CSV.read(IOBuffer(join(linhas[i:end], '\n')), DataFrame; delim = ';', header = 1, types = String,
+                  missingstring = ["", "null"], silencewarnings = true)
+    col = findfirst(n -> startswith(uppercase(n), "EVAPORACAO DO PICHE"), names(bp))
+    ev = DataFrame(data = Date.(bp[!, 1]), evap = parse_num.(bp[!, col]))
+    ev = ev[year.(ev.data) .>= INICIO_TEMP, :]; ev.ano = year.(ev.data); ev.mes = month.(ev.data)
+    evm = combine(groupby(ev, [:ano, :mes]; sort = true)) do g
+        nd = daysinmonth(Date(g.ano[1], g.mes[1])); f = ismissing.(g.evap)
+        ok = count(f) + nd - nrow(g) <= MAX_DIAS_FALTA && max_consecutivo(f) <= MAX_DIAS_CONSEC
+        (evap = ok ? mean(skipmissing(g.evap)) : missing,)
+    end
+    dme = leftjoin(select(dm, :ano, :mes, :tmax, :tmin), evm, on = [:ano, :mes])
+    dme.eto = [eto_mensal(a, m, x, n, LAT_82983) for (a, m, x, n) in zip(dme.ano, dme.mes, dme.tmax, dme.tmin)]
+    for (vv, k) in ((:eto, "ETo"), (:evap, "Piche"))
+        cl = Dict(m => mean(skipmissing(dme[(dme.mes .== m) .& (REF[1] .<= dme.ano .<= REF[2]), vv])) for m in 1:12)
+        anos = sort(unique(dme.ano))
+        y = map(anos) do a
+            g = dme[dme.ano .== a, :]
+            an = [x - cl[m] for (x, m) in zip(g[!, vv], g.mes) if !ismissing(x)]
+            length(an) >= MIN_MESES_ANO ? mean(values(cl)) + mean(an) : missing
+        end
+        tt = tendencia_completa(anos, y; nome = k)
+        media = mean(skipmissing(y))
+        registra_ic!("Sen" * k * "Pct", 100tt.sen_decada / media, 100tt.sen_ic_inf / media, 100tt.sen_ic_sup / media; dig = k == "ETo" ? 2 : 1)
+        registra_p!("PTFPW" * k, tt.p_mk_tfpw); registra!("N" * k, tt.n)
+        @printf("%s: n = %d, Sen = %.2f%% por década, p TFPW = %.3f\n", k, tt.n, 100tt.sen_decada / media, tt.p_mk_tfpw)
+    end
     return (ich = ich, anu = anu, tend = tend)
 end
 
