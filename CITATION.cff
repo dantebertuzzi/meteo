@@ -8,6 +8,7 @@ authors:
     affiliation: "Pesquisador independente"
     orcid: "https://orcid.org/0009-0007-5223-2814"
 version: "1.0.0"
+doi: "10.5281/zenodo.23438824"
 date-released: "2026-10-17"
 license: MIT
 repository-code: "https://github.com/dantebertuzzi/meteo"
@@ -29,6 +30,7 @@ preferred-citation:
       given-names: "Dante de Souza"
       orcid: "https://orcid.org/0009-0007-5223-2814"
   year: 2026
+  doi: "10.5281/zenodo.23438824"
   publisher:
     name: "Zenodo"
   languages:
