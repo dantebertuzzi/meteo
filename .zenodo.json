@@ -2,7 +2,7 @@
   "title": "Menos chuva e mais calor em Petrolina-PE (1961–2025): tendências do regime meteorológico e o que elas implicam para a frequência de anos muito secos",
   "upload_type": "publication",
   "publication_type": "preprint",
-  "description": "<p>Artigo estatístico reprodutível (LaTeX + Julia) sobre as mudanças no regime meteorológico de Petrolina (PE), semiárido brasileiro, e o que elas implicam para a frequência de anos muito secos, com base na estação convencional do INMET 82983 (1961–2025), validada contra a estação automática A307 e contra estações vizinhas. A chuva anual caiu e as temperaturas mínima e máxima subiram de forma detectável; o período de retorno de um ano tão seco quanto 2012/13 é estimado com modelos estacionários e não estacionários (frequentistas e bayesianos) e, com uma única estação, só pode ser conhecido em ordem de grandeza. Inclui testes de homogeneidade, índices SPI/SPEI e ETCCDI, regressão quantílica e cadeia de Markov. Todo número do texto é gerado pelo código.</p>",
+  "description": "<p>Preprint estatístico reprodutível (LaTeX + Julia) sobre as mudanças no regime de chuva e de temperatura de Petrolina (PE), no semiárido do Nordeste, com a série diária da estação convencional do INMET 82983 (1961–2025), verificada com a estação automática do mesmo sítio, quatro estações vizinhas do INMET, cinco pluviômetros independentes da ANA e as Normais Climatológicas do INMET.</p><p>A chuva anual caiu cerca de 60 mm por década [−87; −33], com chuva menos intensa e, com evidência mais fraca, menos dias chuvosos; a queda é regional e aparece também nas normais oficiais (577 mm em 1961–1990, 419 mm em 1991–2020). As temperaturas mínima e máxima subiram 0,39 e 0,28 °C por década (0,19 °C na máxima corrigindo uma possível quebra). A significância da queda da chuva depende da década de 2010. Para um ano tão seco quanto 2012/13, o período de retorno passa da ordem de 38 anos sob clima estacionário para cerca de 12 anos com a média recente (médias por pesos de Akaike entre distribuições candidatas), com intervalos que cobrem uma ordem de grandeza.</p><p>Inclui testes de homogeneidade, SPI/SPEI, índices ETCCDI, sazonalidade, regressão quantílica, cadeia de Markov, validação fora da amostra e uma verificação independente em Python. Todo número do texto é gerado pelo código. Texto sob CC-BY 4.0; código sob MIT.</p>",
   "creators": [
     {
       "name": "Bertuzzi, Dante de Souza",
@@ -22,7 +22,11 @@
     "SPEI",
     "não estacionariedade",
     "Mann-Kendall",
-    "Julia"
+    "Julia",
+    "Pernambuco",
+    "ETCCDI",
+    "homogeneidade",
+    "INMET"
   ],
   "related_identifiers": [
     {
@@ -36,5 +40,6 @@
       "scheme": "doi"
     }
   ],
-  "version": "0.1.0"
+  "version": "1.0.0",
+  "publication_date": "2026-10-17"
 }

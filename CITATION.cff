@@ -7,8 +7,8 @@ authors:
     given-names: "Dante de Souza"
     affiliation: "Pesquisador independente"
     orcid: "https://orcid.org/0009-0007-5223-2814"
-version: "0.1.0"
-date-released: "2026-10-14"
+version: "1.0.0"
+date-released: "2026-10-17"
 license: MIT
 repository-code: "https://github.com/dantebertuzzi/meteo"
 keywords:
