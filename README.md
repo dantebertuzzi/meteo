@@ -82,4 +82,4 @@ results/paper/         tabelas CSV de todas as análises do artigo
 
 ## Como citar
 
-Ver `CITATION.cff`. Preprint no Zenodo: [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824).
+Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
