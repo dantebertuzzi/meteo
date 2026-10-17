@@ -19,3 +19,9 @@ results/paper/resultados.jls
 # ambiente Python da verificação independente
 .venv-verif/
 __pycache__/
+
+# notas de trabalho locais (prompt e revisões simuladas), fora do repositório público
+prompt_paper_seca_petrolina.md
+paper/PARECER_*.md
+paper/README_REVISAO.md
+paper/REVISAO_LITERATURA_REGIONAL.md
