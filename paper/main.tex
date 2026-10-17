@@ -388,7 +388,9 @@ não paramétrico dos anos, em que as oito candidatas e os pesos são reajustado
 $Y_t \sim \mathrm{Gamma}(k,\ \mu_t/k)$, também é ajustada de forma bayesiana, com
 $b \sim \mathcal N(0,\,0{,}2)$, que admite variações de até cerca de 40\,\% por década, e serve
 como sensibilidade. Ela também define os estados sem tendência da persistência e das
-teleconexões. O valor principal é avaliado no último ano hidrológico válido; valores para 2025
+teleconexões. Sob não estacionariedade, $T_t = 1/p_t$ é o período de retorno do clima do
+ano $t$, e não o tempo médio de espera até o próximo evento, que depende da trajetória futura de
+$p$ \parencite{salas2014}. O valor principal é avaliado no último ano hidrológico válido; valores para 2025
 extrapolam a tendência para além dos dados e são apresentados como cenário. Como sensibilidades,
 $b$ é fixado na inclinação estimada para a série de referência regional (de novo como média entre
 as candidatas), e a Gamma é reajustada com o critério FCA $\le$ 7,5\,\%. O mesmo esquema é aplicado aos postos
@@ -1036,6 +1038,27 @@ amplitude térmica sobe \parencite{lacerda2010} e a Tmín cai levemente em 1978-
 \parencite{teixeira2011}, enquanto na \Est{} a amplitude não muda e a Tmín média é a que mais
 aquece. Como esses trabalhos não testam a homogeneidade, e o segundo também não testa a
 significância, a divergência fica em aberto.
+
+\paragraph{Petrolina entre os semiáridos.} A mudança em Petrolina tem paralelos com outras
+regiões semiáridas. No Sahel, a seca das décadas de 1970 e 1980 foi seguida de uma recuperação
+apenas parcial. No Sahel central, a média de 1990--2007 superou em cerca de 10\,\% a de 1970--1989,
+mas ficou abaixo da de 1950--1989; no Sahel ocidental, o déficit persistiu
+\parencite{lebel2009,nicholson2013}. A recuperação foi atribuída sobretudo ao aumento dos gases de
+efeito estufa \parencite{dong2015}. No sudoeste da América do Norte, 2000--2021 foi o período de
+22 anos mais seco desde pelo menos o ano 800, com contribuição antrópica relevante
+\parencite{williams2020,williams2022}. No sudeste da Austrália, a Seca do Milênio (2001--2009), a pior
+do registro, foi explicada em grande parte pelo El Niño \parencite{vandijk2013}.
+
+Três lições se aplicam aqui. Primeiro, uma década seca pode ser seguida de anos chuvosos sem que a
+média volte ao nível anterior, como no Sahel. Os anos de 2021/22 a 2023/24 em Petrolina ainda não
+dizem se a recuperação será completa, e por isso a tendência é apresentada com e sem eles.
+Segundo, em todas essas regiões a variabilidade natural (ENSO e oceanos) se sobrepõe a qualquer
+tendência. Quando uma década seca cai no fim da série, a tendência estimada fica sensível ao
+período, como mostram aqui as Tabelas~\ref{tab:senschuva} e~\ref{tab:anaretorno}. Terceiro, quando
+o clima não é estacionário, o período de retorno deixa de ser uma propriedade fixa do lugar
+\parencite{milly2008}: $1/p_t$ descreve o clima de um ano, e o risco num horizonte de vários anos
+depende da trajetória futura \parencite{salas2014}, que é o que a \cref{tab:prob} calcula com $p$
+variável.
 
 \paragraph{A seca de 2011/12 a 2016/17 nesse contexto.} A seca iniciada em 2011/12 é descrita
 como a mais severa e prolongada do semiárido desde 1981, num período em que a área afetada por

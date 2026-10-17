@@ -183,3 +183,17 @@ passa de 8,0 para 8,5, e a nota ponderada vai de 8,63 para 8,65, o que **mantém
   metodológica (análise regional não estacionária com bootstrap por ano em séries do semiárido)
   eleva o critério de originalidade de 6,5 para cerca de 7,5, e a **nota ponderada vai de 8,65
   para cerca de 8,8**.
+
+## Contexto internacional (2) — 17/10/2026
+
+- Novo parágrafo "Petrolina entre os semiáridos" na Discussão, comparando com o Sahel (Lebel e Ali
+  2009; Nicholson 2013; Dong e Sutton 2015), o sudoeste da América do Norte (Williams et al. 2020,
+  2022) e o sudeste da Austrália (van Dijk et al. 2013). As referências foram conferidas no
+  Crossref, e as afirmações vêm dos resumos. Não encontrei magnitude verificável da queda no Sahel,
+  então o texto não cita porcentagem para ela.
+- Três lições: recuperação parcial depois de uma década seca, como no Sahel; sensibilidade da
+  tendência ao período quando a seca cai no fim da série; e período de retorno sob não
+  estacionariedade (Milly et al. 2008; Salas e Obeysekera 2014). Uma frase nos Métodos esclarece
+  que 1/pₜ é o período de retorno do clima do ano t, e não o tempo médio de espera.
+- Com isso, os três pedidos previstos para uma revista internacional (1a, 1b e 2) estão atendidos.
+  O artigo tem 26 p.; para submissão, ainda será preciso encurtar.
