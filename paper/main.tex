@@ -68,8 +68,8 @@ por década), mas sua significância depende da década de 2010: com dados só a
 \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média de \UltimoAnoNS{}, ambos por média de Akaike
 entre distribuições candidatas. Nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
 \TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos, e uma análise regional com as
-\NRegEstacoes{} estações dá \TRegEst{} e \TRegNS{} anos. Esses intervalos largos fazem parte do resultado: com uma
-estação e cerca de meio século de anos válidos, a frequência de anos extremos só pode ser
+\NRegEstacoes{} estações dá \TRegEst{} e \TRegNS{} anos. Esses intervalos largos fazem parte do resultado: mesmo
+juntando estações vizinhas, cujos anos secos coincidem, a frequência de anos extremos só pode ser
 conhecida em ordem de grandeza, e os dados não separam a persistência de anos secos da tendência
 nem detectam a influência do ENSO.
 \end{abstract}
@@ -99,8 +99,8 @@ under a stationary climate and \TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSM
 the mean of \UltimoAnoNS{}, both Akaike-weighted averages over candidate distributions; at the
 \NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years,
 and a regional analysis of the \NRegEstacoes{} stations gives \TRegEst{} and \TRegNS{} years. These
-wide intervals are part of the result: with one station and about half a century of valid years,
-the frequency of extreme years can only be known to an order of magnitude, and the data cannot
+wide intervals are part of the result: even pooling neighbouring stations, whose dry years
+coincide, the frequency of extreme years can only be known to an order of magnitude, and the data cannot
 separate persistence of dry years from the trend nor detect an ENSO influence.
 \end{abstract}
 \end{otherlanguage}
@@ -132,9 +132,11 @@ por definição, e ainda esbarra em lacunas, possíveis inomogeneidades instrume
 estacionariedade. Por isso o trabalho está organizado do resultado mais firme para o mais
 incerto. Primeiro, caracterizamos as mudanças no regime de chuva e de temperatura e testamos se
 elas são climáticas ou instrumentais, comparando a série longa da estação convencional do INMET
-em Petrolina com a estação automática do mesmo sítio e com estações vizinhas. Depois, usamos
+em Petrolina com a estação automática do mesmo sítio, com estações vizinhas e com pluviômetros
+independentes da ANA. Depois, usamos
 essas mudanças para avaliar a frequência de anos muito secos, com modelos estacionários e não
-estacionários, frequentistas e bayesianos, e mostramos quanta incerteza resta.
+estacionários, frequentistas e bayesianos, na estação e numa análise regional com os
+pluviômetros vizinhos, e mostramos quanta incerteza resta.
 
 As perguntas são:
 \begin{itemize}
@@ -147,8 +149,8 @@ As perguntas são:
 A numeração segue a ordem do projeto original, mas a P2 é a base da P1: o período de retorno
 não estacionário só faz sentido se a tendência da chuva for real. Adiantamos que a P2 tem
 resposta clara, enquanto a P1 só pode ser respondida em ordem de grandeza. Tratamos essa
-incerteza como um resultado, e não como uma falha a esconder: ela delimita o que uma única
-estação consegue dizer sobre anos extremos.
+incerteza como um resultado, e não como uma falha a esconder: ela delimita o que uma estação, e mesmo
+um conjunto de estações vizinhas, consegue dizer sobre anos extremos.
 
 % ============================================================================= área
 \section{Área de estudo}\label{sec:area}
@@ -218,18 +220,11 @@ ausência depende do tempo e não do valor medido.
   \label{fig:ausencias}
 \end{figure}
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{figuras/fig12_padroes_ausencia.pdf}
-  \caption{Padrões de ausência conjunta na escala diária: cada linha é uma combinação de
-  variáveis ausentes no mesmo dia, e a barra é a fração de dias com aquele padrão.}
-  \label{fig:padroes}
-\end{figure}
-
 \paragraph{A307 \texorpdfstring{$\times$}{x} \Est.}
 Nos dias em que as duas estações têm registro, a razão anual entre os totais de chuva
 (A307/\Est) tem média \RazaoChuvaMedia{} e varia de \RazaoChuvaMin{} a \RazaoChuvaMax{}, sem
-quebra detectável (SNHT, $p$\,\PSnhtChuva; Pettitt, $p$\,\PPettittChuva). O valor mínimo,
+quebra detectável pelo SNHT \parencite{alexandersson1986} ($p$\,\PSnhtChuva) nem pelo Pettitt
+($p$\,\PPettittChuva). O valor mínimo,
 \RazaoChuvaDozeTreze{}, ocorre justamente em 2012/13: a A307 registrou bem menos chuva que
 o pluviômetro convencional naquele ano. Por isso a chuva do artigo vem só da \Est{}: um
 único instrumento, sem preenchimento entre fontes. Na temperatura, a diferença média
@@ -583,7 +578,7 @@ retorno não estacionário em \UltimoAnoNS{} é menor que o estacionário: de \T
 anos passa a \TNSAnaMin{}--\TNSAnaMax{} (mediana \TNSAnaMediana{}), contra \TMediaAkaikeB{} e
 \TNSMediaUlt{} anos na \Est{}. Com o 2012/13 do próprio posto como limiar, onde ele é válido
 (\NAnaProprio{} postos), o padrão se repete. Os intervalos são tão largos quanto os da \Est{}, mas
-a direção é a mesma em todos os postos.
+a direção é a mesma em todos os postos (\cref{fig:retestacoes}).
 
 Os postos têm também os anos de 2021/22 a \UltimoAnoAna{}, que a \Est{} não tem válidos, e esses
 anos são chuvosos. Com eles, as tendências dos postos caem de uma mediana de
@@ -638,6 +633,15 @@ reduz a incerteza.
     \bottomrule
   \end{tabular}
 \end{table}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/fig13_retorno_estacoes.pdf}
+  \caption{Período de retorno de um ano tão seco quanto 2012/13 em cada estação (limiar relativo
+  nos postos da ANA) e na análise regional, sob estacionariedade (vazio) e com a média de
+  \UltimoAnoNS{} (cheio). Barras: IC de 95\,\% por bootstrap dos anos.}
+  \label{fig:retestacoes}
+\end{figure}
 
 Os modelos bayesianos, todos Gamma, convergiram ($\hat R \le \RhatMaxNS$; tamanho efetivo de
 amostra $\ge \ESSMin$). A probabilidade preditiva de um mínimo simulado ser menor que o observado
@@ -741,15 +745,6 @@ que é o que permite separar tendência de variabilidade.
   porque a normal admite valores negativos; só a parte em torno dos limiares do texto é
   interpretável. Os intervalos estão na \cref{tab:retorno}.}
   \label{fig:retorno}
-\end{figure}
-
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{figuras/fig07_posterior_T.pdf}
-  \caption{Sensibilidade: posterior do período de retorno de E1 sob os modelos Gamma
-  bayesianos estacionário e não estacionário (cenário de 2025). Tracejado: medianas. A média entre candidatas
-  (\cref{tab:retorno}) dá valores menores que a Gamma.}
-  \label{fig:posterior}
 \end{figure}
 
 A \cref{tab:prob} traduz $T$ em probabilidade de pelo menos um ano igual ou mais seco que
@@ -983,14 +978,6 @@ aquecimento em toda a distribuição. A Tmín subiu \QRTminQumzero{}, \QRTminQci
 \QRTmaxQcincozero{} e \QRTmaxQnovezero{}~°C. Os intervalos se sobrepõem, então não há evidência
 clara de aquecimento desigual entre os quantis; todos excluem zero.
 
-\begin{figure}[htbp]
-  \centering
-  \includegraphics[width=\textwidth]{figuras/fig11_quantilica.pdf}
-  \caption{Tendência por quantil da temperatura diária (regressão quantílica com controle
-  sazonal; IC de 95\,\% por bootstrap em blocos anuais).}
-  \label{fig:quant}
-\end{figure}
-
 % ============================================================================= discussão
 \section{Discussão}\label{sec:discussao}
 
@@ -1067,7 +1054,8 @@ por \textcite{marengo2017} e \textcite{cunha2019}. Em Petrolina, ela corresponde
 anos hidrológicos de 2011/12 a 2016/17: os três anos mais secos desde 1963 caem nesse período, e
 o evento de SPI-12 que inclui 2012/13 é o mais severo do registro. A tendência ajuda a entender
 essa sequência. Sob estacionariedade, um ano como 2012/13 teria período de retorno de algumas
-décadas, conforme a distribuição; com a média recente, passa à ordem de uma década. Os anos secos consecutivos também são compatíveis com a queda da média sozinha, sem
+décadas, conforme a distribuição; com a média recente, passa a uma ou duas décadas, na \Est{}, nos pluviômetros da ANA e na
+análise regional. Os anos secos consecutivos também são compatíveis com a queda da média sozinha, sem
 persistência adicional de um ano para o outro.
 
 \paragraph{O que os dados não conseguem dizer.} Esses números de período de retorno são ordens
@@ -1079,16 +1067,18 @@ com ela relaxada, as quatro famílias dão de \TNSVarMin{} a \TNSVarMax{} anos. 
 Akaike incorpora essa incerteza, mas só entre as candidatas consideradas. Com uma estação, não é possível separar persistência de tendência. As correlações com o
 ENSO e com o gradiente do Atlântico têm o sinal esperado, não são significativas e não dependem da
 tendência. Isso não contradiz o papel conhecido desses modos \parencite{hastenrath1977,moura1981}:
-reflete o tamanho da amostra, com \NFaseNino{} a \NFaseNeutro{} anos por fase do ENSO. Responder
-a essas perguntas com mais poder exige mais estações ou dados em grade, e não modelos mais
-complexos aplicados à mesma série.
+reflete o tamanho da amostra, com \NFaseNino{} a \NFaseNeutro{} anos por fase do ENSO. A análise
+regional mostra que juntar estações vizinhas pouco ajuda, porque elas secam nos mesmos anos.
+Responder a essas perguntas com mais poder exige estações mais distantes, séries mais longas (por
+exemplo, reconstruções) ou dados em grade, e não modelos mais complexos aplicados aos mesmos
+anos.
 
 % ============================================================================= limitações
 \section{Limitações}\label{sec:limitacoes}
 
 \begin{enumerate}
   \item \textbf{Tamanho da amostra.} Com \NanosValidos{} anos válidos, os intervalos para $T$
-  abrangem uma ordem de grandeza. Para o evento plurianual E3 há um único evento dessa magnitude.
+  abrangem uma ordem de grandeza, e a análise regional os estreita pouco. Para o evento plurianual E3 há um único evento dessa magnitude.
   \item \textbf{Seleção do evento.} 2012/13 foi escolhido por ser extremo e está na amostra de
   ajuste. $T$ descreve a frequência de anos abaixo do limiar, e não a raridade daquele ano em
   particular.
@@ -1168,6 +1158,42 @@ complexos aplicados à mesma série.
 \end{enumerate}
 
 % ============================================================================= disponibilidade
+\clearpage
+\appendix
+\renewcommand{\thefigure}{A\arabic{figure}}
+\setcounter{figure}{0}
+\section{Figuras complementares}\label{sec:apendice}
+
+Figuras de apoio citadas no texto: padrões de ausência conjunta (\cref{sec:dados}), a posterior
+da Gamma bayesiana, usada como sensibilidade (\cref{sec:resultados}), e a regressão quantílica
+da temperatura.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/fig12_padroes_ausencia.pdf}
+  \caption{Padrões de ausência conjunta na escala diária: cada linha é uma combinação de
+  variáveis ausentes no mesmo dia, e a barra é a fração de dias com aquele padrão.}
+  \label{fig:padroes}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/fig07_posterior_T.pdf}
+  \caption{Sensibilidade: posterior do período de retorno de E1 sob os modelos Gamma
+  bayesianos estacionário e não estacionário (cenário de 2025). Tracejado: medianas. A média entre candidatas
+  (\cref{tab:retorno}) dá valores menores que a Gamma.}
+  \label{fig:posterior}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{figuras/fig11_quantilica.pdf}
+  \caption{Tendência por quantil da temperatura diária (regressão quantílica com controle
+  sazonal; IC de 95\,\% por bootstrap em blocos anuais).}
+  \label{fig:quant}
+\end{figure}
+
+\clearpage
 \section*{Disponibilidade de dados e código}
 Os dados brutos são públicos (INMET/BDMEP, normais do INMET, ANA/Hidroweb e NOAA PSL); a chuva
 dos postos da ANA é baixada por \texttt{scripts/baixa\_ana.jl}, e as normais do INMET, por

@@ -2,8 +2,9 @@
 
 Artigo estatístico reprodutível (LaTeX + Julia) sobre a recorrência de anos secos e as
 mudanças no regime meteorológico de Petrolina, no semiárido de Pernambuco, a partir da
-estação convencional do INMET 82983, validada contra a estação automática A307 e contra
-estações convencionais vizinhas.
+estação convencional do INMET 82983, validada contra a estação automática A307, estações
+convencionais vizinhas, pluviômetros independentes da ANA e as normais oficiais do INMET, com
+uma análise regional de frequência (índice de cheia com tendência) para o período de retorno.
 
 **Autor:** Dante de Souza Bertuzzi (pesquisador independente) ·
 ORCID [0009-0007-5223-2814](https://orcid.org/0009-0007-5223-2814)
@@ -35,9 +36,9 @@ execução.
 ### Verificação independente
 
 `scripts/verifica.py` reimplementa os cálculos centrais em Python (SciPy, pymannkendall) a partir
-dos dados brutos, sem usar o código Julia, e compara 34 números com as macros do artigo
+dos dados brutos, sem usar o código Julia, e compara 70 números com as macros do artigo
 (dados, ajustes de distribuição, período de retorno, tendências, modelo não estacionário, SPI,
-Markov, teleconexão e referência regional). Também confere a consistência interna das macros.
+Markov, teleconexão, referência regional, anos chuvosos recentes e pluviômetros da ANA). Também confere a consistência interna das macros.
 
 ```bash
 python3 -m venv .venv-verif

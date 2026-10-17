@@ -358,11 +358,53 @@ function fig_padroes(P)
     salva_pfig(fig, "fig12_padroes_ausencia")
 end
 
+# ----------------------------------------------------------------------------- 13. T por estação e regional
+"""
+Período de retorno de E1 por estação (82983 e postos da ANA, limiar relativo) e na
+análise regional: estacionário (vazio) e não estacionário no último ano válido da
+82983 (cheio), com IC de 95 % por bootstrap.
+"""
+function fig_retorno_estacoes(P)
+    ic(ps) = (1 / quantile(ps, 0.975), 1 / quantile(ps, 0.025))
+    nomes = ["82983 (INMET)"]
+    est = [(1 / P.R.p_med, ic(P.R.pm)...)]
+    ns = [(1 / P.N.pns_ult, ic(P.N.pbm[:, 1])...)]
+    for r in eachrow(P.AR)
+        push!(nomes, r.posto)
+        push!(est, (r.T_est, r.T_est_inf, r.T_est_sup)); push!(ns, (r.T_ns, r.T_ns_inf, r.T_ns_sup))
+    end
+    rg = P.RG
+    push!(nomes, "Regional ($(length(nomes)) estações)")
+    push!(est, (1 / Base.invokelatest(rg.me.p_em, P.E.x1213, 0.0), ic(rg.boot.est)...))   # invokelatest: closures vindas do cache
+    ult = maximum(P.E.v.ano_hidro); m = mean(P.E.v.ano_hidro)
+    push!(ns, (1 / Base.invokelatest(rg.mn.p_em, P.E.x1213, (ult - m) / 10), ic(rg.boot.ns)...))
+    n = length(nomes)
+    fig = figura(215)
+    ax = Axis(fig[1, 1]; xscale = log10, yticks = (1:n, nomes), yreversed = true,
+              xlabel = "Período de retorno T (anos, escala log) de um ano tão seco quanto 2012/13",
+              xticks = [2, 5, 10, 20, 50, 100, 200, 500], xtickformat = v -> fmt_br.(v; d = 0),
+              ygridvisible = false, xgridvisible = true, xgridcolor = (COR_CINZA, 0.25))
+    for (i, (e, s)) in enumerate(zip(est, ns))
+        rangebars!(ax, [i - 0.15], [e[2]], [e[3]]; direction = :x, color = COR_CINZA, linewidth = 1.2, whiskerwidth = 4)
+        scatter!(ax, [e[1]], [i - 0.15]; color = :white, strokecolor = COR_CINZA, strokewidth = 1.2, markersize = 7)
+        rangebars!(ax, [i + 0.15], [s[2]], [s[3]]; direction = :x, color = COR_LARANJA, linewidth = 1.2, whiskerwidth = 4)
+        scatter!(ax, [s[1]], [i + 0.15]; color = COR_LARANJA, markersize = 7)
+    end
+    hlines!(ax, [n - 0.5]; color = COR_TEXTO2, linewidth = 0.5, linestyle = :dot)
+    xlims!(ax, 2, 700)
+    elems = [MarkerElement(color = :white, strokecolor = COR_CINZA, strokewidth = 1.2, marker = :circle, markersize = 7),
+             MarkerElement(color = COR_LARANJA, marker = :circle, markersize = 7)]
+    Legend(fig[2, 1], elems, ["estacionário", "não estacionário, $(rotulo_hidro(ult))"]; orientation = :horizontal,
+           framevisible = false, labelsize = 7, tellheight = true)
+    rowgap!(fig.layout, 1, 0); rowsize!(fig.layout, 2, Fixed(14))
+    salva_pfig(fig, "fig13_retorno_estacoes")
+end
+
 function gera_figuras_paper(P)
     titulo("Figuras do artigo")
     set_theme!(tema_artigo())
     for f in (fig_area, fig_ausencias, fig_climatologia, fig_chuva_anual, fig_spi_spei, fig_retorno, fig_posterior,
-              fig_markov, fig_tendencias, fig_estacao, fig_quantilica, fig_padroes)
+              fig_markov, fig_tendencias, fig_estacao, fig_quantilica, fig_padroes, fig_retorno_estacoes)
         try
             f(P)
         catch e

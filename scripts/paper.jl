@@ -240,7 +240,7 @@ function bloco_retorno(L, E)
         end
         out[rot] = (perfil = pr, boot = bs, resumo = rb)
     end
-    return (cmp = cmp, n = n, out = out)
+    return (cmp = cmp, n = n, out = out, p_med = p_med, pm = pm)
 end
 
 # ============================================================================= P1: bayes
@@ -523,7 +523,8 @@ function bloco_nao_estacionario(L, E, V)
     salva_ptab(DataFrame(ano = collect(anos), T_local = [1 / nt.p_em(E.x1213, tc(a)) for a in anos],
                          T_regional = [isnothing(nf) ? missing : 1 / nf.p_em(E.x1213, tc(a)) for a in anos],
                          T_bayes_med = [median(1 ./ [pdraw(i, a) for i in 1:20:nd]) for a in anos]), "periodo_retorno_no_tempo")
-    return (tend = tend, tab = tab, oni = oni, nt = nt, nf = nf, po = po, cen = tcen, tT = tT, ma = ma)
+    return (tend = tend, tab = tab, oni = oni, nt = nt, nf = nf, po = po, cen = tcen, tT = tT, ma = ma,
+            pbm = pbm, pns_ult = ma.p_em(E.x1213, tc(ult)))
 end
 
 # ============================================================================= P1: validação fora da amostra

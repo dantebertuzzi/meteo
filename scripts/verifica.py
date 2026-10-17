@@ -268,6 +268,27 @@ for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos")):
     t_ = stats.theilslopes([va[a_] for a_ in com_], com_)
     compara(f"Sen {k} nos anos comuns", 10 * t_.slope, "SenAna" + k, tol_abs=0.6)
 
+# ---------------------------------------------------------------- 7c. anos chuvosos recentes e postos desde 1963/64
+Hr = H[((H.fca <= 0.075) | (H.ah == 2022)) & (H.tot > 0)].sort_values("ah")
+compara("Sen chuva com 2021–23 (FCA ≤ 7,5 % + 2022/23)", 10 * stats.theilslopes(Hr.tot.values, Hr.ah.values).slope, "SenChuvaRecentes", tol_abs=0.6)
+def media_aic_T(xs, lim):
+    fs = {"Gamma": stats.gamma(*stats.gamma.fit(xs, floc=0)), "Weibull": stats.weibull_min(*stats.weibull_min.fit(xs, floc=0)),
+          "LogNormal": stats.lognorm(*stats.lognorm.fit(xs, floc=0)), "Normal": stats.norm(*stats.norm.fit(xs))}
+    ai = {k_: 4 - 2 * np.sum(f_.logpdf(xs)) for k_, f_ in fs.items()}; am = min(ai.values())
+    ww = {k_: math.exp(-(v_ - am) / 2) for k_, v_ in ai.items()}; sw = sum(ww.values())
+    return 1 / sum(ww[k_] / sw * fs[k_].cdf(lim) for k_ in fs)
+for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos"), ("840015", "LagoaGrande")):
+    da = pd.read_csv(f"{RAIZ}/data/raw/ana/ana_{cod}.csv", parse_dates=["data"])
+    va = {a_: v_ for a_, v_ in hidro_validos(da[["data", "prec"]]).items() if a_ >= int(anos.min())}
+    aa = np.array(sorted(va)); yy = np.array([va[a_] for a_ in aa])
+    compara(f"Sen {k} desde 1963/64 (série toda)", 10 * stats.theilslopes(yy, aa).slope, "SenAnaTodos" + k, tol_abs=0.6)
+    m_ = aa <= int(anos.max())
+    compara(f"Sen {k} desde 1963/64 até 2020/21", 10 * stats.theilslopes(yy[m_], aa[m_]).slope, "SenAnaAteUlt" + k, tol_abs=0.6)
+    com_ = [a_ for a_ in aa if a_ in cand]
+    lim = x0 * np.mean([va[a_] for a_ in com_]) / np.mean([cand[a_] for a_ in com_])
+    compara(f"limiar relativo {k} (mm)", lim, "LimiarAna" + k, tol_abs=0.6)
+    compara(f"T estacionário {k} (média AIC)", media_aic_T(yy, lim), "TEstAna" + k, tol_rel=0.05)
+
 viz = {}
 for f in glob.glob(f"{RAIZ}/data/raw/bdmep/dados_8*_D_*.csv"):
     cod = os.path.basename(f).split("_")[1]
