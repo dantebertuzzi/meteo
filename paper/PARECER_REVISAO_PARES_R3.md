@@ -30,3 +30,14 @@ desses anos.
 - A climatologia de Bebedouro (Teixeira 2010) indica março como mês mais chuvoso em 1963–2009,
   e a 82983 indica janeiro em 1991–2020; períodos diferentes, sem contradição, mas um revisor pode
   perguntar.
+
+## Atualização — 17/10/2026
+
+- **Normais oficiais do INMET** (portal de volta; exige user-agent de navegador): a climatologia
+  1991–2020 calculada reproduz a normal oficial (419 mm; temperaturas mensais com diferença ≤ 0,1 °C).
+  As normais anteriores registram a mesma queda (577 mm em 1961–1990, 483 mm em 1981–2010). Novo
+  parágrafo "Normais oficiais" em Dados; a limitação "Linha de base externa" foi reescrita.
+  Dados em `data/raw/inmet_normais/` via `scripts/extrai_normais_inmet.py`.
+- **Mês mais chuvoso:** na normal oficial 1991–2020, janeiro (83,5 mm) e março (83,6 mm) empatam;
+  em 1961–1990 março se destacava (136 mm), como em Bebedouro. O texto deixa de afirmar "janeiro".
+- **Resumo** reduzido de ~380 para ~245 palavras (PT e EN), agora citando as normais oficiais.

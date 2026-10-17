@@ -835,8 +835,26 @@ function bloco_p2_sazonalidade(L)
     end
     mostra(clim; titulo = "Climatologia mensal da 82983 (meses válidos)")
     salva_ptab(clim, "climatologia_mensal")
-    registra!("MesMaisChuvoso", ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")[argmax(clim.prec_9120)])
+    MESES = ("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro")
+    registra!("MesMaisChuvoso", MESES[argmax(clim.prec_9120)])
     registra!("ChuvaMarNormal", clim.prec_9120[3]; dig = 0)
+
+    # normais oficiais do INMET (scripts/extrai_normais_inmet.py) × climatologia calculada
+    no = CSV.read(joinpath(RAIZ, "data", "raw", "inmet_normais", "normais_82983.csv"), DataFrame)
+    of(p, v) = (g = no[(no.periodo .== p) .& (no.variavel .== v), :]; (mensal = g.valor[sortperm(g.mes)][2:13], anual = only(g.valor[g.mes .== 0])))
+    p91, x91, n91 = of("1991-2020", "prec"), of("1991-2020", "tmax"), of("1991-2020", "tmin")
+    registra!("NormalOficialChuva", p91.anual; dig = 0)
+    registra!("NormalOficialChuvaSeisUm", of("1961-1990", "prec").anual; dig = 0)
+    registra!("NormalOficialChuvaOitoUm", of("1981-2010", "prec").anual; dig = 0)
+    dp, ip = findmax(abs.(clim.prec_9120 .- p91.mensal))
+    registra!("DifNormalChuvaMensalMax", dp; dig = 1); registra!("MesDifNormalChuva", MESES[ip])
+    registra!("DifNormalTempMax", maximum(abs.(vcat(clim.tmax_9120 .- x91.mensal, clim.tmin_9120 .- n91.mensal))); dig = 2)
+    registra!("ChuvaJanNormal", clim.prec_9120[1]; dig = 0)
+    registra!("ChuvaJanNormalOficial", p91.mensal[1]; dig = 1); registra!("ChuvaMarNormalOficial", p91.mensal[3]; dig = 1)
+    registra!("ChuvaMarSeisUmOficial", of("1961-1990", "prec").mensal[3]; dig = 0)
+    registra!("TmaxNormalOficialSeisUm", of("1961-1990", "tmax").anual; dig = 1)
+    t7190 = dm[1971 .<= dm.ano .<= 1990, :]
+    registra!("TmaxSetentaUmNoventa", mean(mean(skipmissing(g.tmax)) for g in groupby(t7190, :mes)); dig = 1)
     return (s = s, tend = tend, clim = clim)
 end
 
