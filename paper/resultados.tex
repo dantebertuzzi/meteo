@@ -1,11 +1,18 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-10-17 12:05 | 1119 macros
+% 2026-11-20 21:27 | 1174 macros
 \newcommand{\AICChuvaDegrau}{\num{481.4}}
+\newcommand{\AICChuvaDegrauRec}{\num{526.9}}
 \newcommand{\AICChuvaLinear}{\num{476.1}}
+\newcommand{\AICChuvaLinearRec}{\num{526.5}}
+\newcommand{\AICEpisodio}{\num{486.4}}
+\newcommand{\AICEpisodioRec}{\num{523.7}}
 \newcommand{\AnoCorteValidacao}{2005/06}
 \newcommand{\AnoDegrauChuva}{2009/10}
+\newcommand{\AnoDegrauChuvaRec}{1981/82}
 \newcommand{\AnoMinimo}{2016/17}
 \newcommand{\AnosCobertosSPI}{\num{41}}
+\newcommand{\AnosEpisodio}{2011/12--2017/18}
+\newcommand{\AnosEpisodioRec}{1981/82--2020/21}
 \newcommand{\AnosFCASete}{1981/82, 2021/22, 2023/24}
 \newcommand{\AnosSemEstacao}{1975/76, 1992/93, 1997/98, 2011/12, 2012/13, 2015/16, 2016/17}
 \newcommand{\BTmaxDegrau}{\num{0.23}}
@@ -121,6 +128,12 @@
 \newcommand{\MDTVento}{\num{0.08}}
 \newcommand{\MediaChuvaAteDoisMilNove}{\num{536}}
 \newcommand{\MediaChuvaValidos}{\num{481}}
+\newcommand{\MediaNormalUlt}{\num{343}}
+\newcommand{\MediaNormalUltICinf}{\num{280}}
+\newcommand{\MediaNormalUltICsup}{\num{410}}
+\newcommand{\MedianaModeloVinteDois}{\num{330}}
+\newcommand{\MedianaModeloVinteTres}{\num{326}}
+\newcommand{\MedianaModeloVinteUm}{\num{334}}
 \newcommand{\MelhorAIC}{Weibull}
 \newcommand{\MelhorAICNS}{normal}
 \newcommand{\MelhorAICNSForma}{fixa}
@@ -142,8 +155,12 @@
 \newcommand{\NAnaTodosNegSig}{\num{3}}
 \newcommand{\NAnaTodosPSig}{\num{1}}
 \newcommand{\NBootAnaRetorno}{\num{1000}}
+\newcommand{\NBootEstMedia}{\num{2000}}
+\newcommand{\NBootGammaDozeTreze}{\num{10000}}
+\newcommand{\NBootGammaMinimo}{\num{10000}}
 \newcommand{\NBootNSMedia}{\num{2000}}
 \newcommand{\NBootReg}{\num{400}}
+\newcommand{\NBootValid}{\num{500}}
 \newcommand{\NCDD}{\num{46}}
 \newcommand{\NCWD}{\num{47}}
 \newcommand{\NChuvaAteDezOnze}{\num{37}}
@@ -234,6 +251,9 @@
 \newcommand{\NvizinhasTendNeg}{\num{4}}
 \newcommand{\NvizinhasTendSig}{\num{0}}
 \newcommand{\NvizinhasUsadas}{\num{4}}
+\newcommand{\ONIRecVinteDois}{\num{-0.4}}
+\newcommand{\ONIRecVinteTres}{\num{1.6}}
+\newcommand{\ONIRecVinteUm}{\num{-0.9}}
 \newcommand{\ORSemEstacao}{\num{1.47}}
 \newcommand{\ORSemEstacaoICinf}{\num{0.83}}
 \newcommand{\ORSemEstacaoICsup}{\num{2.60}}
@@ -249,6 +269,14 @@
 \newcommand{\PAntesDepoisAnaLagoaBoiVal}{\num{0.53}}
 \newcommand{\PAntesDepoisAnaLagoaGrande}{\ensuremath{=}\,\num{0.47}}
 \newcommand{\PAntesDepoisAnaLagoaGrandeVal}{\num{0.47}}
+\newcommand{\PBootDegrau}{\ensuremath{=}\,\num{0.84}}
+\newcommand{\PBootDegrauRec}{\ensuremath{=}\,\num{0.66}}
+\newcommand{\PBootDegrauRecVal}{\num{0.66}}
+\newcommand{\PBootDegrauVal}{\num{0.84}}
+\newcommand{\PBootEpisodio}{\ensuremath{=}\,\num{0.60}}
+\newcommand{\PBootEpisodioRec}{\ensuremath{=}\,\num{0.12}}
+\newcommand{\PBootEpisodioRecVal}{\num{0.12}}
+\newcommand{\PBootEpisodioVal}{\num{0.60}}
 \newcommand{\PDozeTreze}{\num{0.012}}
 \newcommand{\PFisher}{\ensuremath{=}\,\num{0.31}}
 \newcommand{\PFisherVal}{\num{0.31}}
@@ -338,6 +366,26 @@
 \newcommand{\PPettittTmaxVal}{\num{0.12}}
 \newcommand{\PPettittTmin}{\ensuremath{=}\,\num{0.007}}
 \newcommand{\PPettittTminVal}{\num{0.007}}
+\newcommand{\PPredObsEumEstGamma}{\ensuremath{=}\,\num{0.001}}
+\newcommand{\PPredObsEumEstGammaVal}{\num{0.001}}
+\newcommand{\PPredObsEumEstMedia}{\ensuremath{=}\,\num{0.007}}
+\newcommand{\PPredObsEumEstMediaVal}{\num{0.007}}
+\newcommand{\PPredObsEumNSGamma}{\ensuremath{=}\,\num{0.013}}
+\newcommand{\PPredObsEumNSGammaVal}{\num{0.013}}
+\newcommand{\PPredObsEumNSMedia}{\ensuremath{=}\,\num{0.19}}
+\newcommand{\PPredObsEumNSMediaVal}{\num{0.19}}
+\newcommand{\PPredObsEumNSNormal}{\ensuremath{=}\,\num{0.23}}
+\newcommand{\PPredObsEumNSNormalVal}{\num{0.23}}
+\newcommand{\PPredObsPdezEstGamma}{\ensuremath{=}\,\num{0.007}}
+\newcommand{\PPredObsPdezEstGammaVal}{\num{0.007}}
+\newcommand{\PPredObsPdezEstMedia}{\ensuremath{=}\,\num{0.006}}
+\newcommand{\PPredObsPdezEstMediaVal}{\num{0.006}}
+\newcommand{\PPredObsPdezNSGamma}{\ensuremath{=}\,\num{0.38}}
+\newcommand{\PPredObsPdezNSGammaVal}{\num{0.38}}
+\newcommand{\PPredObsPdezNSMedia}{\ensuremath{=}\,\num{0.42}}
+\newcommand{\PPredObsPdezNSMediaVal}{\num{0.42}}
+\newcommand{\PPredObsPdezNSNormal}{\ensuremath{=}\,\num{0.37}}
+\newcommand{\PPredObsPdezNSNormalVal}{\num{0.37}}
 \newcommand{\PPreditiva}{\num{0.017}}
 \newcommand{\PQAnaCavalos}{\ensuremath{=}\,\num{0.15}}
 \newcommand{\PQAnaCavalosVal}{\num{0.15}}
@@ -349,6 +397,10 @@
 \newcommand{\PQAnaLagoaBoiVal}{\num{0.51}}
 \newcommand{\PQAnaLagoaGrande}{\ensuremath{=}\,\num{0.034}}
 \newcommand{\PQAnaLagoaGrandeVal}{\num{0.034}}
+\newcommand{\PRecConjuntaInv}{\num{70000}}
+\newcommand{\PRecVinteDois}{\num{3.7}}
+\newcommand{\PRecVinteTres}{\num{2.9}}
+\newcommand{\PRecVinteUm}{\num{1.3}}
 \newcommand{\PSS}{\num{0.50}}
 \newcommand{\PSSICinf}{\num{0.27}}
 \newcommand{\PSSICsup}{\num{0.73}}
@@ -1066,10 +1118,13 @@
 \newcommand{\TNSAnaUltPostoJunco}{\num{29}}
 \newcommand{\TNSAnaUltPostoLagoaBoi}{\num{11}}
 \newcommand{\TNSAnaUltPostoLagoaGrande}{\num{20}}
+\newcommand{\TNSFaixaMax}{\num{15}}
+\newcommand{\TNSFaixaMin}{\num{11}}
 \newcommand{\TNSGamma}{\num{36}}
 \newcommand{\TNSGammaVar}{\num{11}}
 \newcommand{\TNSLogNormal}{\num{36}}
 \newcommand{\TNSLogNormalVar}{\num{12}}
+\newcommand{\TNSMediaDecada}{\num{15}}
 \newcommand{\TNSMediaDoisMilVinteCinco}{\num{9.0}}
 \newcommand{\TNSMediaDoisMilVinteCincoICinf}{\num{3.9}}
 \newcommand{\TNSMediaDoisMilVinteCincoICsup}{\num{64}}

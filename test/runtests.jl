@@ -239,3 +239,24 @@ end
     me = regional_media_akaike(y, xs, s; nsites = 3, estacionario = true)
     @test me.p_em(300.0, -2.0) ≈ me.p_em(300.0, 2.0)
 end
+
+@testset "Forma da tendência: reta × degrau × episódio" begin
+    rng = MersenneTwister(7)
+    a = collect(1961:2020); n = length(a)
+    # série com degrau claro em 1991: o degrau vence a reta e o p sob a reta é pequeno
+    yd = [t < 1991 ? 600.0 : 400.0 for t in a] .+ 40 .* randn(rng, n)
+    fd = forma_tendencia(a, yd; B = 199)
+    @test fd.deg < fd.lin
+    @test 1989 <= fd.c_deg <= 1993
+    @test fd.p_deg < 0.05
+    # série com episódio seco 2000–2010 e recuperação: o episódio é encontrado
+    ye = [2000 <= t <= 2010 ? 300.0 : 550.0 for t in a] .+ 40 .* randn(rng, n)
+    fe = forma_tendencia(a, ye; B = 199)
+    @test fe.ep < fe.lin
+    @test abs(fe.c_ep[1] - 2000) <= 2 && abs(fe.c_ep[2] - 2010) <= 2
+    @test fe.p_ep < 0.05
+    # sob a reta, os p não devem ser pequenos de forma sistemática
+    yl = 700 .- 3.0 .* (a .- a[1]) .+ 60 .* randn(rng, n)
+    fl = forma_tendencia(a, yl; B = 199)
+    @test fl.p_deg > 0.01 && fl.p_ep > 0.01
+end

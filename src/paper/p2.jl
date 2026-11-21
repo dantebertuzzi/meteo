@@ -75,6 +75,8 @@ function percentil_calendario(datas, x, q; base = (1991, 2020), janela = 2)
         (ismissing(v) || !(base[1] <= year(dt) <= base[2])) && continue
         d = dayofyear(dt)
         for k in -janela:janela
+            # mod1(·, 366): nos anos não bissextos, a janela de 31/12 inclui o "dia 366", que só
+            # existe nos bissextos. O efeito nos limiares de TX90p/TN10p é desprezível.
             push!(porDia[mod1(d + k, 366)], v)
         end
     end
@@ -138,6 +140,44 @@ function tendencia_completa(t, y; nome = "", escala = 10)
     a = analise_tendencia(t, y; nome = nome, escala = escala)
     hr = mk_hamed_rao(t, y); md = tendencia_minima_detectavel(t, y)
     return merge(a, (p_hamed_rao = hr.p, fator_hr = hr.fator, mdt_decada = md.mdt_decada))
+end
+
+"""
+    forma_tendencia(a, y; B, min_dentro, min_fora)
+
+Compara três formas para a média de uma série anual, todas com erro normal e AIC:
+- reta: μₜ = β₀ + β₁·t (3 parâmetros com σ);
+- degrau: uma média antes e outra a partir do corte c (4, contando c);
+- episódio: uma média dentro de [c₁, c₂] e outra fora, antes e depois (5, contando c₁ e c₂).
+Os cortes são escolhidos nos dados, então o AIC subestima a penalidade. Por isso o p de cada
+alternativa vem de bootstrap paramétrico sob a reta: simula-se y* = Xβ̂ + σ̂ε, repete-se a busca
+dos cortes e p = (1 + #{ΔAIC* ≥ ΔAIC}) / (B + 1), com ΔAIC = AIC(reta) − AIC(alternativa).
+"""
+function forma_tendencia(a, y; B = 999, min_dentro = 5, min_fora = 3, rng = MersenneTwister(SEMENTE))
+    o = sortperm(a); a = Float64.(a[o]); y = Float64.(y[o]); n = length(y)
+    X = hcat(ones(n), a)
+    aic(rss, k) = n * log(rss / n) + 2k
+    rss2(yy, g) = sum(abs2, yy[.!g] .- mean(yy[.!g])) + sum(abs2, yy[g] .- mean(yy[g]))
+    anos = unique(a)
+    cortes = [c for c in anos if min_dentro <= count(<(c), a) <= n - min_dentro]
+    janelas = [(c1, c2) for c1 in anos for c2 in anos
+               if c2 >= c1 && count(x -> c1 <= x <= c2, a) >= min_dentro &&
+                  count(<(c1), a) >= min_fora && count(>(c2), a) >= min_fora]
+    function ajusta(yy)
+        lin = aic(sum(abs2, yy .- X * (X \ yy)), 3)
+        deg, cd = minimum((aic(rss2(yy, a .>= c), 4), c) for c in cortes)
+        ep, ce = minimum((aic(rss2(yy, c[1] .<= a .<= c[2]), 5), c) for c in janelas)
+        (lin = lin, deg = deg, c_deg = cd, ep = ep, c_ep = ce)
+    end
+    f = ajusta(y)
+    β = X \ y; σ = sqrt(sum(abs2, y .- X * β) / n)
+    nd = ne = 0
+    for _ in 1:B
+        fb = ajusta(X * β .+ σ .* randn(rng, n))
+        nd += (fb.lin - fb.deg) >= (f.lin - f.deg)
+        ne += (fb.lin - fb.ep) >= (f.lin - f.ep)
+    end
+    return merge(f, (p_deg = (1 + nd) / (B + 1), p_ep = (1 + ne) / (B + 1), n = n))
 end
 
 # ============================================================================= regressão quantílica

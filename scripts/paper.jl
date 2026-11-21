@@ -9,6 +9,7 @@ include(joinpath(@__DIR__, "..", "src", "paper", "carrega.jl"))
 
 const REF = (1991, 2020)            # período de referência (normal OMM) para SPI/SPEI
 const HORIZONTES = (5, 10, 20, 30)
+const NBOOT_VALID = 500             # réplicas do p preditivo da validação e do IC da média em 2020/21
 
 titulo(s) = println("\n", "="^length(s), "\n", s, "\n", "="^length(s))
 
@@ -198,6 +199,7 @@ function bloco_retorno(L, E)
         w = exp.(-(aic .- minimum(aic)) ./ 2); w ./= sum(w)
         push!(pm, sum(w .* [cdf(f, E.x1213) for f in fits]))
     end
+    registra!("NBootEstMedia", length(pm))                 # réplicas válidas de 2000
     # estimativa pontual = amostra completa; o bootstrap fornece só o intervalo (percentis)
     registra_ic!("TMediaAkaikeB", 1 / p_med, 1 / quantile(pm, 0.975), 1 / quantile(pm, 0.025); sig = 2)
     for nh in HORIZONTES
@@ -228,6 +230,7 @@ function bloco_retorno(L, E)
         pr = perfil_p_gamma(x, x0)
         bs = bootstrap_p(Gamma, x, x0; B = 10_000)
         rb = resumo_replicas(bs)
+        registra!("NBootGamma" * rot, length(bs))           # réplicas válidas de 10 000
         @printf("\n[%s] x₀ = %.1f mm | Gamma: p̂ = %.4f, T̂ = %.1f anos\n", rot, x0, pr.p, 1 / pr.p)
         @printf("  perfilada: p ∈ [%.4f, %.4f] → T ∈ [%.1f, %.1f]\n", pr.inf, pr.sup, 1 / pr.sup, 1 / pr.inf)
         @printf("  bootstrap: p ∈ [%.4f, %.4f] → T ∈ [%.1f, %.1f]\n", rb.p[1], rb.p[3], rb.T[1], rb.T[3])
@@ -438,6 +441,13 @@ function bloco_nao_estacionario(L, E, V)
     for r in eachrow(d75[in.(d75.ano_hidro, Ref(novos)), :])
         registra!("FCA" * nome_macro(rotulo_hidro(r.ano_hidro)), 100r.fca; dig = 1)   # FCA (%) dos anos acrescentados
     end
+    # --- faixa entre cenários para o fim da série: o último ano é o ponto de maior alavancagem da
+    #     reta, então o resultado sai como faixa, e não como um ponto em 2020/21
+    pdec = mean(ma.p_em(E.x1213, tc(a)) for a in 2011:ult)
+    registra!("TNSMediaDecada", 1 / pdec; sig = 2)
+    cenT = [1 / ma.p_em(E.x1213, tc(ult)), 1 / pdec, 1 / m75.p_em(E.x1213, u75)]
+    ismissing(b_reg) || push!(cenT, 1 / mr.p_em(E.x1213, tc(2025)))
+    registra!("TNSFaixaMin", minimum(cenT); sig = 2); registra!("TNSFaixaMax", maximum(cenT); sig = 2)
 
     # --- sensibilidade da tendência da chuva ao período: a série termina na década seca de 2010,
     #     então testam-se a remoção da seca de 2011/12–2016/17, o corte antes dela e o início em 1971
@@ -472,18 +482,24 @@ function bloco_nao_estacionario(L, E, V)
                   ic_sup = trr.sen_ic_sup, p_mk = trr.p_mk, p_tfpw = trr.p_mk_tfpw))
     mostra(tsens; titulo = "Sensibilidade da tendência da chuva anual ao período (Sen por década)")
     salva_ptab(tsens, "sensibilidade_tendencia_chuva")
-    # tendência linear × degrau único (melhor ponto de corte), ambos com erro normal, por AIC
-    aa = Float64.(v.ano_hidro); nn = length(y)
-    rss_lin = sum(abs2, residuals(lm(hcat(ones(nn), aa), y)))
-    cortes = [c for c in sort(unique(v.ano_hidro)) if 5 <= count(<(c), v.ano_hidro) <= nn - 5]
-    rss_deg, c_deg = minimum(map(cortes) do c
-        g = v.ano_hidro .>= c
-        (sum(abs2, y[.!g] .- mean(y[.!g])) + sum(abs2, y[g] .- mean(y[g])), c)
-    end)
-    # degrau: média antes, média depois e o ponto de corte (escolhido pelos dados) → 4 parâmetros com σ
-    registra!("AICChuvaLinear", nn * log(rss_lin / nn) + 2 * 3; dig = 1)
-    registra!("AICChuvaDegrau", nn * log(rss_deg / nn) + 2 * 4; dig = 1)
-    registra!("AnoDegrauChuva", rotulo_hidro(c_deg))
+    # forma da tendência: reta × degrau único × episódio seco (duas datas), com erro normal, por AIC.
+    # Os cortes são escolhidos nos dados, então o AIC subestima a penalidade: o p vem de bootstrap
+    # paramétrico sob a reta, repetindo a busca dos cortes em cada réplica.
+    ftabs = NamedTuple[]
+    for (rot, k, aa, yy) in (("critério principal", "", v.ano_hidro, y),
+                             ("FCA ≤ 7,5 % + 2022/23", "Rec", drec.ano_hidro, Float64.(drec.prec_obs)))
+        f = forma_tendencia(aa, yy)
+        registra!("AICChuvaLinear" * k, f.lin; dig = 1)
+        registra!("AICChuvaDegrau" * k, f.deg; dig = 1); registra!("AnoDegrauChuva" * k, rotulo_hidro(round(Int, f.c_deg)))
+        registra!("AICEpisodio" * k, f.ep; dig = 1)
+        registra!("AnosEpisodio" * k, rotulo_hidro(round(Int, f.c_ep[1])) * "--" * rotulo_hidro(round(Int, f.c_ep[2])))
+        registra_p!("PBootDegrau" * k, f.p_deg); registra_p!("PBootEpisodio" * k, f.p_ep)
+        push!(ftabs, (amostra = rot, n = length(yy), AIC_reta = f.lin, AIC_degrau = f.deg,
+                      corte_degrau = rotulo_hidro(round(Int, f.c_deg)), p_degrau = f.p_deg, AIC_episodio = f.ep,
+                      episodio = rotulo_hidro(round(Int, f.c_ep[1])) * "–" * rotulo_hidro(round(Int, f.c_ep[2])), p_episodio = f.p_ep))
+    end
+    mostra(DataFrame(ftabs); titulo = "Forma da tendência (AIC; p por bootstrap paramétrico sob a reta)")
+    salva_ptab(DataFrame(ftabs), "forma_tendencia_chuva")
 
     # --- probabilidade de ≥ 1 evento em n anos, por cenário
     cen = NamedTuple[]
@@ -572,9 +588,89 @@ function bloco_validacao(L, E; corte = 2005)
             push!(linhas, (limiar = rotL, x0 = x0, modelo = nome, esperado = esp, observado = obs, p_ao_menos_obs = pk))
         end
     end
+    # p preditivo: o p acima trata os parâmetros como conhecidos. Aqui eles variam por bootstrap
+    # dos anos de treino (pares ano–chuva), e o p é a média de P(N ≥ obs | θ*) entre as réplicas.
+    # O limiar P10 fica fixo no valor do treino original.
+    rngv = MersenneTwister(SEMENTE); ntr = length(ytr)
+    acum = Dict((rotL, k) => Float64[] for rotL in ("Eum", "Pdez") for (k, _) in modelos)
+    for _ in 1:NBOOT_VALID
+        i = rand(rngv, 1:ntr, ntr); yb = ytr[i]; tb = ttr[i]
+        res = try
+            (Dict(string(nameof(D)) => ajusta_mle(D, yb) for D in CANDIDATAS), ns_media_akaike(yb, tb))
+        catch
+            nothing
+        end
+        isnothing(res) && continue
+        estb, mab = res
+        aicb = Dict(k => 2length(params(d)) - 2loglikelihood(d, yb) for (k, d) in estb)
+        mb = minimum(values(aicb)); wb = Dict(k => exp(-(x - mb) / 2) for (k, x) in aicb); swb = sum(values(wb))
+        gfb = only(f for f in mab.fits if f.D === Gamma && !f.forma_var)
+        nfb = only(f for f in mab.fits if f.D === Normal && !f.forma_var)
+        pb = Dict("EstGamma" => (x0, t) -> cdf(estb["Gamma"], x0),
+                  "EstMedia" => (x0, t) -> sum(wb[k] * cdf(estb[k], x0) for k in keys(estb)) / swb,
+                  "NSGamma" => (x0, t) -> gfb.F(x0, t), "NSNormal" => (x0, t) -> nfb.F(x0, t),
+                  "NSMedia" => (x0, t) -> mab.p_em(x0, t))
+        for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10)), (k, _) in modelos
+            push!(acum[(rotL, k)], prob_ao_menos_k([pb[k](x0, t) for t in tte], count(<=(x0), yte)))
+        end
+    end
+    registra!("NBootValid", length(acum[("Pdez", "EstGamma")]))
     tab = DataFrame(linhas)
+    tab.p_preditivo = [mean(acum[(r.limiar, k)]) for (r, (k, _)) in zip(eachrow(tab), Iterators.cycle(modelos))]
+    for (rotL, k) in keys(acum)
+        registra_p!("PPredObs" * rotL * k, mean(acum[(rotL, k)]))
+    end
     mostra(tab; titulo = "Esperado × observado nos anos de teste (P = probabilidade de ≥ observado)")
     salva_ptab(tab, "validacao_fora_amostra")
+    return tab
+end
+
+# ============================================================================= P1: anos chuvosos recentes
+"""
+Os anos de 2021/22 a 2023/24 ficaram fora do ajuste pelo critério de completude. Eles são um teste
+fora da amostra *depois* do fim da série: sob a média de Akaike não estacionária ajustada até o
+último ano válido, calcula-se P(Y ≥ total observado) em cada ano. O total observado é um limite
+inferior (dias sem registro contam como zero), então essas probabilidades são limites superiores.
+"""
+function bloco_anos_recentes(L, E, N)
+    titulo("Anos chuvosos recentes, fora do ajuste, contra o modelo não estacionário")
+    v = sort(E.v, :ano_hidro); tc(a) = (a - mean(v.ano_hidro)) / 10
+    ma = N.ma
+    Fm(x, t) = sum(ma.w[j] * ma.fits[j].F(x, t) for j in eachindex(ma.fits))
+    function mediana_modelo(t)                        # bisseção de F(x) = 0,5
+        lo, hi = 0.0, 3000.0
+        for _ in 1:60
+            m = (lo + hi) / 2; Fm(m, t) < 0.5 ? (lo = m) : (hi = m)
+        end
+        (lo + hi) / 2
+    end
+    sufixo = Dict(2021 => "VinteUm", 2022 => "VinteDois", 2023 => "VinteTres")
+    linhas = NamedTuple[]
+    for a in (2021, 2022, 2023)
+        r = only(eachrow(L.dh[L.dh.ano_hidro .== a, :]))
+        x = Float64(r.prec_obs); p = 1 - Fm(x, tc(a)); med = mediana_modelo(tc(a))
+        o = get(N.oni, a, missing)
+        registra!("PRec" * sufixo[a], 100p; dig = 1); registra!("MedianaModelo" * sufixo[a], med; dig = 0)
+        ismissing(o) || registra!("ONIRec" * sufixo[a], o; dig = 1)
+        push!(linhas, (ano = rotulo_hidro(a), chuva_obs = x, dias_aus = r.dias_aus, fca = r.fca,
+                       mediana_modelo = med, p_ao_menos_obs = p, oni_nov_abr = o))
+    end
+    tab = DataFrame(linhas)
+    pj = prod(tab.p_ao_menos_obs)
+    registra!("PRecConjuntaInv", 1 / pj; sig = 1)
+    # média do modelo no último ano válido, com IC do bootstrap dos anos (normal com DP fixo, a
+    # candidata de menor AIC; serve para comparar com a normal oficial de 1991–2020)
+    nfix = only(f for f in ma.fits if f.D === Normal && !f.forma_var)
+    ult = maximum(v.ano_hidro); y = Float64.(v.prec); t = tc.(v.ano_hidro)
+    rng = MersenneTwister(SEMENTE); mb = Float64[]
+    for _ in 1:NBOOT_VALID
+        i = rand(rng, 1:length(y), length(y))
+        f = try ns_candidata(Normal, y[i], t[i]) catch; continue end
+        push!(mb, exp(f.θ[2] + f.θ[3] * tc(ult)))
+    end
+    registra_ic!("MediaNormalUlt", exp(nfix.θ[2] + nfix.θ[3] * tc(ult)), quantile(mb, 0.025), quantile(mb, 0.975); dig = 0)
+    mostra(tab; titulo = "P(Y ≥ observado) sob a média de Akaike ajustada até $(rotulo_hidro(ult))")
+    salva_ptab(tab, "anos_recentes_modelo")
     return tab
 end
 
@@ -1330,6 +1426,7 @@ function executa_paper()
     B = bloco_bayes(L, E)
     N = bloco_nao_estacionario(L, E, V)
     VF = bloco_validacao(L, E)
+    RA = bloco_anos_recentes(L, E, N)
     AN = bloco_ana(L, E)
     AR = bloco_ana_retorno(L, E, AN)
     RG = bloco_regional(L, E, AN)
@@ -1343,7 +1440,7 @@ function executa_paper()
     ST = bloco_p2_stl(L)
     T = bloco_teleconexoes(L, E, N)
     println("\nMacros: ", escreve_macros())
-    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, AN = AN, AR = AR, RG = RG, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
+    return (L = L, H = H, V = V, E = E, R = R, B = B, N = N, VF = VF, RA = RA, AN = AN, AR = AR, RG = RG, I = I, M = M, S = S, Z = Z, X = X, HT = HT, QR = QR, ST = ST, T = T)
 end
 
 using Serialization
