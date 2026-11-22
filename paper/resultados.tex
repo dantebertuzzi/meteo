@@ -1,5 +1,5 @@
 % Gerado automaticamente por scripts/paper.jl — NÃO EDITAR À MÃO.
-% 2026-11-22 10:13 | 1190 macros
+% 2026-11-22 11:15 | 1221 macros
 \newcommand{\AICChuvaDegrau}{\num{481.4}}
 \newcommand{\AICChuvaDegrauRec}{\num{526.9}}
 \newcommand{\AICChuvaLinear}{\num{476.1}}
@@ -14,6 +14,7 @@
 \newcommand{\AnosEpisodio}{2011/12--2017/18}
 \newcommand{\AnosEpisodioRec}{1981/82--2020/21}
 \newcommand{\AnosFCASete}{1981/82, 2021/22, 2023/24}
+\newcommand{\AnosRefUmaViz}{1983/84, 2010/11, 2017/18, 2018/19, 2019/20}
 \newcommand{\AnosSemEstacao}{1975/76, 1992/93, 1997/98, 2011/12, 2012/13, 2015/16, 2016/17}
 \newcommand{\BTmaxDegrau}{\num{0.23}}
 \newcommand{\BTmaxDegrauICinf}{\num{0.06}}
@@ -30,6 +31,7 @@
 \newcommand{\ChuvaMarNormalOficial}{\num{83.6}}
 \newcommand{\ChuvaMarSeisUmOficial}{\num{136}}
 \newcommand{\ChuvaMinima}{\num{134.9}}
+\newcommand{\ChuvaObsOitentaUm}{\num{281}}
 \newcommand{\ChuvaObsVinteDois}{\num{607}}
 \newcommand{\ChuvaObsVinteTres}{\num{622}}
 \newcommand{\ChuvaObsVinteUm}{\num{691}}
@@ -110,29 +112,29 @@
 \newcommand{\LimiarAnaLagoaBoi}{\num{141}}
 \newcommand{\LimiarAnaLagoaGrande}{\num{154}}
 \newcommand{\LimiarPdez}{\num{345}}
-\newcommand{\MDTCDD}{\num{12.2}}
-\newcommand{\MDTCWD}{\num{0.7}}
-\newcommand{\MDTCentroide}{\num{6.3}}
+\newcommand{\MDTCDD}{\num{14.0}}
+\newcommand{\MDTCWD}{\num{0.8}}
+\newcommand{\MDTCentroide}{\num{7.2}}
 \newcommand{\MDTConc}{\num{0.041}}
 \newcommand{\MDTDTR}{\num{0.17}}
-\newcommand{\MDTDuracao}{\num{12.1}}
-\newcommand{\MDTFim}{\num{6.0}}
-\newcommand{\MDTFracNovAbr}{\num{0.022}}
+\newcommand{\MDTDuracao}{\num{13.8}}
+\newcommand{\MDTFim}{\num{6.8}}
+\newcommand{\MDTFracNovAbr}{\num{0.025}}
 \newcommand{\MDTInicio}{\num{12.1}}
 \newcommand{\MDTRnovecincop}{\num{24}}
 \newcommand{\MDTRummm}{\num{3.3}}
 \newcommand{\MDTRxumday}{\num{7.7}}
-\newcommand{\MDTSDII}{\num{0.74}}
+\newcommand{\MDTSDII}{\num{0.85}}
 \newcommand{\MDTSI}{\num{0.045}}
-\newcommand{\MDTTNn}{\num{0.35}}
+\newcommand{\MDTTNn}{\num{0.40}}
 \newcommand{\MDTTNumzerop}{\num{3.4}}
-\newcommand{\MDTTXnovezerop}{\num{1.3}}
-\newcommand{\MDTTXx}{\num{0.25}}
-\newcommand{\MDTTmax}{\num{0.14}}
+\newcommand{\MDTTXnovezerop}{\num{1.5}}
+\newcommand{\MDTTXx}{\num{0.29}}
+\newcommand{\MDTTmax}{\num{0.16}}
 \newcommand{\MDTTmed}{\num{0.16}}
-\newcommand{\MDTTmin}{\num{0.11}}
+\newcommand{\MDTTmin}{\num{0.13}}
 \newcommand{\MDTUR}{\num{1.2}}
-\newcommand{\MDTVento}{\num{0.08}}
+\newcommand{\MDTVento}{\num{0.09}}
 \newcommand{\MediaChuvaAteDoisMilNove}{\num{536}}
 \newcommand{\MediaChuvaValidos}{\num{481}}
 \newcommand{\MediaNormalUlt}{\num{343}}
@@ -242,7 +244,10 @@
 \newcommand{\NanosFCASete}{\num{50}}
 \newcommand{\NanosHidro}{\num{65}}
 \newcommand{\NanosQ}{\num{43}}
+\newcommand{\NanosRefUmaViz}{\num{5}}
 \newcommand{\NanosSemEstacao}{\num{7}}
+\newcommand{\NanosSemRef}{\num{4}}
+\newcommand{\NanosTempComum}{\num{42}}
 \newcommand{\NanosValidos}{\num{47}}
 \newcommand{\NeventosSPI}{\num{6}}
 \newcommand{\NormalChuva}{\num{419}}
@@ -251,11 +256,13 @@
 \newcommand{\NormalOficialChuvaSeisUm}{\num{577}}
 \newcommand{\Npares}{\num{4}}
 \newcommand{\NparesQuebraSig}{\num{0}}
+\newcommand{\NparesTendSig}{\num{2}}
 \newcommand{\NquebrasTemp}{\num{2}}
 \newcommand{\NtendSig}{\num{11}}
 \newcommand{\NtendTotal}{\num{16}}
 \newcommand{\NtestesTemp}{\num{4}}
 \newcommand{\NtransicoesMarkov}{\num{43}}
+\newcommand{\NvizEncerram}{\num{4}}
 \newcommand{\NvizinhasTendNeg}{\num{4}}
 \newcommand{\NvizinhasTendSig}{\num{0}}
 \newcommand{\NvizinhasUsadas}{\num{4}}
@@ -287,6 +294,10 @@
 \newcommand{\PBootEpisodioVal}{\num{0.60}}
 \newcommand{\PDozeTreze}{\num{0.012}}
 \newcommand{\PFisher}{\ensuremath{=}\,\num{0.31}}
+\newcommand{\PFisherNinoNeutro}{\ensuremath{=}\,\num{0.055}}
+\newcommand{\PFisherNinoNeutroDet}{\ensuremath{=}\,\num{1.00}}
+\newcommand{\PFisherNinoNeutroDetVal}{\num{1.00}}
+\newcommand{\PFisherNinoNeutroVal}{\num{0.055}}
 \newcommand{\PFisherVal}{\num{0.31}}
 \newcommand{\PFormaVarGamma}{\ensuremath{=}\,\num{0.034}}
 \newcommand{\PFormaVarGammaVal}{\num{0.034}}
@@ -364,6 +375,7 @@
 \newcommand{\PObsPdezNSNormalVal}{\num{0.34}}
 \newcommand{\PPCMinEst}{\num{0.36}}
 \newcommand{\PPCMinNS}{\num{0.27}}
+\newcommand{\PParesTendMax}{\num{0.039}}
 \newcommand{\PPettittChuva}{\ensuremath{=}\,\num{0.23}}
 \newcommand{\PPettittChuvaLonga}{\ensuremath{=}\,\num{0.009}}
 \newcommand{\PPettittChuvaLongaVal}{\num{0.009}}
@@ -407,6 +419,8 @@
 \newcommand{\PQAnaLagoaGrandeVal}{\num{0.034}}
 \newcommand{\PRecConjuntaInv}{\num{70000}}
 \newcommand{\PRecConjuntaPredInv}{\num{4000}}
+\newcommand{\PRecFisherInv}{\num{950}}
+\newcommand{\PRecFisherPredInv}{\num{400}}
 \newcommand{\PRecPredVinteDois}{\num{4.7}}
 \newcommand{\PRecPredVinteTres}{\num{4.0}}
 \newcommand{\PRecPredVinteUm}{\num{2.2}}
@@ -524,7 +538,9 @@
 \newcommand{\PTFPWTminAteDoisMilOitoVal}{\num{< 0.001}}
 \newcommand{\PTendQ}{\ensuremath{=}\,\num{0.007}}
 \newcommand{\PTendQVal}{\num{0.007}}
+\newcommand{\ParesTendSig}{Cabrobó e Remanso}
 \newcommand{\PctNormalDozeTreze}{\num{36}}
+\newcommand{\PctSnhtSobTendencia}{\num{65}}
 \newcommand{\PeriodoAnaRetCavalos}{1963/64–2024/25}
 \newcommand{\PeriodoAnaRetJuazeiro}{1963/64–2024/25}
 \newcommand{\PeriodoAnaRetJunco}{1972/73–2024/25}
@@ -623,18 +639,18 @@
 \newcommand{\ProbNSCongNumzero}{\num{36}}
 \newcommand{\ProbNSCongNumzeroICinf}{\num{10}}
 \newcommand{\ProbNSCongNumzeroICsup}{\num{77}}
-\newcommand{\ProbNSContNcinco}{\num{23}}
-\newcommand{\ProbNSContNcincoICinf}{\num{6}}
-\newcommand{\ProbNSContNcincoICsup}{\num{59}}
-\newcommand{\ProbNSContNdoiszero}{\num{82}}
-\newcommand{\ProbNSContNdoiszeroICinf}{\num{32}}
-\newcommand{\ProbNSContNdoiszeroICsup}{\num{100}}
-\newcommand{\ProbNSContNtreszero}{\num{97}}
-\newcommand{\ProbNSContNtreszeroICinf}{\num{53}}
+\newcommand{\ProbNSContNcinco}{\num{18}}
+\newcommand{\ProbNSContNcincoICinf}{\num{5}}
+\newcommand{\ProbNSContNcincoICsup}{\num{48}}
+\newcommand{\ProbNSContNdoiszero}{\num{73}}
+\newcommand{\ProbNSContNdoiszeroICinf}{\num{26}}
+\newcommand{\ProbNSContNdoiszeroICsup}{\num{99}}
+\newcommand{\ProbNSContNtreszero}{\num{94}}
+\newcommand{\ProbNSContNtreszeroICinf}{\num{45}}
 \newcommand{\ProbNSContNtreszeroICsup}{\num{100}}
-\newcommand{\ProbNSContNumzero}{\num{47}}
-\newcommand{\ProbNSContNumzeroICinf}{\num{14}}
-\newcommand{\ProbNSContNumzeroICsup}{\num{87}}
+\newcommand{\ProbNSContNumzero}{\num{37}}
+\newcommand{\ProbNSContNumzeroICinf}{\num{11}}
+\newcommand{\ProbNSContNumzeroICsup}{\num{79}}
 \newcommand{\ProbNSMediaUltNcinco}{\num{36}}
 \newcommand{\ProbNSMediaUltNcincoICinf}{\num{6}}
 \newcommand{\ProbNSMediaUltNcincoICsup}{\num{67}}
@@ -793,8 +809,12 @@
 \newcommand{\QuebraAnaJunco}{1984/85}
 \newcommand{\QuebraAnaLagoaBoi}{2019/20}
 \newcommand{\QuebraAnaLagoaGrande}{1994/95}
+\newcommand{\QuebraPettittTmax}{2007/08}
+\newcommand{\QuebraPettittTmin}{2013/14}
 \newcommand{\QuebraQ}{2003/04}
 \newcommand{\QuebraSnhtChuva}{2006/07}
+\newcommand{\QuebraSnhtTmax}{2006/07}
+\newcommand{\QuebraSnhtTmin}{2008/09}
 \newcommand{\QuebraTmaxCabrobo}{2001}
 \newcommand{\QuebraTmaxRemanso}{1975}
 \newcommand{\QuebraTminCabrobo}{1988}
@@ -858,6 +878,7 @@
 \newcommand{\RegMelhorPeso}{\num{0.67}}
 \newcommand{\RhatMax}{\num{1.001}}
 \newcommand{\RhatMaxNS}{\num{1.001}}
+\newcommand{\RhatMaxTodos}{\num{1.001}}
 \newcommand{\SIMedio}{\num{1.07}}
 \newcommand{\SPEIDezesseisDezessete}{\num{-1.75}}
 \newcommand{\SPEIDozeTreze}{\num{-1.54}}
@@ -898,6 +919,8 @@
 \newcommand{\SenAnaLagoaGrandeICsup}{\num{-8}}
 \newcommand{\SenAnaMax}{\num{-18}}
 \newcommand{\SenAnaMin}{\num{-69}}
+\newcommand{\SenAnaSigMax}{\num{-46}}
+\newcommand{\SenAnaSigMin}{\num{-69}}
 \newcommand{\SenAnaTodosCavalos}{\num{-17}}
 \newcommand{\SenAnaTodosCavalosICinf}{\num{-43}}
 \newcommand{\SenAnaTodosCavalosICsup}{\num{7}}
@@ -965,6 +988,8 @@
 \newcommand{\SenInicio}{\num{8.6}}
 \newcommand{\SenInicioICinf}{\num{1.9}}
 \newcommand{\SenInicioICsup}{\num{15.5}}
+\newcommand{\SenParesTendMax}{\num{-6.5}}
+\newcommand{\SenParesTendMin}{\num{-6.6}}
 \newcommand{\SenPichePct}{\num{8.7}}
 \newcommand{\SenPichePctICinf}{\num{4.8}}
 \newcommand{\SenPichePctICsup}{\num{12.2}}
@@ -1018,6 +1043,9 @@
 \newcommand{\SenTmaxAteDoisMilOito}{\num{0.24}}
 \newcommand{\SenTmaxAteDoisMilOitoICinf}{\num{0.08}}
 \newcommand{\SenTmaxAteDoisMilOitoICsup}{\num{0.36}}
+\newcommand{\SenTmaxComum}{\num{0.31}}
+\newcommand{\SenTmaxComumICinf}{\num{0.18}}
+\newcommand{\SenTmaxComumICsup}{\num{0.40}}
 \newcommand{\SenTmaxDesdeSetentaCinco}{\num{0.30}}
 \newcommand{\SenTmaxDesdeSetentaCincoICinf}{\num{0.19}}
 \newcommand{\SenTmaxDesdeSetentaCincoICsup}{\num{0.38}}
@@ -1030,6 +1058,9 @@
 \newcommand{\SenTminAteDoisMilOito}{\num{0.44}}
 \newcommand{\SenTminAteDoisMilOitoICinf}{\num{0.28}}
 \newcommand{\SenTminAteDoisMilOitoICsup}{\num{0.58}}
+\newcommand{\SenTminComum}{\num{0.37}}
+\newcommand{\SenTminComumICinf}{\num{0.29}}
+\newcommand{\SenTminComumICsup}{\num{0.44}}
 \newcommand{\SenTminDesdeSetentaCinco}{\num{0.40}}
 \newcommand{\SenTminDesdeSetentaCincoICinf}{\num{0.33}}
 \newcommand{\SenTminDesdeSetentaCincoICsup}{\num{0.46}}

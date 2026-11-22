@@ -108,7 +108,7 @@ function mk_hamed_rao(t, y)
 end
 
 """
-Tendência mínima detectável (poder 80 %, MK bilateral a 5 %) por simulação:
+Tendência mínima detectável (poder 80 %, MK-TFPW bilateral a 5 %, o teste principal) por simulação:
 yₜ = β·t + eₜ, eₜ ~ AR(1) com ρ e σ estimados dos resíduos de Sen da série real.
 Busca β numa grade e devolve o menor com poder ≥ 0,8 (em unidades/década).
 """
@@ -123,7 +123,7 @@ function tendencia_minima_detectavel(t, y; poder = 0.8, B = 400, rng = MersenneT
             for i in 2:n
                 u[i] = ρ * u[i-1] + sqrt(1 - ρ^2) * σ * randn(rng)
             end
-            rej += mann_kendall(t, β .* (t .- t[1]) .+ u).p < 0.05
+            rej += mk_tfpw(t, β .* (t .- t[1]) .+ u).mk.p < 0.05      # mesmo teste do texto (TFPW)
         end
         rej / B
     end
