@@ -274,7 +274,7 @@ function fig_tendencias(P)
     for (k, (_, vs, _)) in enumerate(grupos)        # altura proporcional ao número de linhas
         rowsize!(fig.layout, k, Auto(0.3 + 0.12length(vs)))
     end
-    Label(fig[5, 1], "Ponto: declive de Sen; barra: IC 95 %. Cheio (azul): q < 0,05 (MK-TFPW, Benjamini–Hochberg); vazio (cinza): não significativo.";
+    Label(fig[5, 1], "Ponto: declive de Sen; barra: IC 95 %. Cheio (azul): q < 0,05 (teste principal, Benjamini–Hochberg); vazio (cinza): não significativo.";
           fontsize = 7, color = COR_TEXTO2, halign = :left)
     salva_pfig(fig, "fig09_tendencias")
 end

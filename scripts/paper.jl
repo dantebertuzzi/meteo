@@ -577,7 +577,7 @@ function bloco_nao_estacionario(L, E, V)
             e = f.c_ep[1] .<= ao .<= f.c_ep[2]
             σe = sqrt((sum(abs2, yo[e] .- mean(yo[e])) + sum(abs2, yo[.!e] .- mean(yo[.!e]))) / nn)
             registra!("TFormaEpDentro", Tn(mean(yo[e]), σe); sig = 2); registra!("MediaFormaEpDentro", mean(yo[e]); dig = 0)
-            registra!("TFormaEpFora", Tn(mean(yo[.!e]), σe); sig = 1); registra!("MediaFormaEpFora", mean(yo[.!e]); dig = 0)
+            registra!("TFormaEpFora", Tn(mean(yo[.!e]), σe); sig = 2); registra!("MediaFormaEpFora", mean(yo[.!e]); dig = 0)
         end
         push!(ftabs, (amostra = rot, n = length(yy), AIC_reta = f.lin, AIC_degrau = f.deg,
                       corte_degrau = rotulo_hidro(round(Int, f.c_deg)), p_degrau = f.p_deg, AIC_episodio = f.ep,
@@ -768,7 +768,7 @@ function bloco_anos_recentes(L, E, N)
     pjp = mean(prod(P, dims = 2))
     registra!("PRecConjuntaPredInv", 1 / pjp; sig = 1); registra!("NBootRec", size(P, 1))
     # o produto de três probabilidades de cauda não é um p-valor (qualquer produto específico é
-    # pequeno); a combinação de Fisher, −2 Σ log pᵢ ~ χ²₆ sob H₀, é a medida calibrada de surpresa
+    # pequeno); a combinação de Fisher, −2 Σ log pᵢ ~ χ²_{2k} sob H₀, é a medida calibrada de surpresa
     fisher(ps) = ccdf(Chisq(2length(ps)), -2sum(log, ps))
     registra!("PRecFisherInv", 1 / fisher(tab.p_ao_menos_obs); sig = 2)
     registra!("PRecFisherPredInv", 1 / fisher(tab.p_preditivo); sig = 2)
@@ -835,11 +835,11 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
                                     theil_sen(Float64.(comc), [ref[a] for a in comc]).declive,
                                     analise_tendencia(comc, [ref[a] / only(v.prec[v.ano_hidro .== a]) for a in comc]).p_mk_tfpw,
                                     maximum(comc)) : (NaN, NaN, NaN, missing)
-        # até 2011/12, antes da quebra da razão com Juazeiro
-        c11 = [a for a in com if a <= 2011]
-        s11 = (10theil_sen(Float64.(c11), [only(v.prec[v.ano_hidro .== a]) for a in c11]).declive,
-               10theil_sen(Float64.(c11), [ref[a] for a in c11]).declive)
+        # anos antes da quebra (SNHT) da razão com o posto
         sn = snht_teste(Float64.(com), q)
+        c11 = [a for a in com if a <= Int(sn.ultimo_antes)]
+        s11 = length(c11) >= 8 ? (10theil_sen(Float64.(c11), [only(v.prec[v.ano_hidro .== a]) for a in c11]).declive,
+                                  10theil_sen(Float64.(c11), [ref[a] for a in c11]).declive) : (NaN, NaN)
         antes = q[com .< ano_a307]; depois = q[com .>= ano_a307]
         pw = length(depois) >= 3 ? pvalue(UnequalVarianceTTest(antes, depois)) : NaN
         k = info.chave
@@ -851,7 +851,7 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
         registra!("QAntesAna" * k, mean(antes); dig = 2); registra!("QDepoisAna" * k, mean(depois); dig = 2)
         registra_p!("PAntesDepoisAna" * k, pw); registra_p!("PTesteAna" * k, pposto)
         registra!("SenAnaAteOnze" * k, s11[1]; dig = 0); registra!("SenRefAteOnze" * k, s11[2]; dig = 0)
-        registra!("NComumAteOnze" * k, length(c11))
+        registra!("NComumAteOnze" * k, length(c11)); registra!("AnoAntesQuebraAna" * k, rotulo_hidro(Int(sn.ultimo_antes)))
         linhas[end] = merge(linhas[end], (p_posto = pposto, n_cons = length(comc), ult_cons = sc[4],
                                           razao_sen = tp.declive / tr.declive, razao_sen_cons = sc[1] / sc[2],
                                           p_Q_cons = sc[3], sen_posto = 10tp.declive, sen_posto_inf = 10tp.ic_inf, sen_posto_sup = 10tp.ic_sup,
@@ -1500,6 +1500,13 @@ function bloco_p2_homog_temp(L, X)
         mn_ = lm(@formula(y ~ t + d), ddn); icn = confint(mn_)
         registra_ic!("BTminDegrau", coef(mn_)[2], icn[2, 1], icn[2, 2]; dig = 2)
         registra!("DegrauTmin", coef(mn_)[3]; dig = 2)
+        # mesma regra da Tmáx (salto frente a Cabrobó), para a correção não depender da escolha
+        hcn = h[(h.variavel .== "Tmín") .& (h.vizinha .== "Cabrobó"), :]
+        if nrow(hcn) == 1
+            a0c = hcn.quebra_snht[1] + 1
+            tc_ = tendencia_completa(sn_.ano, sn_.tmin .- hcn.salto[1] .* (sn_.ano .>= a0c); nome = "Tmín ajustada (Cabrobó)")
+            registra!("SenTminAjustadaCabrobo", tc_.sen_decada; dig = 2)
+        end
     end
     for (vv, k) in ((:tmax, "Tmax"), (:tmin, "Tmin"))
         ss = dropmissing(anu[anu.ano .>= 1975, [:ano, vv]])
@@ -1642,7 +1649,9 @@ function bloco_teleconexoes(L, E, N)
     for (crit, k) in (("bruto", ""), ("sem tendência", "Det"))
         a = only(eachrow(tcd[(tcd.fase .== "El Niño") .& (tcd.criterio .== crit), :]))
         b = only(eachrow(tcd[(tcd.fase .== "neutro") .& (tcd.criterio .== crit), :]))
-        registra_p!("PFisherNinoNeutro" * k, pvalue(FisherExactTest(a.secos, a.n - a.secos, b.secos, b.n - b.secos)))
+        ft_ = FisherExactTest(a.secos, a.n - a.secos, b.secos, b.n - b.secos)
+        registra_p!("PFisherNinoNeutro" * k, pvalue(ft_))                       # bilateral central
+        registra_p!("PFisherNinoNeutroMinlike" * k, pvalue(ft_; method = :minlike))  # soma das tabelas menos prováveis
     end
     salva_ptab(df, "teleconexoes_anual")
     return (tab = tab, cond = tcd, df = df)

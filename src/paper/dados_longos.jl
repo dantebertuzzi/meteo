@@ -52,6 +52,7 @@ function qc_temperatura!(d)
     noseg = [SEG_TMIN_SUSPEITO[1] <= x <= SEG_TMIN_SUSPEITO[2] for x in d.data]
     nseg = count(noseg .& .!ismissing.(d.tmin))
     d[noseg, :tmin] .= missing
+    d[noseg, :tmed] .= missing          # a Tméd compensada usa a Tmín: mesmo segmento
     n = Dict{Symbol, Int}()
     for v in (:tmax, :tmin, :tmed)
         cl = Dict(m => (μ = mean(skipmissing(d[d.mes .== m, v])), σ = std(skipmissing(d[d.mes .== m, v]))) for m in 1:12)
