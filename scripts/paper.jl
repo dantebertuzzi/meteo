@@ -445,8 +445,13 @@ function bloco_nao_estacionario(L, E, V)
     #     reta, então o resultado sai como faixa, e não como um ponto em 2020/21
     pdec = mean(ma.p_em(E.x1213, tc(a)) for a in 2011:ult)
     registra!("TNSMediaDecada", 1 / pdec; sig = 2)
-    cenT = [1 / ma.p_em(E.x1213, tc(ult)), 1 / pdec, 1 / m75.p_em(E.x1213, u75)]
-    ismissing(b_reg) || push!(cenT, 1 / mr.p_em(E.x1213, tc(2025)))
+    # todos os cenários avaliados no MESMO ano (o último válido): misturar 2020/21, 2023/24 e 2025
+    # numa faixa compararia climas de anos diferentes de uma reta com tendência
+    cenT = [1 / ma.p_em(E.x1213, tc(ult)), 1 / pdec, 1 / m75.p_em(E.x1213, tc(ult))]
+    if !ismissing(b_reg)
+        tru = 1 / mr.p_em(E.x1213, tc(ult)); push!(cenT, tru)
+        registra!("TRegionalMediaUlt", tru; sig = 2)
+    end
     registra!("TNSFaixaMin", minimum(cenT); sig = 2); registra!("TNSFaixaMax", maximum(cenT); sig = 2)
 
     # --- sensibilidade da tendência da chuva ao período: a série termina na década seca de 2010,
@@ -658,6 +663,25 @@ function bloco_anos_recentes(L, E, N)
     tab = DataFrame(linhas)
     pj = prod(tab.p_ao_menos_obs)
     registra!("PRecConjuntaInv", 1 / pj; sig = 1)
+    # versão preditiva: o p acima trata os parâmetros como conhecidos, justamente no ponto de
+    # maior alavancagem da reta. Aqui os parâmetros variam pelo bootstrap dos anos (pares
+    # ano–chuva), e P(Y ≥ obs) é a média entre réplicas. A conjunta é a média do produto (os três
+    # anos compartilham os parâmetros de cada réplica), e não o produto das médias.
+    yv = Float64.(v.prec); tv = tc.(v.ano_hidro); nv = length(yv)
+    rngr = MersenneTwister(SEMENTE); pr = Vector{Vector{Float64}}()
+    xs_rec = [(Float64(only(L.dh.prec_obs[L.dh.ano_hidro .== a])), tc(a)) for a in (2021, 2022, 2023)]
+    for _ in 1:NBOOT_VALID
+        i = rand(rngr, 1:nv, nv)
+        mb = try ns_media_akaike(yv[i], tv[i]) catch; continue end
+        push!(pr, [1 - mb.p_em(x, tt) for (x, tt) in xs_rec])
+    end
+    P = permutedims(reduce(hcat, pr))
+    tab.p_preditivo = vec(mean(P, dims = 1))
+    for (j, a) in enumerate((2021, 2022, 2023))
+        registra!("PRecPred" * sufixo[a], 100tab.p_preditivo[j]; dig = 1)
+    end
+    pjp = mean(prod(P, dims = 2))
+    registra!("PRecConjuntaPredInv", 1 / pjp; sig = 1); registra!("NBootRec", size(P, 1))
     # média do modelo no último ano válido, com IC do bootstrap dos anos (normal com DP fixo, a
     # candidata de menor AIC; serve para comparar com a normal oficial de 1991–2020)
     nfix = only(f for f in ma.fits if f.D === Normal && !f.forma_var)

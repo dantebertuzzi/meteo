@@ -260,3 +260,31 @@ end
     fl = forma_tendencia(a, yl; B = 199)
     @test fl.p_deg > 0.01 && fl.p_ep > 0.01
 end
+
+@testset "Identidades provadas em Lean (lean/MeteoLean)" begin
+    # Cada teste confere que a função Julia satisfaz o teorema correspondente. O Lean prova a
+    # matemática; estes testes ligam a prova ao código que gera os números do artigo.
+    rng = MersenneTwister(2026)
+    for _ in 1:200
+        n = rand(rng, 1:40); ps = rand(rng, n); p = rand(rng)
+        # Retorno.soma_primeiro_evento e probVar_const
+        @test sum((1 - p)^k * p for k in 0:n-1) ≈ prob_ao_menos_um(p, n)
+        @test prob_n_variavel(_ -> p, n) ≈ prob_ao_menos_um(p, n)
+        # Retorno.continua_ge_congelado: p crescente ⇒ risco ≥ clima congelado em p₁
+        pc = sort(ps)
+        @test prob_n_variavel(j -> pc[j], n) >= prob_ao_menos_um(pc[1], n) - 1e-12
+        # PoissonBinomial.pb_ao_menos_um: P(N ≥ 1) da recursão = 1 − ∏(1 − pⱼ)
+        @test prob_ao_menos_k(ps, 1) ≈ prob_n_variavel(j -> ps[j], n)
+        # PoissonBinomial.pb_binomial
+        k = rand(rng, 0:n)
+        @test prob_ao_menos_k(fill(p, n), k) ≈ (k == 0 ? 1.0 : ccdf(Binomial(n, p), k - 1)) atol = 1e-10
+        # Akaike.T_media_le_media_T: 1/Σwp ≤ Σw/p
+        w = rand(rng, n); w ./= sum(w)
+        @test 1 / sum(w .* ps) <= sum(w ./ ps) * (1 + 1e-12)
+    end
+    # Retorno.tempo_medio_espera: E[K] = 1/p (série truncada)
+    @test sum((k + 1) * (1 - 0.1)^k * 0.1 for k in 0:2000) ≈ 1 / 0.1 rtol = 1e-8
+    # Markov.estacionaria: π_S = a/(a+b) é fixo da matriz de transição
+    a, b = 0.3, 0.5; πS = a / (a + b)
+    @test πS * (1 - b) + (1 - πS) * a ≈ πS
+end

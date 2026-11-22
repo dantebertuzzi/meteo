@@ -68,8 +68,9 @@ por década), mas sua significância depende da década de 2010: com dados só a
 \TNSFaixaMax{} anos no fim da série, conforme o cenário (\TNSMediaUlt{} anos
 \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média de \UltimoAnoNS{}), ambos por média de Akaike
 entre distribuições candidatas. Os três anos chuvosos seguintes, que ficaram fora do ajuste, seriam
-muito improváveis sob esse modelo (juntos, cerca de 1 em \PRecConjuntaInv{}): o fim da tendência
-provavelmente exagera a seca atual, e esses períodos de retorno tendem a ser um limite inferior. Nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
+improváveis sob esse modelo (juntos, cerca de 1 em \PRecConjuntaPredInv{}, já com a incerteza dos
+parâmetros): o fim da tendência provavelmente exagera a seca atual, e esses períodos de retorno
+provavelmente subestimam o atual. Nos \NAnaRetorno{} pluviômetros da ANA, ele cai de
 \TEstAnaMin{}--\TEstAnaMax{} para \TNSAnaMin{}--\TNSAnaMax{} anos, e uma análise regional com as
 \NRegEstacoes{} estações dá \TRegEst{} anos sob estacionariedade e \TRegNS{} com a média de \UltimoAnoNS{}. Esses intervalos largos fazem parte do resultado: mesmo
 juntando estações vizinhas, cujos anos secos coincidem, a frequência de anos extremos só pode ser
@@ -101,9 +102,9 @@ return period is of the order of \TMediaAkaikeB{} years \IC{\TMediaAkaikeBICinf}
 under a stationary climate and \TNSFaixaMin{} to \TNSFaixaMax{} years at the end of the record,
 depending on the scenario (\TNSMediaUlt{} years \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} at the
 mean of \UltimoAnoNS{}), both Akaike-weighted averages over candidate distributions. The three wet
-years that followed, left out of the fit, would be very unlikely under this model (jointly, about
-1 in \PRecConjuntaInv{}): the end of the trend probably overstates the current dryness, and these
-return periods are best read as lower bounds. At the
+years that followed, left out of the fit, would be unlikely under this model (jointly, about
+1 in \PRecConjuntaPredInv{}, including parameter uncertainty): the end of the trend probably
+overstates the current dryness, and these return periods probably underestimate the current one. At the
 \NAnaRetorno{} ANA gauges it drops from \TEstAnaMin{}--\TEstAnaMax{} to \TNSAnaMin{}--\TNSAnaMax{} years,
 and a regional analysis of the \NRegEstacoes{} stations gives \TRegEst{} years (stationary) and \TRegNS{} years (mean of \UltimoAnoNS{}). These
 wide intervals are part of the result: even pooling neighbouring stations, whose dry years
@@ -270,13 +271,16 @@ razão $Q = Y_{\Est}/Y_{\text{posto}}$ (\cref{tab:ana}). Todos os postos têm te
 década. O mais informativo é Juazeiro, a \DistJuazeiro{}~km, do outro lado do rio: nos mesmos
 \NComumJuazeiro{} anos, sua tendência é de \SenAnaJuazeiro{}~mm por década
 \IC{\SenAnaJuazeiroICinf}{\SenAnaJuazeiroICsup}, contra \SenRefJuazeiro{} na \Est{}. A razão entre
-os dois não tem tendência ($p$\,\PQAnaJuazeiro) nem muda significativamente entre antes e
-depois de 2003/04 ($Q$ de \QAntesAnaJuazeiro{} para \QDepoisAnaJuazeiro{}; $p$\,\PAntesDepoisAnaJuazeiro);
+os dois não tem tendência ($p$\,\PQAnaJuazeiro) nem muda significativamente entre antes de
+2003/04 e a partir dele ($Q$ de \QAntesAnaJuazeiro{} para \QDepoisAnaJuazeiro{}; $p$\,\PAntesDepoisAnaJuazeiro);
 se algo, a \Est{} passa a registrar relativamente mais, o contrário do que uma perda instrumental
-produziria. O SNHT
-localiza esse aumento em \QuebraAnaJuazeiro{}, o que, se algo, atenua a tendência da \Est{}. Frente a Junco e a Lagoa
+produziria. O SNHT, porém, detecta nessa razão uma quebra significativa a partir de
+\QuebraAnaJuazeiro{} ($p$\,\PSnhtAnaJuazeiro), e não em 2003/04. A comparação não diz qual dos dois
+mudou: se foi a \Est{}, sua tendência real é mais forte que a estimada; se foi Juazeiro, a
+concordância entre as duas tendências é em parte coincidência, e Juazeiro deixa de ser uma
+confirmação independente para os anos recentes. Frente a Junco e a Lagoa
 Grande, a razão cai (\NAnaQSig{} dos \NPostosAna{} testes com $p<0{,}05$), e frente a Junco também
-há diferença antes e depois de 2003/04. Mas a razão com Junco tem sua quebra
+há diferença entre antes de 2003/04 e a partir dele. Mas a razão com Junco tem sua quebra
 principal em \QuebraAnaJunco{}, duas décadas antes da estação automática, Junco tem a menor
 tendência do grupo, e os outros três postos não confirmam o excesso local. Em conjunto, os pluviômetros independentes confirmam que a queda da chuva é real e
 regional, e não dão apoio consistente a uma mudança instrumental na \Est{} em 2003/04.
@@ -357,7 +361,9 @@ Comparamos Gamma, Weibull, log-normal e normal por AIC, pesos de Akaike
 \parencite{burnham2002} e Anderson--Darling com $p$ por bootstrap paramétrico
 \parencite{anderson1954}. Como nenhuma candidata domina, o resultado estacionário principal é a
 média de $p$ ponderada pelos pesos de Akaike, com IC por bootstrap não paramétrico dos anos (as
-quatro distribuições e os pesos são reajustados a cada réplica). A Gamma, que é a base do SPI e
+quatro distribuições e os pesos são reajustados a cada réplica). Como $x \mapsto 1/x$ é convexa, o
+$T = 1/\bar p$ da média de $p$ nunca excede a média ponderada dos $T$ das candidatas: a escolha não
+deixa uma candidata de cauda fina inflar o período de retorno. A Gamma, que é a base do SPI e
 admite uma parametrização simples para os modelos bayesiano e não estacionário, é usada para os
 intervalos por verossimilhança perfilada, reparametrizando por $(k, p)$ com
 $\theta = x_0/Q_{\Gamma(k,1)}(p)$ \parencite{coles2001}, por bootstrap paramétrico e por
@@ -448,7 +454,11 @@ Toda a análise foi feita em Julia \parencite{bezanson2017}. As figuras usam Cai
 \parencite{danisch2021}, e os modelos bayesianos usam Turing \parencite{ge2018} com o amostrador
 NUTS \parencite{hoffman2014}. Os métodos sem implementação confiável disponível (SPI, SPEI,
 Hargreaves, MK modificado, SNHT, corridas) foram implementados à mão e testados contra valores
-publicados \parencite{allen1998} ou contra propriedades conhecidas.
+publicados \parencite{allen1998} ou contra propriedades conhecidas. As fórmulas fechadas que
+transformam probabilidades em resultados (a \cref{eq:pn} e sua versão com $p$ variável, o tempo
+médio de espera $1/p$, a média por pesos de Akaike, as quantidades da cadeia de Markov e a
+recursão Poisson-binomial da validação) foram provadas formalmente em Lean~4 com o Mathlib, e
+testes unitários conferem que o código Julia as satisfaz.
 
 % ============================================================================= resultados
 \section{Resultados}\label{sec:resultados}
@@ -505,7 +515,7 @@ máximo é \TModelosMaxAceitos{} anos. A média ponderada por AIC é de \TMediaA
 \NanosAteDozeTreze{} dos \NanosValidos{} anos tiveram chuva $\le$ E1
 ($T \approx \TEmpiricoDozeTreze$ anos pela posição de Weibull). Essa contagem inclui o próprio
 2012/13 e mistura anos de uma série com tendência, mas a validação fora da amostra
-(\cref{tab:valid}) confirma que a cauda seca da Gamma é mais fina que a dos dados.
+(\cref{tab:valid}) também indica que a cauda seca da Gamma é mais fina que a dos dados.
 
 A tendência da chuva anual é forte: \SenChuva{}~mm/década \IC{\SenChuvaICinf}{\SenChuvaICsup}
 (MK $p$\,\PMKChuva; TFPW $p$\,\PTFPWChuva). Na Gamma, o modelo não estacionário é claramente
@@ -517,7 +527,7 @@ rejeitada pelos dados. Deixando a forma variar no tempo, a razão de verossimilh
 forma fixa na Gamma ($p$\,\PFormaVarGamma) e na log-normal ($p$\,\PFormaVarLogNormal), é marginal
 na Weibull ($p$\,\PFormaVarWeibull) e é desnecessária na normal ($p$\,\PFormaVarNormal), cujo
 desvio-padrão fica praticamente constante (\EfeitoFormaNormal{}\,\% por década). Na Gamma, o
-parâmetro de forma cai \EfeitoFormaGamma{}\,\% por década, isto é, o coeficiente de variação
+parâmetro de forma varia \EfeitoFormaGamma{}\,\% por década, isto é, o coeficiente de variação
 cresce. Em outras palavras, a chuva anual diminuiu sem que a amplitude da oscilação interanual em
 milímetros diminuísse, o que torna os anos muito secos relativamente mais frequentes.
 
@@ -551,7 +561,12 @@ Sob a média de Akaike não estacionária ajustada até \UltimoAnoNS{}, a probab
 menos tão chuvoso quanto o observado é de \PRecVinteUm{}\,\% em 2021/22 (\ChuvaObsVinteUm{}~mm,
 contra uma mediana do modelo de \MedianaModeloVinteUm{}~mm), \PRecVinteDois{}\,\% em 2022/23
 (\ChuvaObsVinteDois{}~mm) e \PRecVinteTres{}\,\% em 2023/24 (\ChuvaObsVinteTres{}~mm). Supondo
-anos independentes, os três juntos teriam probabilidade de cerca de 1 em \PRecConjuntaInv{}. Como
+anos independentes, os três juntos teriam probabilidade de cerca de 1 em \PRecConjuntaInv{}. Esses
+valores, porém, tratam os parâmetros ajustados como conhecidos justamente no ponto de maior
+alavancagem da reta. Incorporando a incerteza deles por bootstrap dos anos (\NBootRec{} réplicas),
+as probabilidades passam a \PRecPredVinteUm{}, \PRecPredVinteDois{} e \PRecPredVinteTres{}\,\%, e a
+conjunta, calculada réplica a réplica, a cerca de 1 em \PRecConjuntaPredInv{}: o teste continua
+desfavorável ao modelo, mas bem menos extremo do que a versão com parâmetros fixos sugere. Como
 os dias sem registro contam como zero, os totais reais são maiores, e essas probabilidades são
 limites superiores. O ENSO explica no máximo um dos três: 2021/22 teve La Niña de novembro a abril
 (ONI \ONIRecVinteUm{}), que favorece a chuva no Nordeste, mas 2022/23 foi neutro
@@ -563,9 +578,12 @@ maior alavancagem do ajuste. Na normal com desvio-padrão fixo, a média em \Ult
 \MediaNormalUlt{}~mm \IC{\MediaNormalUltICinf}{\MediaNormalUltICsup}, com o intervalo todo abaixo
 da normal oficial de 1991--2020 (\NormalOficialChuva{}~mm). Por isso apresentamos o período de
 retorno no fim da série como uma faixa entre cenários: \TNSMediaUlt{} anos com a média de
-\UltimoAnoNS{}, \TNSMediaDecada{} com a média de 2011/12 a \UltimoAnoNS{}, \TNSMediaFCASeteUlt{}
-com o critério FCA $\le$ 7,5\,\% e \TRegionalMedia{} com a inclinação regional, ou seja, de
-\TNSFaixaMin{} a \TNSFaixaMax{} anos. Como o modelo subestima a chuva logo depois do fim da série,
+\UltimoAnoNS{}, \TNSMediaDecada{} com a média de 2011/12 a \UltimoAnoNS{}, \TNSMediaFCASeteUltStd{}
+com o critério FCA $\le$ 7,5\,\% e \TRegionalMediaUlt{} com a inclinação regional, todos avaliados
+em \UltimoAnoNS{}, ou seja, de \TNSFaixaMin{} a \TNSFaixaMax{} anos. Avaliados mais adiante na
+reta, os mesmos modelos dão valores menores (\TNSMediaFCASeteUlt{} anos em \UltimoAnoFCASete{} com o
+critério FCA $\le$ 7,5\,\%; \TRegionalMedia{} em 2025 com a inclinação regional), mas isso só
+extrapola a tendência. Como o modelo subestima a chuva logo depois do fim da série,
 o período de retorno atual provavelmente é maior que essa faixa, sem que os dados digam quanto.
 
 \paragraph{Sensibilidade da tendência da chuva.} Como a série válida termina numa década seca e
@@ -577,7 +595,7 @@ recentes. Com o critério FCA $\le$ 7,5\,\%, que inclui \AnosFCASete{}, e acresc
 total observado (\ChuvaObsVinteDois{}~mm, com \DiasAusVinteDois{} dias sem registro) é um limite
 inferior de um ano chuvoso, a tendência passa a \SenChuvaRecentes{}~mm por década
 \IC{\SenChuvaRecentesICinf}{\SenChuvaRecentesICsup} ($p$\,\PTFPWChuvaRecentes). Essa é a estimativa
-mais conservadora, e também não depende do início da série. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
+mais conservadora. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
 intervalo inclui zero e o teste não rejeita a ausência de tendência ($p$\,\PTFPWChuvaAteDezOnze).
 A queda já estava em curso antes da última década, mas só se torna detectável com ela.
 
@@ -589,9 +607,12 @@ busca das datas em cada réplica. Com o critério principal, a reta é preferida
 (\AnoDegrauChuva; AIC \AICChuvaLinear{} contra \AICChuvaDegrau{}, $p$\,\PBootDegrau) e ao episódio
 (\AnosEpisodio; AIC \AICEpisodio{}, $p$\,\PBootEpisodio). Com os anos chuvosos recentes
 (FCA $\le$ 7,5\,\% e 2022/23), o episódio passa a ter o menor AIC (\AnosEpisodioRec; \AICEpisodioRec{}
-contra \AICChuvaLinearRec{} da reta), mas sem diferença significativa ($p$\,\PBootEpisodioRec). Os
-dados, portanto, favorecem a mudança gradual só enquanto excluem a recuperação recente; com ela,
-não distinguem uma queda contínua de um período seco que pode estar terminando. Nenhuma das
+contra \AICChuvaLinearRec{} da reta), mas sem diferença significativa ($p$\,\PBootEpisodioRec). Esse
+``episódio'' cobre quatro décadas, e seu fim é imposto pelos três anos chuvosos, o mínimo que a busca
+admite depois dele: não é a seca da década de 2010, e sim um regime mais seco desde o início dos
+anos 1980 seguido de uma recuperação de três anos. Os dados, portanto, favorecem a mudança gradual
+só enquanto excluem a recuperação recente; com ela, não distinguem uma queda contínua de um regime
+seco que pode estar terminando. Nenhuma das
 leituras exclui uma contribuição instrumental parcial, como a discutida na \cref{sec:dados}.
 
 \begin{table}[htbp]
@@ -647,8 +668,10 @@ década. Na escala da \Est{}, o período de retorno de E1 passa de \TRegEst{} an
 Os intervalos, obtidos por bootstrap de anos inteiros, são só um pouco mais estreitos que os da
 \Est{} sozinha (\IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} no caso não estacionário). Como os anos
 secos coincidem nas estações vizinhas, juntar seis séries não equivale a ter seis vezes mais anos.
-A região também não é homogênea na tendência. Com uma inclinação por estação, o AIC por
-verossimilhança combinada, que superestima a evidência, varia \DAICRegSite{}. As inclinações vão de
+A homogeneidade da tendência na região também não está garantida. Com uma inclinação por estação,
+o AIC por verossimilhança combinada varia \DAICRegSite{}, uma diferença pequena e que, por tratar
+estações correlacionadas como independentes, não tem a calibração usual do AIC: ela não
+demonstra heterogeneidade, mas também não a exclui. As inclinações vão de
 \RegEfeitoSiteMin{} a \RegEfeitoSiteMax{}\,\% por década, e Campo dos Cavalos e Junco são bem mais
 fracos que as demais. O resultado regional confirma a ordem de grandeza: anos tão secos quanto
 2012/13 passaram de algumas décadas para uma a duas décadas de período de retorno. Mas ele pouco
@@ -706,14 +729,16 @@ esperado de anos secos nos \NTeste{} anos válidos seguintes (\PrimeiroAnoTeste{
 cerca de \EspPdezEstMedia{} esperados pelos modelos estacionários ($p$\,\PObsPdezEstMedia{} de ver
 tantos) e de \EspPdezNSGamma{} a \EspPdezNSMedia{} pelos não estacionários
 ($p$\,\PObsPdezNSMedia{} na média de Akaike). O limiar E1 tem viés de seleção, porque 2012/13 foi
-escolhido justamente por ser um ano extremo do período de teste; mesmo assim, ele discrimina a
-cauda dos modelos. Houve \ObsEum{} anos $\le$ E1. A Gamma com coeficiente de variação constante
+escolhido justamente por ser um ano extremo do período de teste, e por isso serve só como
+indício sobre a cauda dos modelos. Houve \ObsEum{} anos $\le$ E1. A Gamma com coeficiente de variação constante
 esperava \EspEumNSGamma{} ($p$\,\PObsEumNSGamma), e a média de Akaike não estacionária,
 \EspEumNSMedia{} ($p$\,\PObsEumNSMedia). Esses $p$ tratam os parâmetros ajustados como
 conhecidos. Incorporando a incerteza deles por bootstrap dos anos de treino, o $p$ dos modelos
-estacionários no P10 passa a \PPredObsPdezEstMedia{} na média de Akaike (\cref{tab:valid}). A
-validação confirma, portanto, a não estacionariedade com um limiar não viesado e indica que a
-Gamma de forma fixa subestima a cauda seca.
+estacionários no P10 passa a \PPredObsPdezEstMediaVal{} na média de Akaike (\cref{tab:valid}). Com
+um limiar não viesado, a validação rejeita, portanto, os modelos estacionários e é compatível com
+os não estacionários; não rejeitá-los não prova que estejam certos, só que os 15 anos de teste não
+os contradizem. No limiar E1, com o viés de seleção já dito, a Gamma de forma fixa é a única
+não estacionária rejeitada, o que é coerente com a rejeição da forma fixa acima.
 
 \begin{table}[htbp]
   \centering
@@ -919,10 +944,13 @@ sobre as datas é mista (\cref{fig:estacao}). O início atrasa \SenInicio{} dias
 \IC{\SenInicioICinf}{\SenInicioICsup} (MK $p$\,\PMKInicio; Hamed--Rao $p$\,\PHRInicio; TFPW
 $p$\,\PTFPWInicio), e a duração varia \SenDuracao{} dias por década
 \IC{\SenDuracaoICinf}{\SenDuracaoICsup} (MK $p$\,\PMKDuracao; Hamed--Rao $p$\,\PHRDuracao; TFPW
-$p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, e só o teste com pré-branqueamento não é
-significativo. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
-maior que o efeito estimado, a não significância no TFPW reflete falta de poder, e não ausência
-de mudança: há indício de uma estação chuvosa que começa mais tarde e é mais curta. Essas
+$p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, mas eles supõem anos independentes, e as duas
+séries têm autocorrelação de ordem 1 positiva e considerável. Com essa autocorrelação levada em conta,
+a evidência enfraquece: no início, nem o Hamed--Rao nem o TFPW são significativos; na duração, só
+o Hamed--Rao é. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
+maior que o efeito estimado, a não significância não permite concluir que as datas não mudaram;
+mas também não é evidência de que mudaram. O que há é um indício fraco de uma estação chuvosa
+que começa mais tarde e é mais curta. Essas
 tendências descrevem só os anos com estação definida. Os anos sem estação são
 secos e se concentram no período recente; ficando de fora, tendem a fazer a mudança nas datas
 parecer menor do que é.
@@ -1049,10 +1077,11 @@ depende da década de 2010: até 2010/11, a mesma queda não seria significativa
 confirmam a queda. Contra a referência do INMET, a parte exclusiva da \Est{} coincide, com
 significância marginal, com a instalação da estação automática em \QuebraQ{}; mas o pluviômetro
 independente mais próximo, a \DistJuazeiro{}~km, reproduz a tendência da \Est{} nos mesmos anos e
-não mostra mudança relativa nessa data. Uma contribuição instrumental não pode ser descartada, mas
+não mostra mudança relativa nessa data (a quebra que a razão entre os dois tem é posterior, a partir de
+\QuebraAnaJuazeiro{}). Uma contribuição instrumental não pode ser descartada, mas
 não é necessária para explicar a queda. A diminuição aparece nos índices de
-intensidade (Rx1day, SDII, R95p) e, com evidência mais fraca, no número de dias de chuva, e há indício, não confirmado
-pelo teste com pré-branqueamento, de que a estação chuvosa começa mais tarde e ficou mais curta.
+intensidade (Rx1day, SDII, R95p) e, com evidência mais fraca, no número de dias de chuva, e há um indício fraco, que não resiste à correção
+da autocorrelação no início da estação, de que a estação chuvosa começa mais tarde e ficou mais curta.
 A forma do ciclo anual, medida pelo índice de sazonalidade e pela concentração, não mudou, e o
 aumento de anos sem estação chuvosa definida não é estatisticamente significativo.
 
@@ -1093,7 +1122,8 @@ mas ficou abaixo da de 1950--1989; no Sahel ocidental, o déficit persistiu
 efeito estufa \parencite{dong2015}. No sudoeste da América do Norte, 2000--2021 foi o período de
 22 anos mais seco desde pelo menos o ano 800, com contribuição antrópica relevante
 \parencite{williams2020,williams2022}. No sudeste da Austrália, a Seca do Milênio (2001--2009), a pior
-do registro, foi explicada em grande parte pelo El Niño \parencite{vandijk2013}.
+do registro, teve cerca de dois terços do déficit de chuva no leste explicados pelo El Niño, enquanto
+no sul a atribuição ficou inconclusiva \parencite{vandijk2013}.
 
 Três lições se aplicam aqui. Primeiro, uma década seca pode ser seguida de anos chuvosos sem que a
 média volte ao nível anterior, como no Sahel. Os anos de 2021/22 a 2023/24 em Petrolina ainda não
@@ -1121,7 +1151,7 @@ persistência adicional de um ano para o outro.
 de grandeza, e o cenário com inclinação regional (\TRegionalMedia{} anos em 2025) deve ser lido
 lado a lado com o principal. A conclusão não estacionária depende de uma tendência log-linear ao
 longo de seis décadas e de como a variabilidade acompanha a queda da média. O nível dessa reta no
-fim da série é a parte mais frágil: os três anos chuvosos que a sucedem seriam muito improváveis
+fim da série é a parte mais frágil: os três anos chuvosos que a sucedem seriam improváveis
 sob o modelo, de modo que os períodos de retorno de \TNSFaixaMin{} a \TNSFaixaMax{} anos
 descrevem o clima da década de 2010 melhor que o atual e provavelmente subestimam o período de
 retorno hoje. Como no Sahel, só mais anos dirão se a recuperação é parcial ou completa. Supor coeficiente de
@@ -1148,7 +1178,8 @@ anos.
   \item \textbf{Homogeneidade da chuva.} A queda da chuva na \Est{} é regional, mas pode ter
   também uma parte local: a razão com a referência do INMET varia \SenQ{}\,\% por década, com indício marginal
   de quebra após \QuebraQ{}. Os pluviômetros da ANA não confirmam essa quebra de forma consistente
-  (o mais próximo não a mostra; dois mais distantes sugerem um excesso local), de modo que não
+  (o mais próximo não a mostra, mas tem com a \Est{} outra quebra, a partir de
+  \QuebraAnaJuazeiro{}; Junco e Lagoa Grande sugerem um excesso local), de modo que não
   sabemos se o excedente é climático ou instrumental. O cenário com inclinação regional
   (\cref{tab:retorno,tab:prob}) delimita esse efeito.
   \item \textbf{Homogeneidade da temperatura.} A Tmáx anterior a 1971 difere das vizinhas e foi
@@ -1212,9 +1243,9 @@ anos.
   ordem de \TMediaAkaikeB{} anos \IC{\TMediaAkaikeBICinf}{\TMediaAkaikeBICsup}, sob
   estacionariedade, para \TNSFaixaMin{} a \TNSFaixaMax{} anos no fim da série, conforme o cenário
   (\TNSMediaUlt{} anos \IC{\TNSMediaUltICinf}{\TNSMediaUltICsup} com a média do último ano
-  observado). Os anos chuvosos de 2021/22 a 2023/24, fora do ajuste, seriam muito improváveis
-  sob esse modelo, e por isso esses valores tendem a ser um limite inferior do período de retorno
-  atual. Nos
+  observado), todos avaliados em \UltimoAnoNS{}. Os anos chuvosos de 2021/22 a 2023/24, fora do
+  ajuste, seriam improváveis sob esse modelo (cerca de 1 em \PRecConjuntaPredInv{}), e por isso
+  esses valores provavelmente subestimam o período de retorno atual. Nos
   \NAnaRetorno{} pluviômetros da ANA, ele também cai, de \TEstAnaMin{}--\TEstAnaMax{} para
   \TNSAnaMin{}--\TNSAnaMax{} anos, e a análise regional dá \TRegEst{} anos sob estacionariedade
   e \TRegNS{} com a média de \UltimoAnoNS{}, com intervalos só um pouco mais estreitos. O
@@ -1232,8 +1263,9 @@ dos postos da ANA é baixada por \texttt{scripts/baixa\_ana.jl}, e as normais do
 \texttt{scripts/extrai\_normais\_inmet.py}. O código Julia, com testes unitários, e
 o script que regenera todas as figuras e todos os números deste texto (\texttt{scripts/paper.jl},
 que escreve \texttt{paper/resultados.tex}), além de uma verificação independente em Python
-(\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos, estão em \url{https://github.com/dantebertuzzi/meteo} e
-no depósito do Zenodo deste trabalho, \href{https://doi.org/10.5281/zenodo.23438824}{doi:10.5281/zenodo.23438824}. O código está sob licença
+(\texttt{scripts/verifica.py}) que recalcula os números centrais a partir dos dados brutos e as provas
+em Lean das fórmulas fechadas (\texttt{lean/}), estão em \url{https://github.com/dantebertuzzi/meteo} e
+no depósito do Zenodo deste trabalho, \href{https://doi.org/10.5281/zenodo.23438823}{doi:10.5281/zenodo.23438823} (todas as versões). O código está sob licença
 MIT e o texto sob CC-BY 4.0.
 
 \printbibliography[title={Referências}]

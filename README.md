@@ -33,6 +33,16 @@ cd paper && latexmk -pdf main.tex            # artigo
 `julia --project=. scripts/paper.jl figuras` regenera só as figuras a partir do cache da última
 execução.
 
+### Verificação formal (Lean)
+
+`lean/` prova em Lean 4 + Mathlib as fórmulas fechadas usadas pelo código: probabilidade em $n$
+anos e tempo médio de espera $1/p$, risco com $p$ variável, média por pesos de Akaike, cadeia de
+Markov de dois estados e a recursão Poisson-binomial da validação. Ver `lean/README.md`.
+
+```bash
+cd lean && lake exe cache get && lake build
+```
+
 ### Verificação independente
 
 `scripts/verifica.py` reimplementa os cálculos centrais em Python (SciPy, pymannkendall) a partir
@@ -82,4 +92,4 @@ results/paper/         tabelas CSV de todas as análises do artigo
 
 ## Como citar
 
-Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versão 1.1.0, DOI próprio atribuído no depósito; todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
+Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versões 1.1.0 e 1.2.0, DOI próprio atribuído em cada depósito; todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
