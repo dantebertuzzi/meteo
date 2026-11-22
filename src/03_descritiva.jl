@@ -33,7 +33,10 @@ tabela_descritiva(df, vars; razao = Dict()) =
 
 "Ajuste de Benjamini–Hochberg (controle da taxa de falsas descobertas)."
 function bh_ajuste(p::AbstractVector)
-    n = length(p); o = sortperm(p); q = similar(p, Float64)
+    q = fill(NaN, length(p))
+    ok = findall(x -> !ismissing(x) && isfinite(x), p)      # só os testes realizados e válidos
+    n = length(ok); n == 0 && return q
+    o = ok[sortperm(Float64.(p[ok]))]
     acc = 1.0
     for k in n:-1:1
         acc = min(acc, p[o[k]] * n / k)

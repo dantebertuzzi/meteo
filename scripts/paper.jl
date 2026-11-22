@@ -16,7 +16,11 @@ titulo(s) = println("\n", "="^length(s), "\n", s, "\n", "="^length(s))
 # ============================================================================= dados
 function bloco_dados()
     titulo("Série longa 82983")
-    d = carrega_longo()
+    d = carrega_longo(); d_bruto = copy(d)              # d_bruto: sem o controle de qualidade da temperatura
+    qc = qc_temperatura!(d)
+    @printf("CQ da temperatura: segmento da Tmín removido (%d dias); > 4 DP: Tmáx %d, Tmín %d, Tméd %d dias\n",
+            qc.segmento_tmin, qc.tmax, qc.tmin, qc.tmed)
+    registra!("NDiasSegTmin", qc.segmento_tmin); registra!("NQCTmax", qc.tmax); registra!("NQCTmin", qc.tmin)
     dm = mensal_longo(d; ref = REF)
     dh, clim_anual = hidro_longo(d; ref = REF)
     v = dh[dh.valido, :]
@@ -31,7 +35,7 @@ function bloco_dados()
     registra!("MediaChuvaAteDoisMilNove", mean(v09.prec); dig = 0); registra!("NChuvaAteDoisMilNove", nrow(v09))
     salva_ptab(dh, "anos_hidrologicos_82983")
     salva_ptab(dm, "mensal_82983")
-    return (d = d, dm = dm, dh = dh, clim_anual = clim_anual)
+    return (d = d, d_bruto = d_bruto, dm = dm, dh = dh, clim_anual = clim_anual)
 end
 
 # ============================================================================= homogeneidade
@@ -87,6 +91,8 @@ function bloco_homogeneidade(L)
     end
     i1213 = findfirst(==(2012), h.ano_hidro)
     !isnothing(i1213) && registra!("RazaoChuvaDozeTreze", h.razao_prec[i1213]; dig = 2)
+    i2021 = findfirst(==(2021), h.ano_hidro)
+    !isnothing(i2021) && registra!("RazaoChuvaVinteUm", h.razao_prec[i2021]; dig = 2)
     return h, res
 end
 
@@ -118,7 +124,9 @@ function bloco_vizinhas(L)
                        p_tfpw = isnothing(tv) ? missing : tv.p_mk_tfpw,
                        quebra_pettitt = isnothing(tv) ? missing : tv.mudanca_apos, p_pettitt = isnothing(tv) ? missing : tv.p_pettitt))
     end
-    rs = DataFrame(resumo); rs.q_mk = bh_ajuste(coalesce.(rs.p_mk, 1.0))
+    rs = DataFrame(resumo); rs.q_mk = bh_ajuste(rs.p_mk); rs.q_teste = bh_ajuste(rs.p_tfpw)
+    pa = only(eachrow(rs[rs.estacao .== "Paulo Afonso", :]))
+    registra!("SenVizPauloAfonso", pa.sen_decada; dig = 0); registra_p!("PVizPauloAfonso", pa.p_tfpw)
     mostra(rs; titulo = "Tendência da chuva anual nas vizinhas (mesmo critério de validade)")
     salva_ptab(rs, "vizinhas_tendencia")
     cand = Dict(zip(L.dh.ano_hidro[L.dh.valido], Float64.(L.dh.prec[L.dh.valido])))
@@ -134,12 +142,19 @@ function bloco_vizinhas(L)
     registra!("QAntes", sn.media_antes; dig = 2); registra!("QDepois", sn.media_depois; dig = 2)
     registra_p!("PPettittQ", pt.p); registra_p!("PTendQ", tq.p_mk)
     registra!("NvizinhasTendNeg", count(r -> !ismissing(r.sen_decada) && r.sen_decada < 0, eachrow(rs)))
-    registra!("NvizinhasTendSig", count(<(0.05), rs.q_mk))
+    registra!("NvizinhasTendSig", count(<(0.05), rs.q_teste))       # teste principal com BH
     # tendência da referência regional (sinal climático comum)
     tr = analise_tendencia(Q.ano, Q.referencia; nome = "referência regional")
     registra_ic!("SenReferencia", tr.sen_decada, tr.sen_ic_inf, tr.sen_ic_sup; dig = 0); registra_p!("PMKReferencia", tr.p_mk)
     mostra(DataFrame([tq, tr]); titulo = "Tendência: razão Q (inomogeneidade) × referência regional (clima)")
     registra_ic!("SenQ", 100tq.sen_decada, 100tq.sen_ic_inf, 100tq.sen_ic_sup; dig = 1)
+    te = analise_tendencia(Q.ano, Q.candidata; nome = "82983 nos anos da referência")
+    registra_ic!("SenEstAnosRef", te.sen_decada, te.sen_ic_inf, te.sen_ic_sup; dig = 0)
+    registra!("PctRefEst", 100tr.sen_decada / te.sen_decada; dig = 0)
+    a8 = Q.ano .<= 2008
+    registra!("SenRefAteOito", analise_tendencia(Q.ano[a8], Q.referencia[a8]).sen_decada; dig = 0)
+    registra!("SenEstAteOito", analise_tendencia(Q.ano[a8], Q.candidata[a8]).sen_decada; dig = 0)
+    registra_p!("PTesteQ", tq.p_mk_tfpw); registra_p!("PTesteReferencia", tr.p_mk_tfpw)
 
     # par a par: log(82983/vizinha) — a referência composta muda de composição quando
     # estações fecham (S. do Bonfim 2011, P. Afonso 2015); pares fixos evitam esse artefato.
@@ -149,18 +164,26 @@ function bloco_vizinhas(L)
         t = analise_tendencia(an, lq; nome = r.estacao); s = snht_teste(Float64.(an), lq)
         (vizinha = r.estacao, rho_dif = r.rho_dif, n = length(an), inicio = rotulo_hidro(an[1]), fim = rotulo_hidro(an[end]),
          sen_pct_decada = 100(exp(t.sen_decada) - 1), ic_inf = 100(exp(t.sen_ic_inf) - 1), ic_sup = 100(exp(t.sen_ic_sup) - 1),
-         p_mk = t.p_mk, p_snht = s.p, quebra_snht = rotulo_hidro(Int(s.ultimo_antes)))
+         p_mk = t.p_mk, p_teste = t.p_mk_tfpw, p_snht = s.p, quebra_snht = rotulo_hidro(Int(s.ultimo_antes)))
     end)
     pares.q_snht = bh_ajuste(pares.p_snht)
     mostra(pares; titulo = "Razões par a par log(82983/vizinha): tendência relativa e quebra")
     salva_ptab(pares, "vizinhas_pares")
     registra!("NparesQuebraSig", count(<(0.05), pares.q_snht)); registra!("Npares", nrow(pares))
-    # tendência relativa significativa em algum par (excesso local de queda frente à vizinha)
-    ts = pares[pares.p_mk .< 0.05, :]
-    registra!("NparesTendSig", nrow(ts)); registra!("ParesTendSig", join(ts.vizinha, " e "))
-    if nrow(ts) > 0
-        registra!("SenParesTendMin", minimum(ts.sen_pct_decada); dig = 1); registra!("SenParesTendMax", maximum(ts.sen_pct_decada); dig = 1)
-        registra!("PParesTendMax", maximum(ts.p_mk); dig = 3)
+    # tendência relativa nos pares, com o teste principal e BH na família dos pares
+    pares.q_teste = bh_ajuste(pares.p_teste)
+    registra!("NparesTendSig", count(<(0.05), pares.q_teste))
+    neg = pares[pares.sen_pct_decada .< -3, :]                       # pares com queda relativa apreciável
+    registra!("NparesQuedaRel", nrow(neg)); registra!("ParesQuedaRel", join(neg.vizinha, " e "))
+    registra!("SenParesQuedaMin", minimum(neg.sen_pct_decada); dig = 1); registra!("SenParesQuedaMax", maximum(neg.sen_pct_decada); dig = 1)
+    registra_p!("QParesQuedaMin", minimum(neg.q_teste))
+    chave_viz = Dict("Cabrobó" => "Cabrobo", "Remanso" => "Remanso", "Paulo Afonso" => "PauloAfonso",
+                     "Senhor do Bonfim" => "Bonfim", "Ouricuri" => "Ouricuri", "Petrolândia" => "Petrolandia",
+                     "Caraíba" => "Caraiba", "Floresta" => "Floresta")
+    for r in eachrow(pares)
+        k = chave_viz[r.vizinha]
+        registra!("SenPar" * k, r.sen_pct_decada; dig = 1); registra_p!("QPar" * k, r.q_teste)
+        registra!("RhoPar" * k, r.rho_dif; dig = 2)
     end
     # composição da referência: vizinhas que encerram antes do último ano da candidata e anos com uma só
     ultc = maximum(keys(cand))
@@ -168,7 +191,8 @@ function bloco_vizinhas(L)
     registra!("NvizEncerram", count(<(ultc), values(fim_viz)))
     um = Q.ano[Q.n_viz .== 1]
     registra!("NanosRefUmaViz", length(um)); registra!("AnosRefUmaViz", join(rotulo_hidro.(um), ", "))
-    registra!("NanosSemRef", count(a -> !(a in Q.ano), keys(cand)))
+    semref = sort([a for a in keys(cand) if !(a in Q.ano)])
+    registra!("NanosSemRef", length(semref)); registra!("AnosSemRef", join(rotulo_hidro.(semref), ", "))
     # o SNHT também rejeita sob tendência gradual sem quebra: simula a reta ajustada a Q com resíduos
     # normais e conta quantas vezes T₀ supera o valor crítico de 5 % da série i.i.d.
     tq_ = Float64.(Q.ano); X = hcat(ones(length(tq_)), tq_); βq = X \ Q.Q; σq = std(Q.Q .- X * βq)
@@ -241,8 +265,13 @@ function bloco_retorno(L, E)
         registra!("T" * r.distribuicao, r.T_x1213; sig = 2)
     end
 
+    registra!("TMinimoAkaike", 1 / sum(cmp.peso_akaike .* cmp.p_xmin); sig = 2)      # E1′ pelo método principal
     # empírico
     k1213 = count(<=(E.x1213), x); kmin = count(<=(E.xmin), x)
+    # sensibilidade ao empate: 2011/12 fica 0,1 mm acima de 2012/13
+    x1112 = only(E.v.prec[E.v.rotulo .== "2011/12"])
+    registra!("ChuvaOnzeDoze", x1112; dig = 1); registra!("NanosAteOnzeDoze", count(<=(x1112), x))
+    registra!("TEmpiricoOnzeDoze", (n + 1) / count(<=(x1112), x); sig = 2)
     registra!("NanosAteDozeTreze", k1213)
     registra!("TEmpiricoDozeTreze", (n + 1) / k1213; sig = 2)
 
@@ -328,6 +357,10 @@ function bloco_nao_estacionario(L, E, V)
     mostra(DataFrame([tend]); titulo = "Tendência na chuva anual (82983)")
     registra_ic!("SenChuva", tend.sen_decada, tend.sen_ic_inf, tend.sen_ic_sup; dig = 0)
     registra_p!("PMKChuva", tend.p_mk); registra_p!("PTFPWChuva", tend.p_mk_tfpw)
+    for (k, a0, a1) in (("Lacerda", 1965, 2006), ("Teixeira", 1978, 2007), ("Gois", 1975, 2016))
+        m_ = a0 .<= v.ano_hidro .<= a1
+        registra!("SenEst" * k, analise_tendencia(v.ano_hidro[m_], v.prec[m_]).sen_decada; dig = 0)
+    end
     registra_p!("PPettittChuvaLonga", tend.p_pettitt)
     nt = gamma_nao_estacionaria(y, t)
     oni = oni_estacao_chuvosa()
@@ -375,13 +408,21 @@ function bloco_nao_estacionario(L, E, V)
         registra!("PesoNS" * r.distribuicao * sufixo(r.forma), r.peso_akaike; dig = 2)
     end
     # razão de verossimilhança forma variável × fixa, por família (χ²₁)
+    plr = Dict{String, Float64}()
     for D in CANDIDATAS
         nome = string(nameof(D))
         ffix = only(f for f in ma.fits if f.D === D && !f.forma_var)
         fvar = only(f for f in ma.fits if f.D === D && f.forma_var)
-        registra_p!("PFormaVar" * nome, ccdf(Chisq(1), max(2(fvar.ll - ffix.ll), 0.0)))
+        plr[nome] = ccdf(Chisq(1), max(2(fvar.ll - ffix.ll), 0.0))
+        registra_p!("PFormaVar" * nome, plr[nome])
         registra!("EfeitoForma" * nome, 100(exp(fvar.c) - 1); dig = 1)
     end
+    nomes_lr = collect(keys(plr)); qlr = bh_ajuste([plr[k] for k in nomes_lr])
+    for (k, q) in zip(nomes_lr, qlr)
+        registra_p!("QFormaVar" * k, q)
+    end
+    nfx = only(f for f in ma.fits if f.D === Normal && !f.forma_var)
+    registra!("PctNormalNeg", 100nfx.F(0.0, tc(ult)) / nfx.F(E.x1213, tc(ult)); dig = 0)
     fixas = ma.tab.forma .== "fixa"
     registra!("TNSModelosMin", minimum(ma.tab.T_ult[fixas]); sig = 2); registra!("TNSModelosMax", maximum(ma.tab.T_ult[fixas]); sig = 2)
     registra!("TNSVarMin", minimum(ma.tab.T_ult[.!fixas]); sig = 2); registra!("TNSVarMax", maximum(ma.tab.T_ult[.!fixas]); sig = 2)
@@ -412,6 +453,7 @@ function bloco_nao_estacionario(L, E, V)
         pbr = ns_media_akaike_boot(y, t, E.x1213, [tc(ult), tc(2025)]; b = b_reg)
         p0 = mr.p_em(E.x1213, tc(2025)); pu0 = mr.p_em(E.x1213, tc(ult))
         registra_ic!("TRegionalMedia", 1 / p0, 1 / quantile(pbr[:, 2], 0.975), 1 / quantile(pbr[:, 2], 0.025); sig = 2)
+        registra!("NBootRegionalB", size(pbr, 1))
         registra_ic!("TRegionalMediaUltB", 1 / pu0, 1 / quantile(pbr[:, 1], 0.975), 1 / quantile(pbr[:, 1], 0.025); sig = 2)
         for nh in HORIZONTES
             registra_ic!("ProbRegMediaN" * string(nh), 100prob_ao_menos_um(pu0, nh),
@@ -457,7 +499,7 @@ function bloco_nao_estacionario(L, E, V)
     # estimador principal (média de Akaike das oito candidatas) com o critério FCA ≤ 7,5 %: inclui os
     # anos chuvosos depois de 2020/21, onde o T do fim da série é mais sensível
     m75 = ns_media_akaike(y75, t75); u75 = tc(maximum(d75.ano_hidro))
-    pb75 = ns_media_akaike_boot(y75, t75, E.x1213, [u75])
+    pb75 = ns_media_akaike_boot(y75, t75, E.x1213, [u75]); registra!("NBootFCASete", size(pb75, 1))
     registra_ic!("TNSMediaFCASeteUlt", 1 / m75.p_em(E.x1213, u75), 1 / quantile(pb75[:, 1], 0.975), 1 / quantile(pb75[:, 1], 0.025); sig = 2)
     registra!("TNSMediaFCASeteUltStd", 1 / m75.p_em(E.x1213, tc(ult)); sig = 2)          # mesmo modelo, avaliado em 2020/21
     registra!("UltimoAnoFCASete", rotulo_hidro(maximum(d75.ano_hidro)))
@@ -523,6 +565,20 @@ function bloco_nao_estacionario(L, E, V)
         registra!("AICEpisodio" * k, f.ep; dig = 1)
         registra!("AnosEpisodio" * k, rotulo_hidro(round(Int, f.c_ep[1])) * "--" * rotulo_hidro(round(Int, f.c_ep[2])))
         registra_p!("PBootDegrau" * k, f.p_deg); registra_p!("PBootEpisodio" * k, f.p_ep)
+        if k == "Rec"
+            ao = sort(aa); yo = yy[sortperm(aa)]; nn = length(yo)
+            Xr = hcat(ones(nn), ao); βr = Xr \ yo; σr = sqrt(sum(abs2, yo .- Xr * βr) / nn)
+            Tn(μ, σ) = 1 / cdf(Normal(μ, σ), E.x1213)
+            registra!("TFormaRetaUlt", Tn(βr[1] + βr[2] * ult, σr); sig = 2)
+            registra!("TFormaRetaFim", Tn(βr[1] + βr[2] * maximum(ao), σr); sig = 2)
+            g = ao .>= f.c_deg
+            σd = sqrt((sum(abs2, yo[g] .- mean(yo[g])) + sum(abs2, yo[.!g] .- mean(yo[.!g]))) / nn)
+            registra!("TFormaDegrau", Tn(mean(yo[g]), σd); sig = 2); registra!("MediaFormaDegrau", mean(yo[g]); dig = 0)
+            e = f.c_ep[1] .<= ao .<= f.c_ep[2]
+            σe = sqrt((sum(abs2, yo[e] .- mean(yo[e])) + sum(abs2, yo[.!e] .- mean(yo[.!e]))) / nn)
+            registra!("TFormaEpDentro", Tn(mean(yo[e]), σe); sig = 2); registra!("MediaFormaEpDentro", mean(yo[e]); dig = 0)
+            registra!("TFormaEpFora", Tn(mean(yo[.!e]), σe); sig = 1); registra!("MediaFormaEpFora", mean(yo[.!e]); dig = 0)
+        end
         push!(ftabs, (amostra = rot, n = length(yy), AIC_reta = f.lin, AIC_degrau = f.deg,
                       corte_degrau = rotulo_hidro(round(Int, f.c_deg)), p_degrau = f.p_deg, AIC_episodio = f.ep,
                       episodio = rotulo_hidro(round(Int, f.c_ep[1])) * "–" * rotulo_hidro(round(Int, f.c_ep[2])), p_episodio = f.p_ep))
@@ -606,7 +662,8 @@ function bloco_validacao(L, E; corte = 2005)
     p10 = quantile(ytr, 0.10)
     registra!("LimiarPdez", p10; dig = 0)
     linhas = NamedTuple[]
-    for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10))
+    x1112 = only(E.v.prec[E.v.rotulo .== "2011/12"])
+    for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10), ("Eumb", x1112))
         obs = count(<=(x0), yte)
         registra!("Obs" * rotL, obs)
         for (k, nome) in modelos
@@ -621,7 +678,7 @@ function bloco_validacao(L, E; corte = 2005)
     # dos anos de treino (pares ano–chuva), e o p é a média de P(N ≥ obs | θ*) entre as réplicas.
     # O limiar P10 fica fixo no valor do treino original.
     rngv = MersenneTwister(SEMENTE); ntr = length(ytr)
-    acum = Dict((rotL, k) => Float64[] for rotL in ("Eum", "Pdez") for (k, _) in modelos)
+    acum = Dict((rotL, k) => Float64[] for rotL in ("Eum", "Pdez", "Eumb") for (k, _) in modelos)
     for _ in 1:NBOOT_VALID
         i = rand(rngv, 1:ntr, ntr); yb = ytr[i]; tb = ttr[i]
         res = try
@@ -639,7 +696,7 @@ function bloco_validacao(L, E; corte = 2005)
                   "EstMedia" => (x0, t) -> sum(wb[k] * cdf(estb[k], x0) for k in keys(estb)) / swb,
                   "NSGamma" => (x0, t) -> gfb.F(x0, t), "NSNormal" => (x0, t) -> nfb.F(x0, t),
                   "NSMedia" => (x0, t) -> mab.p_em(x0, t))
-        for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10)), (k, _) in modelos
+        for (rotL, x0) in (("Eum", E.x1213), ("Pdez", p10), ("Eumb", x1112)), (k, _) in modelos
             push!(acum[(rotL, k)], prob_ao_menos_k([pb[k](x0, t) for t in tte], count(<=(x0), yte)))
         end
     end
@@ -673,14 +730,18 @@ function bloco_anos_recentes(L, E, N)
         end
         (lo + hi) / 2
     end
-    sufixo = Dict(2021 => "VinteUm", 2022 => "VinteDois", 2023 => "VinteTres")
+    # todos os anos depois do último válido com total observado (critério fixado antes do resultado),
+    # e não só os chuvosos: 2024/25 entra, embora tenha FCA alta, como 2022/23
+    RECENTES = (2021, 2022, 2023, 2024)
+    sufixo = Dict(2021 => "VinteUm", 2022 => "VinteDois", 2023 => "VinteTres", 2024 => "VinteQuatro")
     linhas = NamedTuple[]
-    for a in (2021, 2022, 2023)
+    for a in RECENTES
         r = only(eachrow(L.dh[L.dh.ano_hidro .== a, :]))
         x = Float64(r.prec_obs); p = 1 - Fm(x, tc(a)); med = mediana_modelo(tc(a))
         o = get(N.oni, a, missing)
         registra!("PRec" * sufixo[a], 100p; dig = 1); registra!("MedianaModelo" * sufixo[a], med; dig = 0)
         ismissing(o) || registra!("ONIRec" * sufixo[a], o; dig = 1)
+        registra!("ChuvaObsRec" * sufixo[a], x; dig = 0); registra!("FCARec" * sufixo[a], 100r.fca; dig = 1)
         push!(linhas, (ano = rotulo_hidro(a), chuva_obs = x, dias_aus = r.dias_aus, fca = r.fca,
                        mediana_modelo = med, p_ao_menos_obs = p, oni_nov_abr = o))
     end
@@ -693,7 +754,7 @@ function bloco_anos_recentes(L, E, N)
     # anos compartilham os parâmetros de cada réplica), e não o produto das médias.
     yv = Float64.(v.prec); tv = tc.(v.ano_hidro); nv = length(yv)
     rngr = MersenneTwister(SEMENTE); pr = Vector{Vector{Float64}}()
-    xs_rec = [(Float64(only(L.dh.prec_obs[L.dh.ano_hidro .== a])), tc(a)) for a in (2021, 2022, 2023)]
+    xs_rec = [(Float64(only(L.dh.prec_obs[L.dh.ano_hidro .== a])), tc(a)) for a in RECENTES]
     for _ in 1:NBOOT_VALID
         i = rand(rngr, 1:nv, nv)
         mb = try ns_media_akaike(yv[i], tv[i]) catch; continue end
@@ -701,7 +762,7 @@ function bloco_anos_recentes(L, E, N)
     end
     P = permutedims(reduce(hcat, pr))
     tab.p_preditivo = vec(mean(P, dims = 1))
-    for (j, a) in enumerate((2021, 2022, 2023))
+    for (j, a) in enumerate(RECENTES)
         registra!("PRecPred" * sufixo[a], 100tab.p_preditivo[j]; dig = 1)
     end
     pjp = mean(prod(P, dims = 2))
@@ -711,6 +772,12 @@ function bloco_anos_recentes(L, E, N)
     fisher(ps) = ccdf(Chisq(2length(ps)), -2sum(log, ps))
     registra!("PRecFisherInv", 1 / fisher(tab.p_ao_menos_obs); sig = 2)
     registra!("PRecFisherPredInv", 1 / fisher(tab.p_preditivo); sig = 2)
+    # bilateral: a direção (anos chuvosos) foi notada depois de ver os dados, então a versão que não
+    # escolhe a cauda é a de referência: pᵢ ← 2 min(pᵢ, 1 − pᵢ)
+    bil(ps) = 2 .* min.(ps, 1 .- ps)
+    registra!("PRecFisherBilInv", 1 / fisher(bil(tab.p_ao_menos_obs)); sig = 2)
+    registra!("PRecFisherBilPredInv", 1 / fisher(bil(tab.p_preditivo)); sig = 2)
+    registra!("NAnosRec", length(RECENTES))
     # média do modelo no último ano válido, com IC do bootstrap dos anos (normal com DP fixo, a
     # candidata de menor AIC; serve para comparar com a normal oficial de 1991–2020)
     nfix = only(f for f in ma.fits if f.D === Normal && !f.forma_var)
@@ -721,6 +788,7 @@ function bloco_anos_recentes(L, E, N)
         f = try ns_candidata(Normal, y[i], t[i]) catch; continue end
         push!(mb, exp(f.θ[2] + f.θ[3] * tc(ult)))
     end
+    registra!("NBootMediaNormal", length(mb))
     registra_ic!("MediaNormalUlt", exp(nfix.θ[2] + nfix.θ[3] * tc(ult)), quantile(mb, 0.025), quantile(mb, 0.975); dig = 0)
     mostra(tab; titulo = "P(Y ≥ observado) sob a média de Akaike ajustada até $(rotulo_hidro(ult))")
     salva_ptab(tab, "anos_recentes_modelo")
@@ -728,6 +796,7 @@ function bloco_anos_recentes(L, E, N)
 end
 
 # ============================================================================= M4: pluviômetros independentes (ANA)
+const PREC_MAX_DIA = 400.0          # mm/dia: acima disso, o valor diário é tratado como erro (como no BDMEP)
 """
 Verificação independente da tendência da chuva com pluviômetros da rede da ANA (outros
 operadores, outros instrumentos). Cada posto passa pelo mesmo critério de completude da 82983
@@ -745,6 +814,7 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
         info = POSTOS_ANA[cod]
         d = CSV.read(arq, DataFrame; missingstring = "")
         d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.prec[coalesce.(d.prec .> PREC_MAX_DIA, false)] .= missing      # mesmo limite de plausibilidade do BDMEP
         d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
         dh, _ = hidro_longo(d; ref = REF)
         v = dh[dh.valido, :]
@@ -755,7 +825,20 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
         length(com) >= min_comum || continue
         yp = [only(v.prec[v.ano_hidro .== a]) for a in com]; yr = [ref[a] for a in com]
         tp = theil_sen(Float64.(com), yp); tr = theil_sen(Float64.(com), yr)
-        q = yr ./ yp; tq = theil_sen(Float64.(com), q); mq = mann_kendall(Float64.(com), q)
+        q = yr ./ yp; tq = theil_sen(Float64.(com), q)
+        mq = (p = analise_tendencia(com, q).p_mk_tfpw,)                # teste principal na razão Q
+        pposto = analise_tendencia(com, yp).p_mk_tfpw                    # teste principal no próprio posto
+        # anos hidrológicos inteiramente consistidos (nível 2) pela ANA
+        cons = Set(g.ano_hidro[1] for g in groupby(d, :ano_hidro) if all(==(2), coalesce.(g.nivel_consistencia, 1)))
+        comc = [a for a in com if a in cons]
+        sc = length(comc) >= 15 ? (theil_sen(Float64.(comc), [only(v.prec[v.ano_hidro .== a]) for a in comc]).declive,
+                                    theil_sen(Float64.(comc), [ref[a] for a in comc]).declive,
+                                    analise_tendencia(comc, [ref[a] / only(v.prec[v.ano_hidro .== a]) for a in comc]).p_mk_tfpw,
+                                    maximum(comc)) : (NaN, NaN, NaN, missing)
+        # até 2011/12, antes da quebra da razão com Juazeiro
+        c11 = [a for a in com if a <= 2011]
+        s11 = (10theil_sen(Float64.(c11), [only(v.prec[v.ano_hidro .== a]) for a in c11]).declive,
+               10theil_sen(Float64.(c11), [ref[a] for a in c11]).declive)
         sn = snht_teste(Float64.(com), q)
         antes = q[com .< ano_a307]; depois = q[com .>= ano_a307]
         pw = length(depois) >= 3 ? pvalue(UnequalVarianceTTest(antes, depois)) : NaN
@@ -766,13 +849,18 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
         registra!("SenQAna" * k, 1000tq.declive; dig = 1); registra_p!("PQAna" * k, mq.p)
         registra_p!("PSnhtAna" * k, sn.p); registra!("QuebraAna" * k, rotulo_hidro(Int(sn.ultimo_antes) + 1))
         registra!("QAntesAna" * k, mean(antes); dig = 2); registra!("QDepoisAna" * k, mean(depois); dig = 2)
-        registra_p!("PAntesDepoisAna" * k, pw)
-        linhas[end] = merge(linhas[end], (sen_posto = 10tp.declive, sen_posto_inf = 10tp.ic_inf, sen_posto_sup = 10tp.ic_sup,
+        registra_p!("PAntesDepoisAna" * k, pw); registra_p!("PTesteAna" * k, pposto)
+        registra!("SenAnaAteOnze" * k, s11[1]; dig = 0); registra!("SenRefAteOnze" * k, s11[2]; dig = 0)
+        registra!("NComumAteOnze" * k, length(c11))
+        linhas[end] = merge(linhas[end], (p_posto = pposto, n_cons = length(comc), ult_cons = sc[4],
+                                          razao_sen = tp.declive / tr.declive, razao_sen_cons = sc[1] / sc[2],
+                                          p_Q_cons = sc[3], sen_posto = 10tp.declive, sen_posto_inf = 10tp.ic_inf, sen_posto_sup = 10tp.ic_sup,
                                           sen_82983 = 10tr.declive, sen_Q_pct = 1000tq.declive, p_Q_mk = mq.p,
                                           p_snht = sn.p, quebra_apos = Int(sn.ultimo_antes), Q_antes = mean(antes),
                                           Q_depois = mean(depois), p_antes_depois = pw))
     end
-    tab = DataFrame([merge((sen_posto = missing, sen_posto_inf = missing, sen_posto_sup = missing, sen_82983 = missing,
+    tab = DataFrame([merge((p_posto = missing, n_cons = missing, ult_cons = missing, razao_sen = missing,
+                            razao_sen_cons = missing, p_Q_cons = missing, sen_posto = missing, sen_posto_inf = missing, sen_posto_sup = missing, sen_82983 = missing,
                             sen_Q_pct = missing, p_Q_mk = missing, p_snht = missing, quebra_apos = missing,
                             Q_antes = missing, Q_depois = missing, p_antes_depois = missing), l) for l in linhas])
     sort!(tab, :dist_km)
@@ -786,6 +874,14 @@ function bloco_ana(L, E; min_comum = 30, ano_a307 = 2003)
     sg = u[u.sen_posto_sup .< 0, :]
     registra!("SenAnaSigMin", minimum(sg.sen_posto); dig = 0); registra!("SenAnaSigMax", maximum(sg.sen_posto); dig = 0)
     registra!("NAnaQSig", count(<(0.05), u.p_Q_mk)); registra!("NAnaAntesDepoisSig", count(<(0.05), u.p_antes_depois))
+    registra!("NAnaNegSigTeste", count(r -> r.sen_posto < 0 && r.p_posto < 0.05, eachrow(u)))
+    # quanto da tendência da 82983 os postos compartilham: razão dos declives nos anos comuns
+    registra!("RazaoSenAnaMediana", 100median(u.razao_sen); dig = 0)
+    uc = u[.!isnan.(u.razao_sen_cons), :]
+    registra!("RazaoSenAnaConsMediana", 100median(uc.razao_sen_cons); dig = 0)
+    registra!("NAnaCons", nrow(uc)); registra!("NAnaConsMenor", count(<(1), uc.razao_sen_cons))
+    registra!("NAnaConsQSig", count(<(0.05), uc.p_Q_cons))
+    registra!("UltimoAnoConsAna", rotulo_hidro(maximum(skipmissing(uc.ult_cons))))
     return tab
 end
 
@@ -813,11 +909,15 @@ function bloco_ana_retorno(L, E, AN; B = 1000)
         info = POSTOS_ANA[r.codigo]; k = info.chave
         d = CSV.read(joinpath(RAIZ, "data", "raw", "ana", "ana_$(r.codigo).csv"), DataFrame; missingstring = "")
         d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.prec[coalesce.(d.prec .> PREC_MAX_DIA, false)] .= missing      # mesmo limite de plausibilidade do BDMEP
         d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
         dh, _ = hidro_longo(d; ref = REF)
         # mesmo início da 82983: antes de 1963 há segmentos inomogêneos (p.ex. Lagoa Grande
         # registra 1 250–1 550 mm/ano em 1955–61, cerca do triplo do restante da série)
-        v = sort(dh[dh.valido .& (dh.ano_hidro .>= minimum(E.v.ano_hidro)), :], :ano_hidro)
+        vtodos = sort(dh[dh.valido .& (dh.ano_hidro .>= minimum(E.v.ano_hidro)), :], :ano_hidro)
+        # os modelos usam só os anos até o último válido da 82983, para que os T sejam comparáveis
+        # aos dela; as tendências "até o fim" usam todos os anos (vtodos)
+        v = vtodos[vtodos.ano_hidro .<= ult, :]
         y = Float64.(v.prec); n = length(y); m = mean(v.ano_hidro)
         t = (v.ano_hidro .- m) ./ 10; tc(a) = (a - m) / 10
         com = [a for a in v.ano_hidro if haskey(ref, a)]
@@ -835,21 +935,20 @@ function bloco_ana_retorno(L, E, AN; B = 1000)
         ma = ns_media_akaike(y, t)
         pn = ma.p_em(x0, tc(ult)); pn_posto = ma.p_em(x0, tc(maximum(v.ano_hidro)))
         pbn = ns_media_akaike_boot(y, t, x0, [tc(ult)]; B)
-        tend = analise_tendencia(v.ano_hidro, v.prec; nome = info.nome)
-        ate = v.ano_hidro .<= ult
-        tult = analise_tendencia(v.ano_hidro[ate], v.prec[ate]; nome = info.nome * " até " * rotulo_hidro(ult))
+        tend = analise_tendencia(vtodos.ano_hidro, vtodos.prec; nome = info.nome)
+        tult = analise_tendencia(v.ano_hidro, v.prec; nome = info.nome * " até " * rotulo_hidro(ult))
         # sensibilidade: limiar = 2012/13 do próprio posto, quando válido
         own = v.prec[v.ano_hidro .== 2012]
         x0_own = isempty(own) ? missing : Float64(only(own))
         Tn_own = ismissing(x0_own) ? missing : 1 / ma.p_em(x0_own, tc(ult))
         Te_own = ismissing(x0_own) ? missing : 1 / media_akaike(y, x0_own)
         l = (codigo = r.codigo, posto = info.nome, dist_km = r.dist_km, n = n,
-             periodo = string(v.rotulo[1], "–", v.rotulo[end]), razao_media = razao, limiar_mm = x0,
+             periodo = string(v.rotulo[1], "–", vtodos.rotulo[end]), razao_media = razao, limiar_mm = x0,
              sen_decada = tend.sen_decada, sen_inf = tend.sen_ic_inf, sen_sup = tend.sen_ic_sup, p_tfpw = tend.p_mk_tfpw,
              sen_ate_ult = tult.sen_decada, p_tfpw_ate_ult = tult.p_mk_tfpw,
              T_est = 1 / pe, T_est_inf = 1 / quantile(pbe, 0.975), T_est_sup = 1 / quantile(pbe, 0.025),
              T_ns = 1 / pn, T_ns_inf = 1 / quantile(pbn[:, 1], 0.975), T_ns_sup = 1 / quantile(pbn[:, 1], 0.025),
-             T_ns_ult_posto = 1 / pn_posto, limiar_proprio = x0_own, T_est_proprio = Te_own, T_ns_proprio = Tn_own)
+             T_ns_ult_posto = 1 / pn_posto, nb_est = length(pbe), nb_ns = size(pbn, 1), limiar_proprio = x0_own, T_est_proprio = Te_own, T_ns_proprio = Tn_own)
         push!(linhas, l)
         registra!("NAnaRet" * k, n); registra!("PeriodoAnaRet" * k, l.periodo); registra!("LimiarAna" * k, x0; dig = 0)
         registra_ic!("SenAnaTodos" * k, l.sen_decada, l.sen_inf, l.sen_sup; dig = 0); registra_p!("PTFPWAnaTodos" * k, l.p_tfpw)
@@ -871,7 +970,7 @@ function bloco_ana_retorno(L, E, AN; B = 1000)
     registra!("UltimoAnoAna", rotulo_hidro(maximum(parse(Int, split(p, "–")[2][1:4]) for p in tab.periodo)))
     registra!("NAnaRetornoCai", count(tab.T_ns .< tab.T_est))
     registra!("NAnaProprio", count(!ismissing, tab.T_ns_proprio))
-    registra!("NBootAnaRetorno", B)
+    registra!("NBootAnaRetorno", minimum(min.(tab.nb_est, tab.nb_ns)))      # réplicas válidas (mínimo entre postos)
     return tab
 end
 
@@ -891,9 +990,10 @@ function bloco_regional(L, E, AN; B = 400)
     for (k, r) in enumerate(eachrow(u))
         d = CSV.read(joinpath(RAIZ, "data", "raw", "ana", "ana_$(r.codigo).csv"), DataFrame; missingstring = "")
         d.prec = allowmissing(Float64.(coalesce.(d.prec, NaN))); d.prec[isnan.(d.prec)] .= missing
+        d.prec[coalesce.(d.prec .> PREC_MAX_DIA, false)] .= missing      # mesmo limite de plausibilidade do BDMEP
         d.ano = year.(d.data); d.mes = month.(d.data); d.ano_hidro = ano_hidro.(d.data)
         dh, _ = hidro_longo(d; ref = REF)
-        v = dh[dh.valido .& (dh.ano_hidro .>= minimum(v82.ano_hidro)), :]
+        v = dh[dh.valido .& (minimum(v82.ano_hidro) .<= dh.ano_hidro .<= maximum(v82.ano_hidro)), :]   # mesmos anos da 82983
         append!(y, Float64.(v.prec)); append!(ano, v.ano_hidro); append!(s, fill(k + 1, nrow(v)))
         push!(nomes, POSTOS_ANA[r.codigo].nome); push!(chaves, POSTOS_ANA[r.codigo].chave)
     end
@@ -948,11 +1048,14 @@ function bloco_indices(L, E)
     dm.balanco = [ismissing(p) || ismissing(e) ? missing : p - e for (p, e) in zip(dm.prec, dm.eto)]
     dm.spei12, ajll = spei(dm.balanco, dm.mes, dm.ano; k = 12, ref = REF, dist = :loglogistica)
     dm.spei12_gev, ajgev = spei(dm.balanco, dm.mes, dm.ano; k = 12, ref = REF, dist = :gev)
+    dm.spei12_pp, _ = spei(dm.balanco, dm.mes, dm.ano; k = 12, ref = REF, pwm = :pp)     # PWM de Vicente-Serrano
+    registra!("NRefJunSPEI", count(i -> dm.mes[i] == 6 && REF[1] <= dm.ano[i] <= REF[2] && !ismissing(dm.spei12[i]), 1:nrow(dm)))
 
     # Stagge et al. (2015): qualidade do ajuste pela normalidade do índice resultante
     sw = DataFrame(map([(:spi12, "SPI-12 (Gamma)"), (:spei12, "SPEI-12 (log-logística)"), (:spei12_gev, "SPEI-12 (GEV)")]) do (v, nm)
         ref = [z for (z, a) in zip(dm[!, v], dm.ano) if !ismissing(z) && REF[1] <= a <= REF[2]]
-        t = ShapiroWilkTest(Float64.(ref[1:12:end]))      # 1 valor por ano (evita sobreposição)
+        jun = [z for (z, a, m) in zip(dm[!, v], dm.ano, dm.mes) if !ismissing(z) && REF[1] <= a <= REF[2] && m == 6]
+        t = ShapiroWilkTest(Float64.(jun))                 # 1 valor por ano (junho), sem sobreposição
         (indice = nm, n_meses = count(!ismissing, dm[!, v]), media_ref = mean(ref), dp_ref = std(ref),
          W = t.W, p_shapiro = pvalue(t))
     end)
@@ -960,12 +1063,13 @@ function bloco_indices(L, E)
     salva_ptab(sw, "indices_normalidade")
 
     # índice no fim do ano hidrológico (junho) = SPI-12/SPEI-12 do ano hidrológico
-    jun = dm[dm.mes .== 6, [:ano, :spi12, :spei12, :spei12_gev]]
+    jun = dm[dm.mes .== 6, [:ano, :spi12, :spei12, :spei12_gev, :spei12_pp]]
     jun.ano_hidro = jun.ano .- 1
     for (rot, a) in (("DozeTreze", 2012), ("DezesseisDezessete", 2016), ("OnzeDoze", 2011))
         r = jun[jun.ano_hidro .== a, :]
         nrow(r) == 1 || continue
         registra!("SPI" * rot, r.spi12[1]; dig = 2); registra!("SPEI" * rot, r.spei12[1]; dig = 2)
+        registra!("SPEIpp" * rot, r.spei12_pp[1]; dig = 2)
     end
     salva_ptab(select(dm, :data, :ano, :mes, :prec, :tmax, :tmin, :eto, :balanco, :spi3, :spi6, :spi12, :spei12, :spei12_gev),
                "indices_mensais")
@@ -995,6 +1099,9 @@ function bloco_indices(L, E)
         registra!("TaxaEventos", λ * 10; dig = 1)    # eventos por década
         registra!("TSeveridadeRef", Tsev; sig = 2)
         registra!("TSeveridadeEmp", anos_cobertos / rank_sev; sig = 2)
+        e3 = e[e.duracao .>= 3, :]
+        T3 = 1 / (nrow(e3) / anos_cobertos * ccdf(fit_mle(Exponential, e3.severidade), r.severidade))
+        registra!("TSeveridadeRefMinTres", T3; sig = 2); registra!("NeventosSPIMinTres", nrow(e3))
         @printf("Evento de referência (SPI-12): %s a %s, D = %d meses, S = %.1f; %d evento(s) com S ≥ S_ref em %.0f anos; T(exp) ≈ %.0f anos\n",
                 r.inicio, r.fim, r.duracao, r.severidade, rank_sev, anos_cobertos, Tsev)
     end
@@ -1111,6 +1218,7 @@ function bloco_p2_sazonalidade(L)
     dia(n) = Dates.format(Date(2001, 7, 1) + Day(round(Int, n) - 1), "dd/mm")
     tend = DataFrame([tendencia_completa(s.ano_hidro, s[!, c]; nome = String(c))
                       for c in (:SI, :centroide, :concentracao, :inicio, :fim, :duracao, :frac_nov_abr)])
+    tend.q_teste = bh_ajuste(tend.p_mk_tfpw)
     mostra(tend; titulo = "Tendência dos indicadores de sazonalidade (por década)")
     salva_ptab(tend, "sazonalidade_tendencias")
     registra!("SIMedio", mean(s.SI); dig = 2); registra!("ConcMedia", mean(s.concentracao); dig = 2)
@@ -1126,13 +1234,21 @@ function bloco_p2_sazonalidade(L)
     registra_p!("PSemEstacao", ccdf(Chisq(1), LRl))
     @printf("Anos sem estação definida: OR por década = %.2f [%.2f; %.2f], LR p = %.3f\n", exp(bl), exp(bl - 1.96el), exp(bl + 1.96el), ccdf(Chisq(1), LRl))
     registra!("AnosSemEstacao", join(s.rotulo[.!s.estacao_definida], ", "))
+    # R̄ é fixo (normal de 1991–2020): num ano mais seco, o início fica mais tarde por construção.
+    # Controlando pelo total do ano, quanto sobra da tendência das datas?
+    sd_ = dropmissing(s[s.estacao_definida, [:decada, :prec, :inicio, :duracao]])
+    for (vv, nm) in ((:inicio, "Inicio"), (:duracao, "Duracao"))
+        mm_ = lm(Term(vv) ~ Term(:decada) + Term(:prec), sd_)
+        registra!("Sen" * nm * "ControleTotal", coef(mm_)[2]; dig = 1)
+        registra_p!("P" * nm * "ControleTotal", coeftable(mm_).cols[4][2])
+    end
     registra!("FracNovAbr", 100mean(s.frac_nov_abr); dig = 0)
     for (i, nm) in enumerate(("SI", "Centroide", "Conc", "Inicio", "Fim", "Duracao", "FracNovAbr"))
         r = tend[i, :]; dg = nm in ("SI", "Conc", "FracNovAbr") ? 3 : 1
         registra_ic!("Sen" * nm, r.sen_decada, r.sen_ic_inf, r.sen_ic_sup; dig = dg)
         registra_p!("PMK" * nm, r.p_mk); registra_p!("PTFPW" * nm, r.p_mk_tfpw); registra_p!("PHR" * nm, r.p_hamed_rao)
         registra!("MDT" * nm, r.mdt_decada; dig = dg)
-        registra!("FatorHR" * nm, r.fator_hr; dig = 2)
+        registra!("FatorHR" * nm, r.fator_hr; dig = 2); registra_p!("QTeste" * nm, r.q_teste)
     end
 
     # climatologia mensal: 1961–1990 × 1991–2020 (meses válidos)
@@ -1195,10 +1311,24 @@ function bloco_p2_indices(L)
         end
     end
     anu.dtr = anu.tmax .- anu.tmin
+    # sensibilidade ao controle de qualidade: Tmín anual da série sem CQ (com o segmento de 2006–08)
+    dmb = mensal_longo(L.d_bruto; ref = REF)
+    clb = Dict(m => mean(skipmissing(dmb[(dmb.mes .== m) .& (REF[1] .<= dmb.ano .<= REF[2]), :tmin])) for m in 1:12)
+    tminb = map(anu.ano) do a
+        g = dmb[dmb.ano .== a, :]
+        an = [x - clb[m] for (x, m) in zip(g.tmin, g.mes) if !ismissing(x)]
+        length(an) >= MIN_MESES_ANO ? mean(values(clb)) + mean(an) : missing
+    end
+    tb = tendencia_completa(anu.ano, tminb; nome = "Tmín sem CQ")
+    registra_ic!("SenTminSemQC", tb.sen_decada, tb.sen_ic_inf, tb.sen_ic_sup; dig = 2)
     # extremos de temperatura (percentis por dia do calendário, base 1991–2020)
     p90 = percentil_calendario(d.data, d.tmax, 0.9); p10 = percentil_calendario(d.data, d.tmin, 0.1)
     ext = combine(groupby(d, :ano; sort = true)) do g
-        a = g.ano[1]; okx = !ismissing(anu.tmax[anu.ano .== a][1]); okn = !ismissing(anu.tmin[anu.ano .== a][1])
+        a = g.ano[1]; nd = daysinyear(a)
+        # completude dos índices de extremos (como no climdex): no máximo 15 dias ausentes no ano
+        ausx = nd - count(!ismissing, g.tmax); ausn = nd - count(!ismissing, g.tmin)
+        okx = !ismissing(anu.tmax[anu.ano .== a][1]) && ausx <= 15
+        okn = !ismissing(anu.tmin[anu.ano .== a][1]) && ausn <= 15
         sx = [(dt, x) for (dt, x) in zip(g.data, g.tmax) if !ismissing(x)]
         sn = [(dt, x) for (dt, x) in zip(g.data, g.tmin) if !ismissing(x)]
         (TXx = okx ? maximum(last.(sx)) : missing, TNn = okn ? minimum(last.(sn)) : missing,
@@ -1293,9 +1423,22 @@ function bloco_p2_homog_temp(L, X)
             dd = [(year(dt), x - y) for (dt, x, y) in zip(j.data, j[!, a], j[!, b]) if !ismissing(x) && !ismissing(y)]
             ini = [d for (an, d) in dd if an <= 1965]; pos = [d for (an, d) in dd if an >= INICIO_TEMP]
             registra!("DifIni" * rot * nm, mean(ini); dig = 1); registra!("DifPos" * rot * nm, mean(pos); dig = 1)
+            if rot == "Tmin"     # segmento suspeito da Tmín (out/2006–dez/2008), excluído pelo CQ
+                noseg(dt) = SEG_TMIN_SUSPEITO[1] <= dt <= SEG_TMIN_SUSPEITO[2]
+                ds = [x - y for (dt, x, y) in zip(j.data, j.tmin, j.tn) if !ismissing(x) && !ismissing(y) && noseg(dt)]
+                df_ = [x - y for (dt, x, y) in zip(j.data, j.tmin, j.tn) if !ismissing(x) && !ismissing(y) && !noseg(dt) && year(dt) >= INICIO_TEMP]
+                registra!("DifSegTmin" * nm, mean(ds); dig = 1); registra!("DifForaTmin" * nm, mean(df_); dig = 1)
+            end
             @printf("%s × %s: diferença média 1963–65 = %.2f °C; ≥ %d = %.2f °C\n", rot, nm, mean(ini), INICIO_TEMP, mean(pos))
         end
     end
+    a307 = CSV.read(joinpath(DIR_PROC, "diario.csv"), DataFrame)
+    a307.tmin = [p ? missing : x for (x, p) in zip(a307.tmin, a307.tmin_pre)]
+    ja = innerjoin(select(a307, :data, :tmin => :ta), select(bruto, :data, :tmin), on = :data)
+    noseg2(dt) = SEG_TMIN_SUSPEITO[1] <= dt <= SEG_TMIN_SUSPEITO[2]
+    dsa = [a - b for (dt, a, b) in zip(ja.data, ja.ta, ja.tmin) if !ismissing(a) && !ismissing(b) && noseg2(dt)]
+    dfa = [a - b for (dt, a, b) in zip(ja.data, ja.ta, ja.tmin) if !ismissing(a) && !ismissing(b) && !noseg2(dt)]
+    registra!("DifSegTminAtres", mean(dsa); dig = 1); registra!("DifForaTminAtres", mean(dfa); dig = 1)
     linhas = NamedTuple[]
     for (c, nm) in (("82886", "Cabrobó"), ("82979", "Remanso"))
         f = filter(x -> startswith(x, "dados_$(c)_D_"), readdir(dir)); isempty(f) && continue
@@ -1342,6 +1485,22 @@ function bloco_p2_homog_temp(L, X)
         @printf("Tmáx: Sen ajustada = %.2f [%.2f; %.2f] | MQO com degrau em %d: b = %.2f [%.2f; %.2f], degrau = %.2f\n",
                 ta.sen_decada, ta.sen_ic_inf, ta.sen_ic_sup, a0, coef(m)[2], ic[2, 1], ic[2, 2], coef(m)[3])
     end
+    # Tmín: as quebras frente às duas vizinhas caem na mesma direção e perto da mesma data (por volta
+    # de 1990), o que aponta para a 82983. Mesma sensibilidade da Tmáx, com o salto frente à vizinha
+    # em que a quebra é mais significativa.
+    sn_ = dropmissing(anu[:, [:ano, :tmin]])
+    hn = sort(h[h.variavel .== "Tmín", :], :q)
+    if nrow(hn) >= 1
+        a0n = hn.quebra_snht[1] + 1; saln = hn.salto[1]
+        registra!("VizTminAjuste", hn.vizinha[1] == "Cabrobó" ? "Cabrobó" : hn.vizinha[1])
+        tn_ = tendencia_completa(sn_.ano, sn_.tmin .- saln .* (sn_.ano .>= a0n); nome = "Tmín ajustada")
+        registra_ic!("SenTminAjustada", tn_.sen_decada, tn_.sen_ic_inf, tn_.sen_ic_sup; dig = 2)
+        registra_p!("PTFPWTminAjustada", tn_.p_mk_tfpw)
+        ddn = DataFrame(y = sn_.tmin, t = (sn_.ano .- mean(sn_.ano)) ./ 10, d = Float64.(sn_.ano .>= a0n))
+        mn_ = lm(@formula(y ~ t + d), ddn); icn = confint(mn_)
+        registra_ic!("BTminDegrau", coef(mn_)[2], icn[2, 1], icn[2, 2]; dig = 2)
+        registra!("DegrauTmin", coef(mn_)[3]; dig = 2)
+    end
     for (vv, k) in ((:tmax, "Tmax"), (:tmin, "Tmin"))
         ss = dropmissing(anu[anu.ano .>= 1975, [:ano, vv]])
         tt = tendencia_completa(ss.ano, ss[!, vv]; nome = k * " desde 1975")
@@ -1353,7 +1512,12 @@ end
 # ============================================================================= P2: quantílica e STL
 function bloco_p2_quantilica(L)
     titulo("P2 — Regressão quantílica da temperatura diária (82983)")
-    q = vcat([insertcols!(quantilica_tempo(L.d.data, L.d[!, v]), 1, :variavel => String(v)) for v in (:tmax, :tmin)]...)
+    qs = Dict(v => quantilica_tempo(L.d.data, L.d[!, v]) for v in (:tmax, :tmin))
+    for (v, k) in ((:tmax, "Tmax"), (:tmin, "Tmin"))
+        dq = metadata(qs[v], "dif")                       # quantil 0,9 menos quantil 0,1
+        registra_ic!("QRDif" * k, dq.est, dq.inf, dq.sup; dig = 2); registra_p!("PQRDif" * k, dq.p)
+    end
+    q = vcat([insertcols!(copy(qs[v]), 1, :variavel => String(v)) for v in (:tmax, :tmin)]...)
     mostra(q; titulo = "β₁ (°C/década) por quantil, IC por bootstrap em blocos anuais")
     salva_ptab(q, "quantilica_temperatura")
     for r in eachrow(q)

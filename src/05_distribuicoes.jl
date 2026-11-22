@@ -31,13 +31,14 @@ end
 
 function p_ad_bootstrap(D, x; B = 1999, rng = MersenneTwister(SEMENTE))
     dhat = ajusta_mle(D, x); A = anderson_darling(dhat, x); n = length(x)
-    maiores = 0
+    maiores = 0; validas = 0
     for _ in 1:B
         xb = rand(rng, dhat, n)
         db = try ajusta_mle(D, xb) catch; continue end
+        validas += 1
         maiores += anderson_darling(db, xb) >= A
     end
-    return A, (maiores + 1) / (B + 1)
+    return A, (maiores + 1) / (validas + 1)
 end
 
 "Tabela comparativa de ajuste para o vetor `x`."

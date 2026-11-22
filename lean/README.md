@@ -1,10 +1,13 @@
 # MeteoLean — verificação formal das fórmulas fechadas do artigo
 
-Provas em Lean 4 + Mathlib das identidades matemáticas que o código Julia usa para transformar
-probabilidades em períodos de retorno, riscos e contagens. O Lean **não** verifica os números
-do artigo, que dependem dos dados, dos otimizadores e do bootstrap. Ele verifica que as fórmulas
-estão certas. O teste `Identidades provadas em Lean` de `test/runtests.jl` confere que as
-funções Julia satisfazem cada teorema.
+Provas em Lean 4 + Mathlib das identidades algébricas que o código Julia usa para transformar
+probabilidades em períodos de retorno, riscos e contagens. Os enunciados são simples: o Lean **não**
+verifica os números do artigo, que dependem dos dados, dos otimizadores e do bootstrap, nem as
+escolhas de modelo. Ele verifica que essas fórmulas estão certas. O grupo de testes `Identidades
+provadas em Lean` de `test/runtests.jl` confere que as funções Julia usadas no artigo
+(`prob_ao_menos_um`, `prob_n_variavel`, `prob_ao_menos_k`, `markov_posterior`, `ns_media_akaike`)
+satisfazem cada teorema. O tempo médio de espera é conferido por simulação, porque nenhuma função do
+artigo o calcula diretamente.
 
 | Arquivo | Teorema | O que garante | Código Julia |
 |---|---|---|---|

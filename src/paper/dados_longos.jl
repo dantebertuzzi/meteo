@@ -34,6 +34,33 @@ function carrega_longo(caminho = ARQ_LONGO)
     return d
 end
 
+"""
+Segmento inomogêneo da Tmín: de out/2006 a dez/2008, a Tmín da 82983 fica 1–2 °C mais fria
+que a de Cabrobó, a de Remanso e a da A307 do mesmo sítio, ao mesmo tempo. Como o segmento
+anterior a 1971, ele é excluído.
+"""
+const SEG_TMIN_SUSPEITO = (Date(2006, 10, 1), Date(2008, 12, 31))
+
+"""
+    qc_temperatura!(d)
+
+Controle de qualidade da temperatura diária (1971 em diante): exclui o segmento suspeito da
+Tmín e transforma em ausentes os valores a mais de 4 desvios-padrão da média do mês do
+calendário (Tmáx, Tmín e Tméd). Devolve as contagens de dias removidos.
+"""
+function qc_temperatura!(d)
+    noseg = [SEG_TMIN_SUSPEITO[1] <= x <= SEG_TMIN_SUSPEITO[2] for x in d.data]
+    nseg = count(noseg .& .!ismissing.(d.tmin))
+    d[noseg, :tmin] .= missing
+    n = Dict{Symbol, Int}()
+    for v in (:tmax, :tmin, :tmed)
+        cl = Dict(m => (μ = mean(skipmissing(d[d.mes .== m, v])), σ = std(skipmissing(d[d.mes .== m, v]))) for m in 1:12)
+        f = [!ismissing(x) && abs(x - cl[m].μ) > 4cl[m].σ for (x, m) in zip(d[!, v], d.mes)]
+        d[f, v] .= missing; n[v] = count(f)
+    end
+    return (segmento_tmin = nseg, tmax = n[:tmax], tmin = n[:tmin], tmed = n[:tmed])
+end
+
 "Climatologia diária da chuva por mês (mm/dia), dos dias válidos de `ref`."
 function clim_diaria(d; ref = (1991, 2020))
     s = d[(ref[1] .<= d.ano .<= ref[2]) .& .!ismissing.(d.prec), :]

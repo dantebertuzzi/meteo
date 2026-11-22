@@ -71,6 +71,45 @@ function mk_tfpw(t, y)
     return (r1 = r1, mk = mann_kendall(tt, yw))
 end
 
+"S de Mann–Kendall (só a estatística, para as simulações)."
+function mk_S(y)
+    n = length(y); S = 0
+    @inbounds for i in 1:n-1, j in i+1:n
+        S += sign(y[j] - y[i])
+    end
+    return S
+end
+
+"""
+    mk_ar1(t, y; B)
+
+Teste principal do artigo: Mann–Kendall com p por bootstrap paramétrico AR(1) no eixo REAL dos
+anos. O ruído dos resíduos de Sen é modelado como AR(1), com ρ estimado só em pares de anos
+realmente consecutivos (`acf_irregular`); simulam-se séries nulas (sem tendência) em todos os
+anos de min(t) a max(t) e guardam-se só os anos observados, de modo que as lacunas entram como
+nos dados e nenhum ano é descartado. p = (1 + #{|S*| ≥ |S|})/(B + 1).
+Diferente do TFPW, que perde os anos sem antecessor e não controla o erro tipo I sob AR(1)
+com n ≈ 50, este teste tem, por construção, o tamanho nominal sob o modelo AR(1).
+"""
+function mk_ar1(t, y; B = 1999, rng = MersenneTwister(SEMENTE))
+    o = sortperm(t); t = Float64.(t[o]); y = Float64.(y[o]); n = length(y)
+    S = mk_S(y); ts = theil_sen(t, y)
+    e = y .- ts.declive .* t .- ts.intercepto
+    ρ = acf_irregular(t, e, 1)[1]
+    ρ = isfinite(ρ) ? clamp(ρ, -0.9, 0.9) : 0.0
+    anos = round.(Int, t); pos = anos .- anos[1] .+ 1; L = pos[end]
+    nulos = Vector{Int}(undef, B); u = zeros(L)
+    for b in 1:B
+        u[1] = randn(rng)
+        for i in 2:L
+            u[i] = ρ * u[i-1] + sqrt(1 - ρ^2) * randn(rng)
+        end
+        nulos[b] = mk_S(view(u, pos))
+    end
+    p = (1 + count(s -> abs(s) >= abs(S), nulos)) / (B + 1)
+    return (r1 = ρ, S = S, p = p, Scrit = quantile(abs.(nulos), 0.95), pos = pos)
+end
+
 """
 Teste de Pettitt: U_k = Σ_{i≤k}Σ_{j>k} sgn(y_j − y_i); K = max|U_k|;
 p ≈ 2·exp(−6K²/(n³ + n²)) (aproximação válida para p ≲ 0,5).
@@ -96,9 +135,11 @@ end
 "Bateria de tendência para uma série anual (valores ausentes descartados)."
 function analise_tendencia(t, y; nome = "", escala = 10)
     ok = .!ismissing.(y); t = Float64.(t[ok]); y = Float64.(y[ok])
-    mk = mann_kendall(t, y); ts = theil_sen(t, y); tf = mk_tfpw(t, y); pt = pettitt(t, y)
+    mk = mann_kendall(t, y); ts = theil_sen(t, y); tf = mk_ar1(t, y); pt = pettitt(t, y)
+    # `p_mk_tfpw` guarda o p do TESTE PRINCIPAL, que desde a v1.3.0 é o MK com p por bootstrap
+    # AR(1) (`mk_ar1`); o nome do campo foi mantido para não quebrar as tabelas
     (variavel = nome, n = mk.n, periodo = "$(Int(minimum(t)))–$(Int(maximum(t)))",
-     tau = mk.tau, Z_mk = mk.Z, p_mk = mk.p, r1 = tf.r1, p_mk_tfpw = tf.mk.p,
+     tau = mk.tau, Z_mk = mk.Z, p_mk = mk.p, r1 = tf.r1, p_mk_tfpw = tf.p,
      sen_decada = escala * ts.declive, sen_ic_inf = escala * ts.ic_inf, sen_ic_sup = escala * ts.ic_sup,
      pettitt_K = pt.K, p_pettitt = pt.p, mudanca_apos = Int(pt.ultimo_antes),
      media_antes = pt.media_antes, media_depois = pt.media_depois)

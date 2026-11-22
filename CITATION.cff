@@ -7,7 +7,7 @@ authors:
     given-names: "Dante de Souza"
     affiliation: "Pesquisador independente"
     orcid: "https://orcid.org/0009-0007-5223-2814"
-version: "1.2.0"
+version: "1.3.0"
 doi: "10.5281/zenodo.23438823"
 date-released: "2026-11-22"
 license: MIT

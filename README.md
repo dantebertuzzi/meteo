@@ -35,20 +35,28 @@ execução.
 
 ### Verificação formal (Lean)
 
-`lean/` prova em Lean 4 + Mathlib as fórmulas fechadas usadas pelo código: probabilidade em $n$
-anos e tempo médio de espera $1/p$, risco com $p$ variável, média por pesos de Akaike, cadeia de
-Markov de dois estados e a recursão Poisson-binomial da validação. Ver `lean/README.md`.
+`lean/` prova em Lean 4 + Mathlib as identidades algébricas por trás de algumas fórmulas do código:
+probabilidade em $n$ anos e tempo médio de espera $1/p$, risco com $p$ variável, pesos e média de
+Akaike, cadeia de Markov de dois estados e a recursão Poisson-binomial da validação. As provas não
+cobrem os ajustes, os bootstraps nem a escolha dos modelos. O grupo de testes "Identidades provadas em
+Lean" de `test/runtests.jl` confere que as funções Julia usadas no artigo satisfazem esses teoremas.
+Ver `lean/README.md`.
 
 ```bash
 cd lean && lake exe cache get && lake build
 ```
 
-### Verificação independente
+### Verificação em Python
 
-`scripts/verifica.py` reimplementa os cálculos centrais em Python (SciPy, pymannkendall) a partir
-dos dados brutos, sem usar o código Julia, e compara 70 números com as macros do artigo
-(dados, ajustes de distribuição, período de retorno, tendências, modelo não estacionário, SPI,
-Markov, teleconexão, referência regional, anos chuvosos recentes e pluviômetros da ANA). Também confere a consistência interna das macros.
+`scripts/verifica.py` reimplementa parte dos cálculos em Python (SciPy, pymannkendall) e compara 70
+números com as macros do artigo. É independente do código Julia na chuva (dados brutos, FCA,
+tendências de Sen), nas distribuições estacionárias, no período de retorno estacionário, na
+referência regional, no SPI, nas contagens de Markov e nos pluviômetros da ANA. **Não é independente
+na temperatura**, porque parte das séries anuais gravadas pelo Julia (`results/paper/anual_civil_82983.csv`),
+e **não confere**: o $p$ do teste principal (MK com bootstrap AR(1)), os IC por bootstrap, o modelo
+não estacionário com IC, a análise regional, os modelos bayesianos, as posteriores de Markov, o SPEI,
+a STL, a regressão quantílica, os índices de sazonalidade e os testes de homogeneidade (SNHT, Pettitt).
+Também confere a consistência interna das macros.
 
 ```bash
 python3 -m venv .venv-verif
@@ -92,4 +100,4 @@ results/paper/         tabelas CSV de todas as análises do artigo
 
 ## Como citar
 
-Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versões 1.1.0 e 1.2.0, DOI próprio atribuído em cada depósito; todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
+Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versões 1.1.0 a 1.3.0, DOI próprio atribuído em cada depósito; todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).

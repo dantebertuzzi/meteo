@@ -101,29 +101,32 @@ function mk_hamed_rao(t, y)
         abs(ρ) > quantile(Normal(), 0.975) / sqrt(n) || continue
         soma += (n - k) * (n - k - 1) * (n - k - 2) * ρ
     end
-    fator = max(1 + 2soma / (n * (n - 1) * (n - 2)), 1e-3)
+    fator = 1 + 2soma / (n * (n - 1) * (n - 2))
+    fator <= 0 && return (fator = fator, Z = NaN, p = NaN)      # correção inválida: não truncar
     v = mk.varS * fator
     Z = mk.S == 0 ? 0.0 : (mk.S - sign(mk.S)) / sqrt(v)
     return (fator = fator, Z = Z, p = 2ccdf(Normal(), abs(Z)))
 end
 
 """
-Tendência mínima detectável (poder 80 %, MK-TFPW bilateral a 5 %, o teste principal) por simulação:
+Tendência mínima detectável (poder 80 %, o teste principal `mk_ar1` bilateral a 5 %) por simulação:
 yₜ = β·t + eₜ, eₜ ~ AR(1) com ρ e σ estimados dos resíduos de Sen da série real.
 Busca β numa grade e devolve o menor com poder ≥ 0,8 (em unidades/década).
 """
 function tendencia_minima_detectavel(t, y; poder = 0.8, B = 400, rng = MersenneTwister(SEMENTE))
     o = sortperm(t); t = Float64.(t[o]); y = Float64.(y[o]); n = length(y)
-    ts = theil_sen(t, y); e = y .- ts.declive .* t .- ts.intercepto
-    ρ = clamp(cor(e[1:end-1], e[2:end]), -0.5, 0.9); σ = std(e)
+    ts = theil_sen(t, y); e = y .- ts.declive .* t .- ts.intercepto; σ = std(e)
+    # mesmo teste do texto (mk_ar1): AR(1) no eixo real dos anos, ρ só de pares consecutivos,
+    # e rejeição pelo valor crítico de |S| da distribuição nula desse mesmo teste
+    tf = mk_ar1(t, y); ρ = tf.r1; pos = tf.pos; L = pos[end]
     simula(β) = begin
         rej = 0
         for _ in 1:B
-            u = zeros(n); u[1] = randn(rng) * σ
-            for i in 2:n
+            u = zeros(L); u[1] = randn(rng) * σ
+            for i in 2:L
                 u[i] = ρ * u[i-1] + sqrt(1 - ρ^2) * σ * randn(rng)
             end
-            rej += mk_tfpw(t, β .* (t .- t[1]) .+ u).mk.p < 0.05      # mesmo teste do texto (TFPW)
+            rej += abs(mk_S(β .* (t .- t[1]) .+ view(u, pos))) > tf.Scrit
         end
         rej / B
     end
@@ -196,15 +199,20 @@ function quantilica_tempo(datas, y; taus = (0.1, 0.5, 0.9), B = 300, rng = Merse
     df.ano = year.(df.data)
     anos = unique(df.ano); blocos = Dict(a => findall(==(a), df.ano) for a in anos)
     f = @formula(y ~ t + s1 + c1 + s2 + c2)
-    map(taus) do τ
-        b = coef(qreg(f, df, τ))[2]
-        bs = Float64[]
-        for _ in 1:B
-            idx = reduce(vcat, [blocos[a] for a in rand(rng, anos, length(anos))])
-            push!(bs, coef(qreg(f, df[idx, :], τ))[2])
-        end
-        (tau = τ, beta_decada = b, ic_inf = quantile(bs, 0.025), ic_sup = quantile(bs, 0.975), n_dias = nrow(df), n_anos = length(anos))
-    end |> DataFrame
+    b0 = [coef(qreg(f, df, τ))[2] for τ in taus]
+    # todos os quantis na MESMA réplica, para que a diferença entre eles tenha IC (comparar IC
+    # separados por sobreposição não testa a diferença)
+    bs = zeros(B, length(taus))
+    for r in 1:B
+        d2 = df[reduce(vcat, [blocos[a] for a in rand(rng, anos, length(anos))]), :]
+        bs[r, :] = [coef(qreg(f, d2, τ))[2] for τ in taus]
+    end
+    out = DataFrame(tau = collect(taus), beta_decada = b0, ic_inf = [quantile(bs[:, j], 0.025) for j in eachindex(taus)],
+                    ic_sup = [quantile(bs[:, j], 0.975) for j in eachindex(taus)], n_dias = nrow(df), n_anos = length(anos))
+    dif = bs[:, end] .- bs[:, 1]
+    metadata!(out, "dif", (est = b0[end] - b0[1], inf = quantile(dif, 0.025), sup = quantile(dif, 0.975),
+                           p = min(1.0, 2min(mean(dif .<= 0), mean(dif .>= 0)))))
+    return out
 end
 
 # ============================================================================= STL
@@ -229,7 +237,7 @@ function stl_simples(x::Vector{Float64}; ns = 0.6, nt = 0.25, iter = 3)
             fit = loess(xs, d[idx]; span = ns, degree = 1)
             ext = vcat(0.0, xs, length(idx) + 1.0)
             pred = lpredict(fit, clamp.(ext, 1.0, Float64(length(idx))))
-            pos = vcat(m, (12 .+ collect(idx)), 12 + n + m)
+            pos = vcat(m, (12 .+ collect(idx)), last(idx) + 24)   # ponto seguinte ao último da subsérie (n qualquer)
             for (p, v) in zip(pos, pred)
                 p <= n + 24 && (C[p] = v)
             end

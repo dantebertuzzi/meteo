@@ -262,6 +262,7 @@ cand = dict(zip(V.ah.astype(int), V.tot))
 # ---------------------------------------------------------------- 7b. pluviômetros da ANA (anos comuns com a 82983)
 for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos")):
     da = pd.read_csv(f"{RAIZ}/data/raw/ana/ana_{cod}.csv", parse_dates=["data"])
+    da.loc[da.prec > 400, "prec"] = np.nan          # mesmo limite de plausibilidade diária do BDMEP
     va = hidro_validos(da[["data", "prec"]])
     com_ = sorted(a_ for a_ in va if a_ in cand)
     compara(f"n comum 82983 × {k}", len(com_), "NComum" + k, tol_abs=0)
@@ -279,6 +280,7 @@ def media_aic_T(xs, lim):
     return 1 / sum(ww[k_] / sw * fs[k_].cdf(lim) for k_ in fs)
 for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos"), ("840015", "LagoaGrande")):
     da = pd.read_csv(f"{RAIZ}/data/raw/ana/ana_{cod}.csv", parse_dates=["data"])
+    da.loc[da.prec > 400, "prec"] = np.nan          # mesmo limite de plausibilidade diária do BDMEP
     va = {a_: v_ for a_, v_ in hidro_validos(da[["data", "prec"]]).items() if a_ >= int(anos.min())}
     aa = np.array(sorted(va)); yy = np.array([va[a_] for a_ in aa])
     compara(f"Sen {k} desde 1963/64 (série toda)", 10 * stats.theilslopes(yy, aa).slope, "SenAnaTodos" + k, tol_abs=0.6)
@@ -287,7 +289,8 @@ for cod, k in (("940024", "Juazeiro"), ("940018", "Cavalos"), ("840015", "LagoaG
     com_ = [a_ for a_ in aa if a_ in cand]
     lim = x0 * np.mean([va[a_] for a_ in com_]) / np.mean([cand[a_] for a_ in com_])
     compara(f"limiar relativo {k} (mm)", lim, "LimiarAna" + k, tol_abs=0.6)
-    compara(f"T estacionário {k} (média AIC)", media_aic_T(yy, lim), "TEstAna" + k, tol_rel=0.05)
+    # os modelos dos postos usam só os anos até o último válido da 82983 (comparáveis aos dela)
+    compara(f"T estacionário {k} (média AIC)", media_aic_T(yy[m_], lim), "TEstAna" + k, tol_rel=0.05)
 
 viz = {}
 for f in glob.glob(f"{RAIZ}/data/raw/bdmep/dados_8*_D_*.csv"):

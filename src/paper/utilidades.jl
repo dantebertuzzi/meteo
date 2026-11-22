@@ -102,6 +102,10 @@ figura(altura; largura = LARG_COL) = Figure(size = (largura, altura), figure_pad
 "p-valor para o texto: < 0,001 quando muito pequeno, 3 casas abaixo de 0,1 e 2 casas acima."
 function registra_p!(nome, p)
     k = nome_macro(nome)
+    if ismissing(p) || !isfinite(p)
+        MACROS[k * "Val"] = "\\textemdash"; MACROS[k] = "\\ensuremath{=}\\,\\textemdash"
+        return MACROS[k]
+    end
     # \PXVal: só o valor (para tabelas); \PX: com o sinal, para o texto escrever $p$\PX ("p = 0,03" ou "p < 0,001")
     MACROS[k * "Val"] = p < 0.001 ? "\\num{< 0.001}" : "\\num{" * @sprintf("%.*f", p < 0.1 ? 3 : 2, p) * "}"
     MACROS[k] = p < 0.001 ? "\\ensuremath{<}\\,\\num{0.001}" : "\\ensuremath{=}\\," * MACROS[k * "Val"]

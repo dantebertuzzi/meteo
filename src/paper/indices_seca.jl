@@ -88,9 +88,14 @@ function eto_mensal(ano, mes, tmax, tmin, lat)
 end
 
 # ----------------------------------------------------------------------------- log-logística
-"PWM não viesados αₛ = E[X(1 − F)ˢ] (Hosking, 1986), s = 0, 1, 2."
-function pwm_alfa(x)
+"""
+PWM αₛ = E[X(1 − F)ˢ], s = 0, 1, 2. `metodo = :ub`: estimador não viesado de Hosking (1986),
+o padrão do pacote R SPEI e o usado no artigo; `metodo = :pp`: posição de plotagem
+Fᵢ = (i − 0,35)/N, como em Vicente-Serrano et al. (2010), usado como sensibilidade.
+"""
+function pwm_alfa(x; metodo = :ub)
     x = sort(x); n = length(x)
+    metodo === :pp && return [sum((1 - (i - 0.35) / n)^s * x[i] for i in 1:n) / n for s in 0:2]
     [sum(binomial(n - i, s) / binomial(n - 1, s) * x[i] for i in 1:n) / n for s in 0:2]
 end
 
@@ -104,8 +109,8 @@ struct LogLogistica3
 end
 LogLogistica3(α, β, γ) = LogLogistica3(α, β, γ, false)
 
-function _pwm_ll(x)
-    w0, w1, w2 = pwm_alfa(x)
+function _pwm_ll(x; metodo = :ub)
+    w0, w1, w2 = pwm_alfa(x; metodo)
     β = (2w1 - w0) / (6w1 - w0 - 6w2)
     Γ = gamma(1 + 1 / β) * gamma(1 - 1 / β)
     α = (w0 - 2w1) * β / Γ
@@ -113,11 +118,11 @@ function _pwm_ll(x)
     return α, β, γ
 end
 
-"Ajuste por PWM conforme Vicente-Serrano et al. (2010), eqs. 4–6."
-function ajusta_loglogistica(x)
-    α, β, γ = _pwm_ll(x)
+"Ajuste por PWM com as fórmulas de Vicente-Serrano et al. (2010), eqs. 4–6; PWM por `metodo` (ver `pwm_alfa`)."
+function ajusta_loglogistica(x; metodo = :ub)
+    α, β, γ = _pwm_ll(x; metodo)
     β > 1 && return LogLogistica3(α, β, γ, false)
-    α, β, γ = _pwm_ll(-x)
+    α, β, γ = _pwm_ll(-x; metodo)
     β > 1 || error("log-logística sem solução por PWM (β = $β)")
     return LogLogistica3(α, β, γ, true)
 end
@@ -148,7 +153,7 @@ end
 Como `spi`, mas sobre o balanço hídrico (pode ser negativo) e com distribuição
 de 3 parâmetros (`:loglogistica` ou `:gev`).
 """
-function spei(balanco, meses, anos; k::Int, ref = (1991, 2020), dist = :loglogistica)
+function spei(balanco, meses, anos; k::Int, ref = (1991, 2020), dist = :loglogistica, pwm = :ub)
     X = soma_movel(balanco, k)
     z = Vector{Union{Missing, Float64}}(missing, length(X))
     ajustes = Dict{Int, Any}()
@@ -157,7 +162,7 @@ function spei(balanco, meses, anos; k::Int, ref = (1991, 2020), dist = :loglogis
         cal = Float64[X[i] for i in idx if ref[1] <= anos[i] <= ref[2]]
         length(cal) < 10 && continue
         if dist == :loglogistica
-            d = ajusta_loglogistica(cal); F = x -> cdf_ll(d, x)
+            d = ajusta_loglogistica(cal; metodo = pwm); F = x -> cdf_ll(d, x)
         else
             d = ajusta_gev_lmom(cal); F = x -> cdf(d, x)
         end
@@ -186,7 +191,7 @@ function corridas(datas, z; z0 = -1.0)
                 j += 1
             end
             zz = Float64.(z[i:j]); S = -sum(zz)
-            cens = (i > 1 && ismissing(z[i-1])) || (j < n && ismissing(z[j+1])) || j == n
+            cens = i == 1 || (i > 1 && ismissing(z[i-1])) || (j < n && ismissing(z[j+1])) || j == n
             push!(ev, (inicio = datas[i], fim = datas[j], duracao = j - i + 1, severidade = S,
                        intensidade = S / (j - i + 1), pico = minimum(zz), censurado = cens))
             i = j + 1

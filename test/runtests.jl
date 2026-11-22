@@ -150,6 +150,13 @@ end
     s = stl_simples(Float64.(x))
     @test cor(s.sazonal, 2 .* sin.(2π .* tt ./ 12)) > 0.98
     @test cor(s.tendencia, 0.01 .* tt) > 0.95
+    # sem ruído e com n NÃO múltiplo de 12 (a série do artigo tem 654 meses): a ponta da tendência
+    # não pode ser contaminada pela extensão das subséries (erro de índice corrigido em p2.jl)
+    for n in (240, 246, 654)
+        t2 = 1:n; tr = 0.002 .* t2
+        s2 = stl_simples(Float64.(tr .+ cos.(2π .* t2 ./ 12)))
+        @test abs((s2.tendencia[end] - s2.tendencia[1]) - (tr[end] - tr[1])) < 0.02
+    end
 end
 
 @testset "ESS" begin
@@ -282,9 +289,51 @@ end
         w = rand(rng, n); w ./= sum(w)
         @test 1 / sum(w .* ps) <= sum(w ./ ps) * (1 + 1e-12)
     end
-    # Retorno.tempo_medio_espera: E[K] = 1/p (série truncada)
-    @test sum((k + 1) * (1 - 0.1)^k * 0.1 for k in 0:2000) ≈ 1 / 0.1 rtol = 1e-8
-    # Markov.estacionaria: π_S = a/(a+b) é fixo da matriz de transição
-    a, b = 0.3, 0.5; πS = a / (a + b)
-    @test πS * (1 - b) + (1 - πS) * a ≈ πS
+    # Retorno.tempo_medio_espera: E[K] = 1/p, conferido por simulação da espera geométrica,
+    # que é o modelo de anos independentes por trás de prob_ao_menos_um
+    esp = [findfirst(_ -> rand(rng) < 0.1, 1:10_000) for _ in 1:20_000]
+    @test mean(esp) ≈ 1 / 0.1 rtol = 0.03
+    @test mean(esp .<= 7) ≈ prob_ao_menos_um(0.1, 7) atol = 0.01
+    # Markov.estacionaria e piSeco_mem, sobre a função do artigo: markov_posterior calcula
+    # π_S = a/(a+b) por draw; a mediana devolvida deve ser a dos draws devolvidos, e π_S deve
+    # ser ponto fixo da matriz de cada draw
+    m = markov_posterior([5 3; 4 20])
+    a_ = m.draws.pNS; b_ = 1 .- m.draws.pSS; πd = a_ ./ (a_ .+ b_)
+    @test m.piS[2] ≈ quantile(πd, 0.5)
+    @test all(abs.(πd .* (1 .- b_) .+ (1 .- πd) .* a_ .- πd) .< 1e-12)
+    @test all(0 .<= πd .<= 1)
+    # Markov.duracao_media_seca: a duração devolvida é 1/b por draw
+    @test m.duracao_seca[2] ≈ quantile(1 ./ b_, 0.5)
+    # Akaike: pesos_soma_um, media_entre e T_media_le_media_T sobre ns_media_akaike (função do artigo)
+    yb = 500 .* exp.(-0.08 .* range(-2, 2, length = 40)) .* (1 .+ 0.3 .* randn(MersenneTwister(5), 40))
+    xb = collect(range(-2, 2, length = 40))
+    ma = ns_media_akaike(abs.(yb), xb)
+    @test sum(ma.w) ≈ 1 && all(ma.w .> 0)
+    pc = [f.F(200.0, 1.5) for f in ma.fits]
+    @test ma.p_em(200.0, 1.5) ≈ sum(ma.w .* pc)
+    @test minimum(pc) - 1e-12 <= ma.p_em(200.0, 1.5) <= maximum(pc) + 1e-12
+    @test 1 / ma.p_em(200.0, 1.5) <= sum(ma.w ./ pc) * (1 + 1e-12)
+end
+
+@testset "Teste principal: MK com p por bootstrap AR(1) (mk_ar1)" begin
+    # sob H₀ com ruído AR(1) (ρ = 0,5) e lacunas como as da série, o tamanho a 5 % deve ficar
+    # perto do nominal; o TFPW, nas mesmas condições, rejeita bem mais
+    rng = MersenneTwister(31)
+    anos = [1963:1965; 1971:1984; 1992:2020]               # 46 anos, com as lacunas da 82983
+    L = anos[end] - anos[1] + 1; pos = anos .- anos[1] .+ 1
+    rej_ar1 = 0; rej_tfpw = 0; R = 300
+    for _ in 1:R
+        u = zeros(L); u[1] = randn(rng)
+        for i in 2:L
+            u[i] = 0.5u[i-1] + sqrt(1 - 0.25) * randn(rng)
+        end
+        y = u[pos]
+        rej_ar1 += mk_ar1(anos, y; B = 399, rng = MersenneTwister(rand(rng, UInt32))).p < 0.05
+        rej_tfpw += mk_tfpw(Float64.(anos), y).mk.p < 0.05
+    end
+    @test rej_ar1 / R < 0.10
+    @test rej_tfpw / R > rej_ar1 / R
+    # com tendência forte, rejeita
+    t = collect(1963.0:2020.0); y = -0.05 .* (t .- t[1]) .+ 0.3 .* randn(MersenneTwister(4), length(t))
+    @test mk_ar1(t, y).p < 0.01
 end
