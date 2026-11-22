@@ -142,6 +142,15 @@ function fig_chuva_anual(P)
         lines!(ax, collect(anos), [exp(P.N.nf.a + P.N.nf.b * (a - m) / 10) for a in anos]; color = COR_TEXTO2, linewidth = 1.0,
                linestyle = :dash, label = "inclinação regional (vizinhas)")
     end
+    # anos depois do último válido (fora do ajuste e com falhas): total observado, contorno vazado,
+    # e a reta da normal estendida até eles só como referência visual
+    ra = P.RA
+    anos_rec = [parse(Int, first(r, 4)) for r in ra.ano]
+    barplot!(ax, anos_rec, Float64.(ra.chuva_obs); color = (:white, 0.0), strokecolor = COR_TEXTO2, strokewidth = 0.8,
+             gap = 0.25, label = "fora do ajuste (total observado)")
+    ext = last(anos):maximum(anos_rec)
+    lines!(ax, collect(ext), [exp(nn.θ[2] + nn.θ[3] * (a - m) / 10) for a in ext]; color = COR_TEXTO, linewidth = 1.0,
+           linestyle = :dot)
     hlines!(ax, [P.E.x1213]; color = COR_SECO, linewidth = 0.8, linestyle = :dot)
     for r in eachrow(v[seco, :])
         text!(ax, r.ano_hidro, r.prec; text = r.rotulo, fontsize = 6.5, rotation = π / 2, align = (:left, :center), offset = (0, 3), color = COR_TEXTO)
