@@ -545,8 +545,8 @@ que inclui os anos chuvosos \AnosFCASete{}: a média de Akaike dá \TNSMediaFCAS
 \TNSMediaFCASeteUltStd{} em \UltimoAnoNS{}. Incluí-los, portanto, quase não muda o período de
 retorno. Isso mede, porém, só o peso de três anos sobre uma reta de seis décadas, e não se o
 modelo os reproduz, o que é testado adiante. Com a inclinação regional, mais lenta
-(\NSRegionalEfeito{}\,\% por década), a média entre as candidatas dá \TRegionalMedia{} anos
-\IC{\TRegionalMediaICinf}{\TRegionalMediaICsup} em 2025. Comparado no mesmo esquema, o período de
+(\NSRegionalEfeito{}\,\% por década), a média entre as candidatas dá \TRegionalMediaUltB{} anos
+\IC{\TRegionalMediaUltBICinf}{\TRegionalMediaUltBICsup} em \UltimoAnoNS{}. Comparado no mesmo esquema, o período de
 retorno passa de \TMediaAkaikeB{} anos sob estacionariedade para \TNSMediaUlt{} com a média
 recente. Dentro da Gamma, a passagem é de \TGamma{} para \TTempoUlt{} anos (máxima
 verossimilhança), ou \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} na versão bayesiana.
@@ -579,7 +579,7 @@ maior alavancagem do ajuste. Na normal com desvio-padrão fixo, a média em \Ult
 da normal oficial de 1991--2020 (\NormalOficialChuva{}~mm). Por isso apresentamos o período de
 retorno no fim da série como uma faixa entre cenários: \TNSMediaUlt{} anos com a média de
 \UltimoAnoNS{}, \TNSMediaDecada{} com a média de 2011/12 a \UltimoAnoNS{}, \TNSMediaFCASeteUltStd{}
-com o critério FCA $\le$ 7,5\,\% e \TRegionalMediaUlt{} com a inclinação regional, todos avaliados
+com o critério FCA $\le$ 7,5\,\% e \TRegionalMediaUltB{} com a inclinação regional, todos avaliados
 em \UltimoAnoNS{}, ou seja, de \TNSFaixaMin{} a \TNSFaixaMax{} anos. Avaliados mais adiante na
 reta, os mesmos modelos dão valores menores (\TNSMediaFCASeteUlt{} anos em \UltimoAnoFCASete{} com o
 critério FCA $\le$ 7,5\,\%; \TRegionalMedia{} em 2025 com a inclinação regional), mas isso só
@@ -597,7 +597,8 @@ inferior de um ano chuvoso, a tendência passa a \SenChuvaRecentes{}~mm por déc
 \IC{\SenChuvaRecentesICinf}{\SenChuvaRecentesICsup} ($p$\,\PTFPWChuvaRecentes). Essa é a estimativa
 mais conservadora. A significância, porém, depende da década de 2010: com os dados só até 2010/11, o
 intervalo inclui zero e o teste não rejeita a ausência de tendência ($p$\,\PTFPWChuvaAteDezOnze).
-A queda já estava em curso antes da última década, mas só se torna detectável com ela.
+A estimativa até 2010/11 já é negativa e de magnitude parecida, mas, sem a década de 2010, os
+dados não distinguem essa queda de zero.
 
 \paragraph{Forma da tendência.} Comparamos a reta com duas alternativas de média constante por
 partes, todas com erro normal: um degrau único e um episódio seco entre duas datas, com a mesma
@@ -795,6 +796,7 @@ não estacionária rejeitada, o que é coerente com a rejeição da forma fixa a
     Gamma & posterior & \TBayesNSUlt{} \IC{\TBayesNSUltICinf}{\TBayesNSUltICsup} \\
     Média por pesos de Akaike, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & bootstrap dos anos & \TNSMediaFCASeteUlt{} \IC{\TNSMediaFCASeteUltICinf}{\TNSMediaFCASeteUltICsup} \\
     Gamma, FCA $\le$ 7,5\,\% (\UltimoAnoFCASete) & máxima verossimilhança & \TFCASeteUlt{} \\
+    Média por pesos de Akaike, inclinação regional & bootstrap dos anos & \TRegionalMediaUltB{} \IC{\TRegionalMediaUltBICinf}{\TRegionalMediaUltBICsup} \\
     \midrule
     \multicolumn{3}{@{}l}{\emph{Não estacionário, 2025 (cenário)}} \\
     Média por pesos de Akaike, inclinação local & bootstrap dos anos & \TNSMediaDoisMilVinteCinco{} \IC{\TNSMediaDoisMilVinteCincoICinf}{\TNSMediaDoisMilVinteCincoICsup} \\
@@ -835,7 +837,7 @@ observado, ela é de \ProbNSMediaUltNtreszero{}\,\%
 \IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup}. Esse número supõe o
 clima congelado no nível de \UltimoAnoNS{}, ao fim de uma década
 excepcionalmente seca, um nível que os anos chuvosos seguintes indicam ser seco demais, e o
-intervalo largo mostra o quanto ele é incerto. É um cenário pessimista, e não uma previsão; com só a inclinação regional,
+intervalo largo mostra o quanto ele é incerto. É um cenário pessimista, e não uma previsão; com só a inclinação regional, no mesmo ano,
 \ProbRegMediaNtreszero{}\,\% \IC{\ProbRegMediaNtreszeroICinf}{\ProbRegMediaNtreszeroICsup}. As
 linhas da Gamma bayesiana mostram a sensibilidade à distribuição. O cenário em que a tendência
 continua depois de 2025 extrapola uma tendência log-linear para além do período observado e
@@ -864,7 +866,7 @@ aparece apenas como limite superior condicional, e não como projeção climáti
                  & \ProbNSMediaUltNumzero{} \IC{\ProbNSMediaUltNumzeroICinf}{\ProbNSMediaUltNumzeroICsup}
                  & \ProbNSMediaUltNdoiszero{} \IC{\ProbNSMediaUltNdoiszeroICinf}{\ProbNSMediaUltNdoiszeroICsup}
                  & \ProbNSMediaUltNtreszero{} \IC{\ProbNSMediaUltNtreszeroICinf}{\ProbNSMediaUltNtreszeroICsup} \\
-    Inclinação regional, 2025 & \ProbRegMediaNcinco{} \IC{\ProbRegMediaNcincoICinf}{\ProbRegMediaNcincoICsup}
+    Inclinação regional, \UltimoAnoNS{} mantido & \ProbRegMediaNcinco{} \IC{\ProbRegMediaNcincoICinf}{\ProbRegMediaNcincoICsup}
                  & \ProbRegMediaNumzero{} \IC{\ProbRegMediaNumzeroICinf}{\ProbRegMediaNumzeroICsup}
                  & \ProbRegMediaNdoiszero{} \IC{\ProbRegMediaNdoiszeroICinf}{\ProbRegMediaNdoiszeroICsup}
                  & \ProbRegMediaNtreszero{} \IC{\ProbRegMediaNtreszeroICinf}{\ProbRegMediaNtreszeroICsup} \\
@@ -947,7 +949,10 @@ $p$\,\PTFPWInicio), e a duração varia \SenDuracao{} dias por década
 $p$\,\PTFPWDuracao). Os dois IC de Sen excluem zero, mas eles supõem anos independentes, e as duas
 séries têm autocorrelação de ordem 1 positiva e considerável. Com essa autocorrelação levada em conta,
 a evidência enfraquece: no início, nem o Hamed--Rao nem o TFPW são significativos; na duração, só
-o Hamed--Rao é. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
+o Hamed--Rao é, e por um motivo frágil: sua correção \emph{reduz} a variância do teste (fator
+\FatorHRDuracao{}), o que corresponde a uma autocorrelação negativa, embora a de ordem 1 seja
+positiva. A correção é estimada na série compactada, sem os anos sem estação definida, e por isso
+não sustenta a significância da duração. Como a tendência mínima detectável do início (\MDTInicio{} dias por década) é
 maior que o efeito estimado, a não significância não permite concluir que as datas não mudaram;
 mas também não é evidência de que mudaram. O que há é um indício fraco de uma estação chuvosa
 que começa mais tarde e é mais curta. Essas
@@ -1081,7 +1086,7 @@ não mostra mudança relativa nessa data (a quebra que a razão entre os dois te
 \QuebraAnaJuazeiro{}). Uma contribuição instrumental não pode ser descartada, mas
 não é necessária para explicar a queda. A diminuição aparece nos índices de
 intensidade (Rx1day, SDII, R95p) e, com evidência mais fraca, no número de dias de chuva, e há um indício fraco, que não resiste à correção
-da autocorrelação no início da estação, de que a estação chuvosa começa mais tarde e ficou mais curta.
+da autocorrelação, de que a estação chuvosa começa mais tarde e ficou mais curta.
 A forma do ciclo anual, medida pelo índice de sazonalidade e pela concentração, não mudou, e o
 aumento de anos sem estação chuvosa definida não é estatisticamente significativo.
 
@@ -1148,7 +1153,7 @@ análise regional. Os anos secos consecutivos também são compatíveis com a qu
 persistência adicional de um ano para o outro.
 
 \paragraph{O que os dados não conseguem dizer.} Esses números de período de retorno são ordens
-de grandeza, e o cenário com inclinação regional (\TRegionalMedia{} anos em 2025) deve ser lido
+de grandeza, e o cenário com inclinação regional (\TRegionalMediaUltB{} anos em \UltimoAnoNS{}) deve ser lido
 lado a lado com o principal. A conclusão não estacionária depende de uma tendência log-linear ao
 longo de seis décadas e de como a variabilidade acompanha a queda da média. O nível dessa reta no
 fim da série é a parte mais frágil: os três anos chuvosos que a sucedem seriam improváveis

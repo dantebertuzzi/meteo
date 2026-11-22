@@ -387,11 +387,13 @@ function bloco_nao_estacionario(L, E, V)
     # inclinação regional, também como média entre as candidatas
     if !ismissing(b_reg)
         mr = ns_media_akaike(y, t; b = b_reg)
-        pbr = ns_media_akaike_boot(y, t, E.x1213, [tc(2025)]; b = b_reg)
-        p0 = mr.p_em(E.x1213, tc(2025))
-        registra_ic!("TRegionalMedia", 1 / p0, 1 / quantile(pbr[:, 1], 0.975), 1 / quantile(pbr[:, 1], 0.025); sig = 2)
+        # avaliada no último ano válido (comparável ao cenário local) e, como extrapolação, em 2025
+        pbr = ns_media_akaike_boot(y, t, E.x1213, [tc(ult), tc(2025)]; b = b_reg)
+        p0 = mr.p_em(E.x1213, tc(2025)); pu0 = mr.p_em(E.x1213, tc(ult))
+        registra_ic!("TRegionalMedia", 1 / p0, 1 / quantile(pbr[:, 2], 0.975), 1 / quantile(pbr[:, 2], 0.025); sig = 2)
+        registra_ic!("TRegionalMediaUltB", 1 / pu0, 1 / quantile(pbr[:, 1], 0.975), 1 / quantile(pbr[:, 1], 0.025); sig = 2)
         for nh in HORIZONTES
-            registra_ic!("ProbRegMediaN" * string(nh), 100prob_ao_menos_um(p0, nh),
+            registra_ic!("ProbRegMediaN" * string(nh), 100prob_ao_menos_um(pu0, nh),
                          100quantile(prob_ao_menos_um.(pbr[:, 1], nh), 0.025),
                          100quantile(prob_ao_menos_um.(pbr[:, 1], nh), 0.975); dig = 0)
         end
@@ -1101,6 +1103,7 @@ function bloco_p2_sazonalidade(L)
         registra_ic!("Sen" * nm, r.sen_decada, r.sen_ic_inf, r.sen_ic_sup; dig = dg)
         registra_p!("PMK" * nm, r.p_mk); registra_p!("PTFPW" * nm, r.p_mk_tfpw); registra_p!("PHR" * nm, r.p_hamed_rao)
         registra!("MDT" * nm, r.mdt_decada; dig = dg)
+        registra!("FatorHR" * nm, r.fator_hr; dig = 2)
     end
 
     # climatologia mensal: 1961–1990 × 1991–2020 (meses válidos)
