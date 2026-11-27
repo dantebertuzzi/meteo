@@ -100,4 +100,4 @@ results/paper/         tabelas CSV de todas as análises do artigo
 
 ## Como citar
 
-Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versão 1.3.1, [doi:10.5281/zenodo.24447699](https://doi.org/10.5281/zenodo.24447699); versão 1.3.2 (figuras, legendas e referências atualizadas), DOI próprio atribuído no depósito (as versões 1.1.0 a 1.3.0 estão só no GitHub, como tags e branches); todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
+Ver `CITATION.cff`. Preprint no Zenodo: versão 1.0.0, [doi:10.5281/zenodo.23438824](https://doi.org/10.5281/zenodo.23438824); versão 1.3.1, [doi:10.5281/zenodo.24447699](https://doi.org/10.5281/zenodo.24447699); versão 1.3.2 (figuras, legendas e referências atualizadas), [doi:10.5281/zenodo.24608594](https://doi.org/10.5281/zenodo.24608594) (as versões 1.1.0 a 1.3.0 estão só no GitHub, como tags e branches); todas as versões (DOI conceito), [doi:10.5281/zenodo.23438823](https://doi.org/10.5281/zenodo.23438823).
